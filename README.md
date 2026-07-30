@@ -64,6 +64,7 @@ SkillsPack includes these reusable skills:
 | `code-authoring-rules` | `development` | Apply language-independent code design and authoring rules. |
 | `commit` | `development` | Create responsibility-scoped Conventional Commit messages. |
 | `csharp-authoring-rules` | `development` | Apply C#-specific implementation and review judgment rules. |
+| `claim-grounding` | `basic` | Ground claims in their sources, adoption status, information validity, scope, and relationships. |
 | `issue-planner` | `development` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | `development` | Write, create, update, or review structured GitHub Issue bodies. |
 | `pr-submit` | `development` | Verify, push, and create or update pull requests. |
@@ -78,7 +79,7 @@ SkillsPack includes these reusable skills:
 | `ultra-review` | `development` | Run deeper multi-pass review and apply safe fixes. |
 | `unity-authoring-rules` | `development` | Apply Unity-specific implementation and review judgment rules with C# rules. |
 | `verification-gate` | `development` | Run the verification needed before PRs or final checks. |
-| `writing` | `basic` | Write, revise, review, summarize, and localize natural-language text while preserving meaning and structure. |
+| `writing` | `basic` | Write, revise, review, summarize, and localize text while preserving meaning and assigning content to the document or section that owns it. |
 | `xml-doc-writer` | `development` | Write contract-focused XML documentation comments. |
 
 ## Categories

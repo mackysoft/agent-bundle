@@ -5,24 +5,26 @@
   "category": "basic",
   "skillName": "referent-modeling",
   "displayName": "Referent Modeling",
-  "description": "要求、観測、調査結果から文章、設計、実装、命名へ進む際に、新しい用語、分類、責務名、抽象化を置く前、または既存の名称と構造を意味上点検、修正する際に、具体対象、役割、責任主体、成立条件、失敗条件、関係、未確定事項、完了を示す観測を分け、下流成果物で使う名称と構造の根拠を確定する。状態、条件、事象、値の区別、型、メソッド、boolean の命名、手順や因果の要約、文書や実装の責務境界を設計、見直すときや、一つの名称が異なる対象や役割を覆っている可能性を点検するときに使う。引用、表記修正、利用者が対応を指定した機械的変更、確立した語を同じ契約で再利用するだけの作業には使わない。",
-  "dependencies": [],
-  "contentDigest": "cbc60a69b369e8865696bdcd95e108e3feea3be73d3d8338f9c732c17bb7083a",
-  "manifestDigest": "76f4558dd6411edbac651cc05261ea0a3c2584937044d4ec91882ae6a83019f5",
+  "description": "要求、観測、調査結果から文章、設計、実装、命名へ進む際に、新しい用語、分類、責務名、抽象化を置く前、または既存の名称と構造を意味上点検、修正する際に、具体対象、役割、責任主体、成立条件、失敗条件、関係、未確定事項、完了を示す観測を分け、下流成果物で使う名称と構造の根拠を確定する。状態、条件、事象、値の区別、型、メソッド、boolean の命名、手順や因果の要約、文書や実装の責務境界を決める前提となる対象対応を整理するときや、一つの名称が異なる対象や役割を覆っている可能性を点検するときに使う。引用、表記修正、利用者が対応を指定した機械的変更、確立した語を同じ契約で再利用するだけの作業には使わない。",
+  "dependencies": [
+    "claim-grounding"
+  ],
+  "contentDigest": "a6f6e72912ceb1cf51868e9025693ef7aa7db0abed535055b23c4871e419179e",
+  "manifestDigest": "c7f7aab2ca7dd126d44dbf94289ba277780af72c04ba0b861740c4dd14bbd27f",
   "hostArtifacts": [
     {
       "host": "claude",
-      "materializedFrontmatterDigest": "4e5b522886f5769897e9b83c0915bb27e81fcf5904a4e07a71872216f6758249"
+      "materializedFrontmatterDigest": "0caed3994f2ba2588023a69d1dabed83c3f431b3d1071cd90256ec93d5c54485"
     },
     {
       "host": "copilot",
-      "materializedFrontmatterDigest": "bc10f7eb0c091e5fd4703c15bf0acfcc320c5c974413addb0e89d70983928319"
+      "materializedFrontmatterDigest": "92f90dd27a20c100faa2274e21dff898846096362cc12cf99fb41e265ac733f1"
     },
     {
       "host": "openai",
       "path": "agents/openai.yaml",
-      "digest": "7ac783afa33523c4f23c0accc3ab1c366b91ec4592a05903cf45d982f4d91bf2",
-      "materializedFrontmatterDigest": "765078a2026a9ac6e7b807a326f933d00e70e2e6f2f1a8c8c715cdfaa91810e2"
+      "digest": "32f4a5a86cbc1bf4abc1bc6e29bd1046cef9d366720034d2ec02fa48c02f9b81",
+      "materializedFrontmatterDigest": "a01a7046ff92e62ba2bdadabe7b0b86e18763e9b8eeca0ecd38dee7ac9943c69"
     }
   ]
 }

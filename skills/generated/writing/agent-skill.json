@@ -5,26 +5,27 @@
   "category": "basic",
   "skillName": "writing",
   "displayName": "Writing",
-  "description": "自然言語の文章を作成、変更、レビュー、要約、翻訳、ローカライズ、返信するときに、対象、読者、媒体、言語、出力形式を文章前提として固定し、意味保持、事実性、論理構造、文章構造、文体、表記を整える。会話、スレッド、コメント、メール、案内、告知、提案、報告、説明文、記事、原稿、専門文書などの文章成果物や、やりとりの読みやすさを改善したいときに使う。",
+  "description": "自然言語の文章を作成、変更、レビュー、要約、翻訳、ローカライズ、返信するときに、対象、読者、媒体、言語、出力形式を文章前提として固定し、意味保持、事実性、論理構造、文章構造、文体、表記を整える。複数の文書や節の責務、正本、情報配置、参照、移動を決めるときにも使う。会話、スレッド、コメント、メール、案内、告知、提案、報告、説明文、記事、原稿、専門文書などの文章成果物や、やりとりの読みやすさを改善したいときに使う。",
   "dependencies": [
+    "claim-grounding",
     "referent-modeling"
   ],
-  "contentDigest": "6cdcb9d9c37183dfc51755ffb6a3f3dcaa7c7680107f71d71bce2d41374c699d",
-  "manifestDigest": "423456c292aa1d9e75425f4f0da3ea9a9ea2d4f8641e6b66a2029168db2ea06a",
+  "contentDigest": "613981e91e527270bb20c8022725ba1d80402f63e3885f85c29b07a5f9334d5b",
+  "manifestDigest": "695ba8ab43d8e31db34d001e242e621bea9fc0b9deeb3f3c09f011f234140c12",
   "hostArtifacts": [
     {
       "host": "claude",
-      "materializedFrontmatterDigest": "8cd173163a812819cf380b97333ef3f92f4f273c839e101176fb86c985ca5af2"
+      "materializedFrontmatterDigest": "7f0cedef23f49883909ce79033eed80bd99754dc82ca1b23373dfe2f20ad9092"
     },
     {
       "host": "copilot",
-      "materializedFrontmatterDigest": "30184022b07919ec97e05f067c26d4e829269b9c4d5cb775c4a03225f109ab8a"
+      "materializedFrontmatterDigest": "58d5e680caa9bedbbb245e1a65ed04846eea78ff52be667ba309a24cb5fe2838"
     },
     {
       "host": "openai",
       "path": "agents/openai.yaml",
-      "digest": "c14e2d25fa8c494849c9b31b3775edea053bd08bc9e1ac2fcf9c04b875516844",
-      "materializedFrontmatterDigest": "1bf73421582d891a453b5471138a4d0808d8cf93342004c9b99e720c75b4f113"
+      "digest": "355c02c0bbed36422d299b1a846c3fb563687e30cdc490ae9fc2705ab9f12100",
+      "materializedFrontmatterDigest": "719b0e6a5ff297886ceb3fe667029f684ffcd881f2465ac5efca2a8b92eb93e9"
     }
   ]
 }

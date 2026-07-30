@@ -10,8 +10,8 @@
     "referent-modeling",
     "writing"
   ],
-  "contentDigest": "316c262b899c9c2aa10d13973eb083d98689a56aaa3fa98fd5b6ce836eaad77d",
-  "manifestDigest": "a6a2bb102dc22a7c940920593bde243543c6989b6e524013c29229d5c2919e1f",
+  "contentDigest": "8c90dbc533ffac15c7f0463cb9a2809c213dfb318b2bcaed80c0432d022d2b26",
+  "manifestDigest": "9e3c06d2e02df89796aebfcb948d5e8cc1e3ecfc84ca26e0c1b5ed4915bb99f7",
   "hostArtifacts": [
     {
       "host": "claude",
