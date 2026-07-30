@@ -12,8 +12,8 @@
     "review-triage",
     "writing"
   ],
-  "contentDigest": "f0c85109aab3a0225a5a2c928baedb80bf9ca4a8e1b6b1f7f169d2859628458d",
-  "manifestDigest": "7bbc6dc5209d7adc7895335a906f98b0168ac43fa74d52a3e3c064a7a9447bc7",
+  "contentDigest": "00bf0953eee27caf55151b51e11460a918936b435526541788dd51d985ec6b4a",
+  "manifestDigest": "cef1a99f4d546ecce0cd8d462d81faabdeb69abf5f7f8bb5904b9c82fe98173a",
   "hostArtifacts": [
     {
       "host": "claude",
