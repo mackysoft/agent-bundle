@@ -5,28 +5,28 @@
   "category": "development",
   "skillName": "ultra-review",
   "displayName": "Ultra Review",
-  "description": "タスク完了前の成果物、変更差分、または指定範囲に対し、指定された重点観点と対象から導いた失敗可能性を複数のサブエージェントで最終点検する。所見の妥当性と今回の対象との関係をトリアージし、対象内の修正、検証、再レビューを収束させる。任意の対象や観点を指定した深いレビュー、修正込みレビュー、または ultra-review が求められたときに使う。編集禁止やレビューのみの指定がある場合は所見と対応方針だけを返す。",
+  "description": "ユーザーの依頼または適用される作業規約が、成果物、変更差分、または指定範囲に対する複数のサブエージェントによる深い最終点検、修正込みの反復レビュー、または ultra-review を明示的に要求するときに使う。指定された重点観点と対象から導いた失敗可能性をレビューし、所見の妥当性と今回の対象との関係をトリアージして、対象内の修正、検証、再レビューを収束させる。編集禁止やレビューのみの指定がある場合は所見と対応方針だけを返す。",
   "dependencies": [
     "referent-modeling",
     "review-triage",
     "writing"
   ],
-  "contentDigest": "a4ec8802ae27dca8e1bc1cd343c69c01a48c5922c6bc8a3a53ae3f223a7b2e58",
-  "manifestDigest": "0a45bce072c33e4569df3a9b39b31d9e3819d4e6a7febe46a9a1e93ca46d84ed",
+  "contentDigest": "626f58628d1df1e8da88732c5dbf1ad4b21ff23beab78e71352ffb040eb29fee",
+  "manifestDigest": "3a6c61bb40fe27c116c5f8d038a1c8d04585a5418f81521eb2b20045bc28c315",
   "hostArtifacts": [
     {
       "host": "claude",
-      "materializedFrontmatterDigest": "5dc21ae16a28786e1b7dc8de861219e3835ac4d2debe6ebb0933e17cd15a1b8c"
+      "materializedFrontmatterDigest": "5a87604b9dd9910cbc82b59b9f8cd9f0b02a26c70b0236acf2be6721b1e435e0"
     },
     {
       "host": "copilot",
-      "materializedFrontmatterDigest": "28f02dc8c764196e58363c1343c63b59cdca060eaaabd21218bfbf6bff9db217"
+      "materializedFrontmatterDigest": "130f91987285bbc5db26a394e1d356b30563634e1ca6c7fa41d9abe5cb9544f0"
     },
     {
       "host": "openai",
       "path": "agents/openai.yaml",
-      "digest": "b7aae34c018efc1841dec0bbd5b421e05c717d1d16c13f2b6c86e97a1acf60ee",
-      "materializedFrontmatterDigest": "4855a6fa0eaad78aabceb39dad9b4ac9f6595ccc900a701dc7ac45887ea90cdd"
+      "digest": "8476e652ecc1595983531b2898a7eb146cd9c575964cffcd995ff37b5b1c5d1d",
+      "materializedFrontmatterDigest": "30b6aaedaf9140b167a8c3e498832f9de8961f91b9810d7e88849fef70370cb3"
     }
   ]
 }
