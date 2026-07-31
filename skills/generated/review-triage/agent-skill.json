@@ -9,8 +9,8 @@
   "dependencies": [
     "claim-grounding"
   ],
-  "contentDigest": "b373179b78640f879bc908cff9ee31c5e26fb0428f04d9df90212bf6e21798f2",
-  "manifestDigest": "a0a3d8f77bc42b8bb6a44428b2f09a543da60d426dfbdc2e8d3ee74a42f7e834",
+  "contentDigest": "a1a9178b39a92fbe03f7dc83a7784a0d9a7f21b1f0c695138be00f8af7f3f85b",
+  "manifestDigest": "7bb9aaddd6ed1e767fd53f75f0da5f63efe37f1b3f8832faef5bb9c7cbe7ef31",
   "hostArtifacts": [
     {
       "host": "claude",
