@@ -8,10 +8,11 @@
   "description": "エージェントスキルを新規作成、更新、レビューするときに、必要性、単一責務、発火面、判断規則、自由度、フロー、スキル間の構成、本文と補助ファイルの情報配置を評価し、実際の利用文脈で意図した判断と成果へ到達できる作業契約に仕上げる。スキル本文の執筆、責務の分割、description と依存関係の設計、構造と挙動の検証で使う。",
   "dependencies": [
     "referent-modeling",
+    "skill-usage-analysis",
     "writing"
   ],
-  "contentDigest": "8c90dbc533ffac15c7f0463cb9a2809c213dfb318b2bcaed80c0432d022d2b26",
-  "manifestDigest": "9e3c06d2e02df89796aebfcb948d5e8cc1e3ecfc84ca26e0c1b5ed4915bb99f7",
+  "contentDigest": "31d9efaeb5eb2906c2b3c15aa39e94006fa5c794f954181e687fd1b72264a1c5",
+  "manifestDigest": "c34ca8cbe14a4d629b13600e5948e984a210dce26341db4c6b821dc35b0a668d",
   "hostArtifacts": [
     {
       "host": "claude",
