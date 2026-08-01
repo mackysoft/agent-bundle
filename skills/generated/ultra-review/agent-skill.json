@@ -5,29 +5,29 @@
   "category": "development",
   "skillName": "ultra-review",
   "displayName": "Ultra Review",
-  "description": "タスク完了前の成果物、変更差分、または指定範囲に対し、指定された重点観点、対象から導いた失敗可能性、要求や正本への根拠忠実性を複数のサブエージェントで最終点検する。所見の妥当性と今回の対象との関係をトリアージし、対象内の修正、検証、再レビューを収束させる。任意の対象や観点を指定した深いレビュー、修正込みレビュー、または ultra-review が求められたときに使う。編集禁止やレビューのみの指定がある場合は所見と対応方針だけを返す。",
+  "description": "ユーザーの依頼または適用される作業規約が、成果物、変更差分、または指定範囲に対する複数のサブエージェントによる深い最終点検、修正込みの反復レビュー、または ultra-review を明示的に要求するときに使う。指定された重点観点、対象から導いた失敗可能性、要求や正本への根拠忠実性をレビューし、所見の妥当性と今回の対象との関係をトリアージして、対象内の修正、検証、再レビューを収束させる。編集禁止やレビューのみの指定がある場合は所見と対応方針だけを返す。",
   "dependencies": [
     "claim-grounding",
     "referent-modeling",
     "review-triage",
     "writing"
   ],
-  "contentDigest": "0cb2050d984a9bb9e1523985e4ec482392f861aa19849f2339c3fc4b6fa30e3b",
-  "manifestDigest": "57bc5aafc6d6da195fe79401bf25a8a91f6d836ca57159949dd923d00b47a317",
+  "contentDigest": "00976d8a86c6a144d85d833075aa8165ffc1e9ea4682bf64a9a92c7b6d0a6e29",
+  "manifestDigest": "d34874b28cfc56039f4072ae1f300b5f31ad410ce026f626dbad0736ff586155",
   "hostArtifacts": [
     {
       "host": "claude",
-      "materializedFrontmatterDigest": "6b8450133985a43cce3785c1f4a96cc1143af3c72f841353f379141b1eb8af57"
+      "materializedFrontmatterDigest": "9d1fa5a282efec1839c8d9837615829e496cec9e56efa1e0968766c3620221e0"
     },
     {
       "host": "copilot",
-      "materializedFrontmatterDigest": "363e9703d37a2ab76d0b0d5382fcf974c8d0c9835a3e171feb487699ed267b46"
+      "materializedFrontmatterDigest": "4e713b0bfb8fefba173914ce0979f7cf2d76cf344d19727565caebc4a3f1bcd7"
     },
     {
       "host": "openai",
       "path": "agents/openai.yaml",
-      "digest": "81e1a648b691a2f11770ec4ac99742d16682e595cfc7b0bbe41a879dbf81bbbf",
-      "materializedFrontmatterDigest": "a0474cf61155fad6160de8262f7d044e6d9b9d1762f322af3f232f1a00838834"
+      "digest": "22466d403bbc1a3e1702720dc5581318b2e05d8459384c999ab5a7e5a63808a9",
+      "materializedFrontmatterDigest": "ba20698f1dda56585504921e96dddbdcfea47182aaf2eab3948c4f61240a38b6"
     }
   ]
 }
