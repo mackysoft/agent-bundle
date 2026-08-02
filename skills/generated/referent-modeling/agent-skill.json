@@ -5,24 +5,26 @@
   "category": "basic",
   "skillName": "referent-modeling",
   "displayName": "Referent Modeling",
-  "description": "要求、観測、調査結果から文章、設計、実装、命名へ進む際に、新しい用語、分類、責務名、抽象化を置く前、または既存の名称と構造を意味上点検、修正する際に、具体対象、役割、責任主体、成立条件、失敗条件、関係、未確定事項、完了を示す観測を分け、下流成果物で使う名称と構造の根拠を確定する。状態、条件、事象、値の区別、型、メソッド、boolean の命名、手順や因果の要約、文書や実装の責務境界を設計、見直すときや、一つの名称が異なる対象や役割を覆っている可能性を点検するときに使う。引用、表記修正、利用者が対応を指定した機械的変更、確立した語を同じ契約で再利用するだけの作業には使わない。",
-  "dependencies": [],
-  "contentDigest": "cbc60a69b369e8865696bdcd95e108e3feea3be73d3d8338f9c732c17bb7083a",
-  "manifestDigest": "76f4558dd6411edbac651cc05261ea0a3c2584937044d4ec91882ae6a83019f5",
+  "description": "要求、観測、調査結果から置く名称、分類、責務名、抽象化が複数の具体対象、役割、状態、条件を覆い、その曖昧さが下流成果物の意味、責務、条件、構造を変える場面で、具体対象、役割、責任主体、成立条件、失敗条件、関係、未確定事項、完了を示す観測を分け、指示対象の対応を確定する。対象となる名称には、用語、型、メソッド、boolean、手順や因果の要約、文書や実装の責務境界を含み、新規設計と既存名称の意味上の点検の双方を扱う。",
+  "dependencies": [
+    "claim-grounding"
+  ],
+  "contentDigest": "333a16eaff74f4763d2e62eea65da42395c2d68d043eb76096efae11192a99bb",
+  "manifestDigest": "79364996de84ed60e6fdeb46545aa47e13f01283b243f6c0ce8b15b989ba8464",
   "hostArtifacts": [
     {
       "host": "claude",
-      "materializedFrontmatterDigest": "4e5b522886f5769897e9b83c0915bb27e81fcf5904a4e07a71872216f6758249"
+      "materializedFrontmatterDigest": "bfcbdf78f5a3268b20a703b40f6f37fe35afcdd296b85db8c51de1a369cbe6ea"
     },
     {
       "host": "copilot",
-      "materializedFrontmatterDigest": "bc10f7eb0c091e5fd4703c15bf0acfcc320c5c974413addb0e89d70983928319"
+      "materializedFrontmatterDigest": "ec6cef619594aa418f36aa95a309d697c34338bfe00dcffba795f0d9a073873c"
     },
     {
       "host": "openai",
       "path": "agents/openai.yaml",
-      "digest": "7ac783afa33523c4f23c0accc3ab1c366b91ec4592a05903cf45d982f4d91bf2",
-      "materializedFrontmatterDigest": "765078a2026a9ac6e7b807a326f933d00e70e2e6f2f1a8c8c715cdfaa91810e2"
+      "digest": "1af29bf41b950ef50670a9a52d2e00199fd716908f9f7f057dff34890d3fec04",
+      "materializedFrontmatterDigest": "7020b2f1fb02ff636ca9086d489955c2d5bf69454e711dbaae3881fe76652f9e"
     }
   ]
 }

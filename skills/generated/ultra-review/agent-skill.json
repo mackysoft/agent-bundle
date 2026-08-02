@@ -5,28 +5,30 @@
   "category": "development",
   "skillName": "ultra-review",
   "displayName": "Ultra Review",
-  "description": "ユーザーの依頼または適用される作業規約が、成果物、変更差分、または指定範囲に対する複数のサブエージェントによる深い最終点検、修正込みの反復レビュー、または ultra-review を明示的に要求するときに使う。指定された重点観点と対象から導いた失敗可能性をレビューし、所見の妥当性と今回の対象との関係をトリアージして、対象内の修正、検証、再レビューを収束させる。編集禁止やレビューのみの指定がある場合は所見と対応方針だけを返す。",
+  "description": "ユーザーの依頼または適用される作業規約が、成果物、変更差分、または指定範囲に対する複数のサブエージェントによる深い最終点検、修正込みの反復レビュー、または ultra-review を明示的に要求するときに使う。指定された重点観点、対象から導いた失敗可能性、要求や正本への根拠忠実性をレビューし、所見の妥当性と今回の対象との関係をトリアージする。対象内の修正まで明示された場合は、修正、受け入れ検証、再レビューを収束させる。それ以外は所見と対応方針を返す。",
   "dependencies": [
+    "claim-grounding",
     "referent-modeling",
     "review-triage",
+    "verification-gate",
     "writing"
   ],
-  "contentDigest": "626f58628d1df1e8da88732c5dbf1ad4b21ff23beab78e71352ffb040eb29fee",
-  "manifestDigest": "3a6c61bb40fe27c116c5f8d038a1c8d04585a5418f81521eb2b20045bc28c315",
+  "contentDigest": "c1287896fe749132e708fc23db406e4a190166fa1715b377c6ccc81ed2759615",
+  "manifestDigest": "299843e5b625bcd3c36cc3262214a9cfc6ce08ccbc600efdc5e566c25902ecba",
   "hostArtifacts": [
     {
       "host": "claude",
-      "materializedFrontmatterDigest": "5a87604b9dd9910cbc82b59b9f8cd9f0b02a26c70b0236acf2be6721b1e435e0"
+      "materializedFrontmatterDigest": "890121049458c297aa8aafcfdf4f3b64c5548260bb285bc73a383713315ebaeb"
     },
     {
       "host": "copilot",
-      "materializedFrontmatterDigest": "130f91987285bbc5db26a394e1d356b30563634e1ca6c7fa41d9abe5cb9544f0"
+      "materializedFrontmatterDigest": "837d5244b924ff9d0c1e2702f7365304871044bb9f8861fe43cb18f373b5e791"
     },
     {
       "host": "openai",
       "path": "agents/openai.yaml",
-      "digest": "8476e652ecc1595983531b2898a7eb146cd9c575964cffcd995ff37b5b1c5d1d",
-      "materializedFrontmatterDigest": "30b6aaedaf9140b167a8c3e498832f9de8961f91b9810d7e88849fef70370cb3"
+      "digest": "81c9978f01ecf9123d2e1efc4aa18280644ae08230da3e4b22c1251438f1805a",
+      "materializedFrontmatterDigest": "1ced9ffa146c4cb769ed1266a4d6e2e11f64b1bd758fc2bcb67e0b986f48d909"
     }
   ]
 }
