@@ -5,26 +5,26 @@
   "category": "development",
   "skillName": "issue-writer",
   "displayName": "Issue Writer",
-  "description": "与えられたIssue構造、本文入力、文書前提に従ってGitHub Issue本文を作成、更新、点検する。Issue本文の項目、完了条件、依存関係、必要な検証、参照を整理し、必要なら `gh` で起票または本文更新まで進める作業で使う。",
+  "description": "与えられたIssue構造、本文入力、文章前提に従ってGitHub Issue本文を作成、更新、点検する。Issue本文の項目、完了条件、依存関係、必要な検証、参照を整理し、必要なら `gh` で起票または本文更新まで進める作業で使う。",
   "dependencies": [
     "writing"
   ],
-  "contentDigest": "1ab92e165940ebbb195b2b1f25de193da18ffea7f7ec0dd76651530469ad3341",
-  "manifestDigest": "b657fd7a907b87e7ac0cfa22e4883e202608b61b0e38095a9caeea2eab6a41cb",
+  "contentDigest": "4c31e1cd8958752a4b70eb8350ed1eab5e8937a328fd94665ea5d9dae809755b",
+  "manifestDigest": "848c457cdaf657df76781ee56281dbc0eb3cb37b81c3e59a588e33dddfc18449",
   "hostArtifacts": [
     {
       "host": "claude",
-      "materializedFrontmatterDigest": "4ba25f19bffc141e8b5c9af385d86afb32f1eeb4886e262c403bee66819fdc46"
+      "materializedFrontmatterDigest": "9d1ac1e688e068e878f415db27ef870301ea5898669acdbd12741c30334a4984"
     },
     {
       "host": "copilot",
-      "materializedFrontmatterDigest": "08fd3445edbb8fbfc205acb0145b178486e783c0630cb6dac2b312c0a93fd35e"
+      "materializedFrontmatterDigest": "85ced03fae4a6a67c68f32d4c5275c18f916c8798fe3ebafec93a75c85b53dd6"
     },
     {
       "host": "openai",
       "path": "agents/openai.yaml",
-      "digest": "4054f4c47a63ecaf109657fa1334edc8f6233ae01e34e47afece7236c3bbb7e2",
-      "materializedFrontmatterDigest": "2cd1b5d3d257751f6affb9cb54271a8f6ef4040f326418e6f9c8c30a13a985e2"
+      "digest": "dd0cefc74aed1d5968d04f5df1c4690f866e9036bfcb62f6880f682e74d6603d",
+      "materializedFrontmatterDigest": "7068381e65a11a000e9b04961d208444cf70f4bece0746d7e8ff9ce88907e24c"
     }
   ]
 }

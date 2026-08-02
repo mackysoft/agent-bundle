@@ -10,8 +10,8 @@
     "claim-grounding",
     "writing"
   ],
-  "contentDigest": "e6f836d7d78c2edfcd9b61ab5f2c7e31e9cd67a920da451946a3b1366817cb4c",
-  "manifestDigest": "451d22ca365258566df16731a92852650bd1df50e8fc0e45a1a9fb3671342528",
+  "contentDigest": "b706108b3bfbedfbdee0e9cd3b6706b224252bc8a2da8ffa45d9435af7fae205",
+  "manifestDigest": "df35ca7e519ac39b3eab0dd62f98b6fb224e08ef1afac6b60d547d5d39d9c4df",
   "hostArtifacts": [
     {
       "host": "claude",

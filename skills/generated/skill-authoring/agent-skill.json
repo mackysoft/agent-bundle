@@ -11,8 +11,8 @@
     "skill-usage-analysis",
     "writing"
   ],
-  "contentDigest": "31d9efaeb5eb2906c2b3c15aa39e94006fa5c794f954181e687fd1b72264a1c5",
-  "manifestDigest": "c34ca8cbe14a4d629b13600e5948e984a210dce26341db4c6b821dc35b0a668d",
+  "contentDigest": "d515046df39cea99647105dbadb7c132d76d72b8a2ff7ca902d0e92fd1693399",
+  "manifestDigest": "678ed5593d1f0e6eef5976ff71bdde99f5433583f0126d1ca3070b0f25e57c3a",
   "hostArtifacts": [
     {
       "host": "claude",
