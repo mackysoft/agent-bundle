@@ -1,0 +1,23 @@
+[agents.architect]
+description = "権限ある根拠から変更目的、変更対象、契約、範囲を設計入力として整理し、アーキテクチャ、責務境界、不変条件、外部契約、実装契約、検証要件を決めるときに使う。成果として、根拠付き設計判断と実装可能な設計契約を返す。"
+config_file = "agents/architect.toml"
+
+[agents.explorer]
+description = "問い、探索範囲、停止条件、期待する根拠形式が確定した読み取り専用の情報収集に使う。成果として、回答、根拠、確認範囲、未確認事項を返す。"
+config_file = "agents/explorer.toml"
+
+[agents.implementer]
+description = "確定済みの設計契約に基づき、内部実現方法を選ぶ通常実装に使う。コード、設定、データ、文書、テストなどの成果物を作成または変更し、実装結果と実装時の検証結果を返す。"
+config_file = "agents/implementer.toml"
+
+[agents.reviewer]
+description = "候補成果の欠陥とリスクを評価し、単一または複数のレビュー所見の妥当性、重複、対象との関係を判定するときに使う。成果として、レビュー範囲における判定と根拠付き所見を返す。"
+config_file = "agents/reviewer.toml"
+
+[agents.verifier]
+description = "権限ある所有者が定めた受入条件について、検証面、必要な証拠、判定方法を定め、証拠を照合するときに使う。成果として、受入条件ごとの証拠と判定結果を返す。"
+config_file = "agents/verifier.toml"
+
+[agents.worker]
+description = "対象、作用、許可、期待結果、確認方法が確定した閉じた作業の履行に使う。成果として、指定された作用結果と実行後の確認結果を返す。"
+config_file = "agents/worker.toml"

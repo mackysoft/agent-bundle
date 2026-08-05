@@ -1,0 +1,7 @@
+interface:
+  display_name: "Orchestrator"
+  short_description: "Coordinate tasks for one accepted objective"
+  default_prompt: "Use $orchestrator to decompose, route, track, and complete one accepted objective."
+
+policy:
+  allow_implicit_invocation: false
