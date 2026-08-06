@@ -7,10 +7,11 @@
   "displayName": "Verification Gate",
   "description": "変更が受け入れ可能かを判断するために、受け入れ条件へ対応する検証面と検証方法を選び、リポジトリの専用スクリプト、CI と同じコマンド、根拠との比較、表示や操作の確認などを実行する。成功、失敗原因、未検証範囲、次に必要な作業を残す。",
   "dependencies": [
-    "claim-grounding"
+    "claim-grounding",
+    "test-oracle-assessment"
   ],
-  "contentDigest": "f6a64bab83f520fa85fee051190a5d921483e0fe8aa290478ce90bfaa8cd4339",
-  "manifestDigest": "77c2bf655489fb585fb6995dbfc715c9d892665327d17784ec2cfb50274bf546",
+  "contentDigest": "dae92878d96ff895b30cf02ae9e1ced17d7275712a8e9da020b5485956d4cd23",
+  "manifestDigest": "df8c02002158a5f466e95fa392793e36a3ef412561e74c3e6064ae2f6c21a312",
   "hostArtifacts": [
     {
       "host": "claude",
