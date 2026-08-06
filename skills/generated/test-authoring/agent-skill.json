@@ -7,10 +7,12 @@
   "displayName": "Test Authoring",
   "description": "自動テスト成果物を新規作成、更新、見直すときに、契約の根拠、独自の検出価値、所有境界、代表ケース、観測範囲、実行境界を判断し、重複、役割を失ったテスト、実装詳細だけを固定するテストを統合または削除して最小のテスト集合にする。テスト成果物の作成、更新、整理を成果とする依頼で使う。",
   "dependencies": [
-    "code-authoring-rules"
+    "change-framing",
+    "code-authoring-rules",
+    "test-oracle-assessment"
   ],
-  "contentDigest": "673f8473b93139392ca85a6d3d42b1744b944a23e3a05af6c7efaef98dcdcece",
-  "manifestDigest": "49bfca5f2a772fd66ab07336edbad0cf7430b14f2ff79d145ae3ea0e09d95de3",
+  "contentDigest": "a765779d93925f519946efaeb290fe9e13a3835a01934f7758f15518e5e7570c",
+  "manifestDigest": "988b5d230ac420484ed9e5919c9b05ee5deeb128782c5070b073550b281b2d0c",
   "hostArtifacts": [
     {
       "host": "claude",
