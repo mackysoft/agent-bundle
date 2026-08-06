@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 1,
+  "catalogId": "com.mackysoft.skills-pack",
+  "category": "basic",
+  "skillName": "change-framing",
+  "displayName": "Change Framing",
+  "description": "要求、仕様、会話、現状観測、変更案が混在し、何のために何をどの範囲で変えるか、誰の判断が必要かを入力から直接確定できないとき、変更方針、影響範囲、許可、受け入れ条件、訂正時の再評価範囲を整理するときに使う。各項目を決定する権限を持つ主体と根拠を確認し、変更目的、変更対象、適用範囲、契約変更、維持する契約、作業対象外、許可、受け入れ条件、確定済みの実現制約、候補手段を再構成する。根拠から確定できない項目は、判断対象、判断主体、必要情報、影響項目、回答先を独立して持つ未確定判断へ対応付け、依存関係から進行状態と再評価対象を返す。",
+  "dependencies": [
+    "claim-grounding",
+    "referent-modeling"
+  ],
+  "contentDigest": "9b050a403f6b7eeb3e20e94d75ca56265537698ed7b51b80527c2609da908f9a",
+  "manifestDigest": "53ef2a9f1e68b4fda86cf034fdb3c196cae1f3e633656d6d1064c82a2b3eb42e",
+  "hostArtifacts": [
+    {
+      "host": "claude",
+      "materializedFrontmatterDigest": "e23afeb1d67804cfb00d53f3e53898f9c2289f9cf91c5c0e6371161377867d30"
+    },
+    {
+      "host": "copilot",
+      "materializedFrontmatterDigest": "6579acaca550fe3e497ad98811b76aa773059aef0ac9318b09670f6e816ce2eb"
+    },
+    {
+      "host": "openai",
+      "path": "agents/openai.yaml",
+      "digest": "cca6f108b8e35e98ba316edf79f15e30aad66cdaca2374da07b37f8e3f627a48",
+      "materializedFrontmatterDigest": "2f5641709c0c13f7290d99edea214d4cafeba3f61dffde7f0f83d70469d12f30"
+    }
+  ]
+}
