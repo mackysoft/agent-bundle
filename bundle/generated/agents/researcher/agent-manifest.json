@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "bundleVersion": 1,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "orchestration",
+  "agentName": "researcher",
+  "displayName": "Researcher",
+  "description": "問い、探索範囲、停止条件、期待する根拠形式が確定した読み取り専用の情報収集に使う。成果として、回答、根拠、確認範囲、未確認事項を返す。",
+  "skillDependencies": [
+    "claim-grounding"
+  ],
+  "contentDigest": "f7453019fa18ddb98fad922bf8c1b6bde5468db707864fa1375571f921508064",
+  "manifestDigest": "f43e440bb5f2bd09142ffac60a235f74e7b23653111bbc3f7b18d437fc624e67",
+  "hostArtifacts": [
+    {
+      "host": "claude-code",
+      "path": "hosts/claude-code/researcher.md",
+      "digest": "5f20b2d183b4476125861122a7d26ba968e1f2485db242246c960dbbff69ac8e"
+    },
+    {
+      "host": "codex",
+      "path": "hosts/codex/researcher.toml",
+      "digest": "1a62a02577884a72f0deb325f557be5578bbc1ca65a220f7cf842f24b2615f2f"
+    },
+    {
+      "host": "github-copilot",
+      "path": "hosts/github-copilot/researcher.agent.md",
+      "digest": "dcf9b86018ec0bc1e880494e370594d9592c7846eb7136279054773409c60b7a"
+    }
+  ]
+}

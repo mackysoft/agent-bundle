@@ -1,7 +1,0 @@
-interface:
-  display_name: "Supervisor"
-  short_description: "Route and track multiple independent work items"
-  default_prompt: "Use $supervisor to route and track multiple independent objectives."
-
-policy:
-  allow_implicit_invocation: false

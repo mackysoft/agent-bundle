@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "bundleVersion": 1,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "orchestration",
+  "agentName": "operator",
+  "displayName": "Operator",
+  "description": "対象、作用、許可、期待結果、確認方法が確定した閉じた作業の履行に使う。成果として、指定された作用結果と実行後の確認結果を返す。",
+  "skillDependencies": [],
+  "contentDigest": "34313ad9ca24976639ee4a00503bdfb99d18879b80040e4e1ff12cefa346b0c6",
+  "manifestDigest": "6eb7079f4be90d4813213f69fa481d026321436f9c8f1be38b05155424b09a84",
+  "hostArtifacts": [
+    {
+      "host": "claude-code",
+      "path": "hosts/claude-code/operator.md",
+      "digest": "949c9226e02ba3b01069a1a1365028d26fb0a27973a4b65cc296dfa2519223e7"
+    },
+    {
+      "host": "codex",
+      "path": "hosts/codex/operator.toml",
+      "digest": "369a5e4c822c2341627c2ee6a706bbe1173103a882af8e31e456ece4a411aaf4"
+    },
+    {
+      "host": "github-copilot",
+      "path": "hosts/github-copilot/operator.agent.md",
+      "digest": "2f72889c343b5332491b27ee4c2c9a7baf15ad157183f075c752d740981cae97"
+    }
+  ]
+}

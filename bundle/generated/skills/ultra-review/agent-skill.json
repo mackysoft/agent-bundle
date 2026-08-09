@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 1,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "ultra-review",
+  "displayName": "Ultra Review",
+  "description": "ユーザーの依頼または適用される作業規約が、成果物、変更差分、または指定範囲に対する複数のサブエージェントによる深い最終点検、修正込みの反復レビュー、または ultra-review を明示的に要求するときに使う。指定された重点観点、対象から導いた失敗可能性、要求や正本への根拠忠実性をレビューし、所見の妥当性と今回の対象との関係をトリアージする。許可される作用が読み取りに限定されるか、要求成果がレビュー結果に限定される場合はレビューのみとする。それ以外の ultra-review は、採用所見の対象内修正、受け入れ検証、再レビューを反復して収束させる。継続中の現在タスクがある場合は、その対象、受け入れ条件、権限を保持し、完了済みの依頼や現在タスクに属さない旧依頼は再開しない。",
+  "dependencies": [
+    "claim-grounding",
+    "referent-modeling",
+    "review-triage",
+    "verification-gate",
+    "writing"
+  ],
+  "contentDigest": "8321f0bf19afa49618193162e86f4c4c9737caf122a17c2f1de379c4383f1264",
+  "manifestDigest": "92139cce26345cb5894e648847021dfd970dc54d0cc6e99a1afcf084b1e791ed",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "2281205e14d0024a18edcd29d8ab7a61c72ecb731097009491b5bc2db942ba20",
+      "materializedFrontmatterDigest": "5d832c9cae3f3a3c1a38ce2279871f689d3671924d646c3b1605367b54dd826d"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "fbfedddc3a6ddb92f050f54d882a7ed1d44ab67e62504044cf92d7ca58e1dde1"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "358b790928afe6ceba2dab0dd5d3eb647bc7719efc60ff7227295983a96beca6"
+    }
+  ]
+}

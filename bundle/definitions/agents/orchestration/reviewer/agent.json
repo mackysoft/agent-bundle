@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Reviewer",
+  "description": "候補成果を作成した実行主体から独立して欠陥とリスクを評価し、単一または複数のレビュー所見の妥当性、重複、対象との関係を判定するときに使う。成果として、レビュー範囲における判定と根拠付き所見を返す。",
+  "skillDependencies": [
+    "review-triage",
+    "writing"
+  ]
+}

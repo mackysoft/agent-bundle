@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Operator",
+  "description": "対象、作用、許可、期待結果、確認方法が確定した閉じた作業の履行に使う。成果として、指定された作用結果と実行後の確認結果を返す。",
+  "skillDependencies": []
+}

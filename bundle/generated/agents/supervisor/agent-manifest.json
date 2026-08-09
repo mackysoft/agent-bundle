@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "bundleVersion": 1,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "orchestration",
+  "agentName": "supervisor",
+  "displayName": "Supervisor",
+  "description": "複数の独立した目的を受け付け、同一性、継続依頼、重複、優先順位を判定し、各目的を対応するオーケストレーターへ振り分け、報告された状態と注意事項を集約する。複数目的の受付と実行先の対応を一元管理するときに使う。",
+  "skillDependencies": [],
+  "contentDigest": "aed1ccdb5daef18df56f9ba416779160a7c66cbdc5e3507faf160cf2aa55e09c",
+  "manifestDigest": "0ed0f5be2b4878ae885fd51f851faa006851be88344cc7326ff7580eb70a700e",
+  "hostArtifacts": [
+    {
+      "host": "claude-code",
+      "path": "hosts/claude-code/supervisor.md",
+      "digest": "f368583f09e3c71d9482daf17da08e1a0438d308557aff0677439154e1a28b8b"
+    },
+    {
+      "host": "codex",
+      "path": "hosts/codex/supervisor.toml",
+      "digest": "c5a5a86d0b83e95fba94dd52e1e63e47cbf844873741e2283dd445afe6e9d3ab"
+    },
+    {
+      "host": "github-copilot",
+      "path": "hosts/github-copilot/supervisor.agent.md",
+      "digest": "af6ce6b761beb2838049536290a223b158db653cd88ee5025d0082d082b9c8f2"
+    }
+  ]
+}
