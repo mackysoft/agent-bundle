@@ -155,8 +155,8 @@ Custom agents are grouped into `orchestration`:
 | `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
 | `verifier` | Determines acceptance evidence and its result. | `verification-gate` |
 | `researcher` | Collects bounded read-only evidence and reports unchecked areas. | `claim-grounding` |
-| `operator` | Performs a fully specified closed action and verifies its result. | None |
-| `orchestrator` | Coordinates one objective across responsible outcomes. | None |
+| `operator` | Performs a fully specified closed action, including waiting for a long-running or external execution, and reports its terminal result or configured stop state. | None |
+| `orchestrator` | Coordinates one objective across responsible outcomes and routes follow-up work with the same responsibility and expected result to its existing executor. | None |
 | `supervisor` | Routes independent objectives and aggregates their state. | None |
 
 Agent bindings materialize as host-specific files while `AGENT.md` remains host-independent. The package intentionally does not install or maintain host-shared configuration files.
