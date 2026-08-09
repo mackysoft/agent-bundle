@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
-  "bundleVersion": 1,
-  "bundleDigest": "1fd07a8afd3823fea47523a3b2d9f374b5ff51a7b5d544b681129a8ecd33bcb9"
+  "bundleVersion": 2,
+  "bundleDigest": "5a5842f717e6d86348b0b34d2015970f96f8c2036264f22dd4da560f43a6244a"
 }

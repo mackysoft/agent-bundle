@@ -1,8 +1,7 @@
 {
-  "schemaVersion": 1,
-  "bundleVersion": 1,
+  "schemaVersion": 2,
+  "bundleVersion": 2,
   "catalogId": "com.mackysoft.agent-bundle",
-  "category": "orchestration",
   "agentName": "researcher",
   "displayName": "Researcher",
   "description": "問い、探索範囲、停止条件、期待する根拠形式が確定した読み取り専用の情報収集に使う。成果として、回答、根拠、確認範囲、未確認事項を返す。",
@@ -10,7 +9,7 @@
     "claim-grounding"
   ],
   "contentDigest": "f7453019fa18ddb98fad922bf8c1b6bde5468db707864fa1375571f921508064",
-  "manifestDigest": "f43e440bb5f2bd09142ffac60a235f74e7b23653111bbc3f7b18d437fc624e67",
+  "manifestDigest": "b08c45e15a0deb159d9bb807bbf021841fec8140f1ba87eabd3207186ca18ff9",
   "hostArtifacts": [
     {
       "host": "claude-code",

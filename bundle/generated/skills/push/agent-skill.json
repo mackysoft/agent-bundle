@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "push",
@@ -11,7 +11,7 @@
     "sync-latest"
   ],
   "contentDigest": "4a717c41e38af52142c9647290892ceefe9d72a861b8cf5f32211633634c7e6d",
-  "manifestDigest": "e189179fef9165354d7adbb96690a2dca76ae5f30401fa9b86fd3b9b6c49c416",
+  "manifestDigest": "450803a345f7a8b0eb20077578ab761d9066fbddbeb23cdd70c7a672c1f70ae7",
   "hostArtifacts": [
     {
       "host": "codex",

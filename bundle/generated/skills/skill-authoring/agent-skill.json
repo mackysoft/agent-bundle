@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "skill-authoring",
@@ -12,7 +12,7 @@
     "writing"
   ],
   "contentDigest": "d515046df39cea99647105dbadb7c132d76d72b8a2ff7ca902d0e92fd1693399",
-  "manifestDigest": "4297b0ae79b7dd44f2e72f3ebd5beedea4d0cb9824b50db6fb7d95df274f7553",
+  "manifestDigest": "0e4374fae8c91f4ae15a7813d069f78369dcc7e5df3c72423bfc0b128da26e18",
   "hostArtifacts": [
     {
       "host": "codex",

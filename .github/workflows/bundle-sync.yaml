@@ -32,7 +32,7 @@ jobs:
 
       - name: Sync canonical bundle
         id: bundle
-        uses: mackysoft/agent-distribution/actions/sync@3.0.0
+        uses: mackysoft/agent-distribution/actions/sync@4.0.0
         with:
           root: bundle
 

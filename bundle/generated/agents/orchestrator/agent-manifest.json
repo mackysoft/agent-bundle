@@ -1,29 +1,28 @@
 {
-  "schemaVersion": 1,
-  "bundleVersion": 1,
+  "schemaVersion": 2,
+  "bundleVersion": 2,
   "catalogId": "com.mackysoft.agent-bundle",
-  "category": "orchestration",
   "agentName": "orchestrator",
   "displayName": "Orchestrator",
   "description": "一つの目的について、依頼者が定めた要求、範囲、制約、許可、受入条件を確認し、必要な成果へ分解して所有責務へ割り当て、依存関係、結果、レビュー、検証、完了を管理する。単一目的に属する複数作業の進行を調整するときに使う。",
   "skillDependencies": [],
-  "contentDigest": "8aa92fef51a7d98b00845bb938537150a54f6ce144ad010a557c9ada5db71a20",
-  "manifestDigest": "b117b38afb1192b4237218a103cabf788c793f4a4baf2982a912c1c66862a459",
+  "contentDigest": "79bd351d0746f6d1eb8b6f1e2a14801fb0a45345ac7b02098ffbbc8d12803992",
+  "manifestDigest": "f2e25f9b5aa305d0d48854123434cfa31ce9fa7c4bc3b27062c0194418a67a8d",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/orchestrator.md",
-      "digest": "ae299c5063d2f4750bb1297f3fcd172611fbd2b3816a98a310933f90961f060b"
+      "digest": "933b3667fd645410008912a10f738217db533493cea53f5a7fa8594374e1a239"
     },
     {
       "host": "codex",
       "path": "hosts/codex/orchestrator.toml",
-      "digest": "546d8b359316618e0dbc02774d81ae7dbfc9ec811a9774bfc501a0b7525b8262"
+      "digest": "65d81e2602a9a204b6a66a7a11c6f09113363cb50397666f8b3d050ca6bac4e0"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/orchestrator.agent.md",
-      "digest": "16c0970801f8c48e4d6af210887f1e21c4eb0646c4fa270d16da1e7cf31502ab"
+      "digest": "ba2ef151175bc49a7efd25884dbdd810125cfa73d937b3ea7c94a4360d62d93d"
     }
   ]
 }

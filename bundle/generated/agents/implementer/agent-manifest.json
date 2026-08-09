@@ -1,8 +1,7 @@
 {
-  "schemaVersion": 1,
-  "bundleVersion": 1,
+  "schemaVersion": 2,
+  "bundleVersion": 2,
   "catalogId": "com.mackysoft.agent-bundle",
-  "category": "orchestration",
   "agentName": "implementer",
   "displayName": "Implementer",
   "description": "確定済みの設計契約に基づき、内部実現方法を選ぶ通常実装に使う。コード、設定、データ、文書、テストなどの成果物を作成または変更し、実装結果と実装時の検証結果を返す。",
@@ -11,7 +10,7 @@
     "writing"
   ],
   "contentDigest": "2fd8b9ff3d73b0124e0adddec60f712b4da8ee488632ada5a031cb2b15228f6c",
-  "manifestDigest": "948224f6502a4136274ffefe2ba0610b69c1178da90d4f520a945c0512423c20",
+  "manifestDigest": "16399e502db396370171c38132195185654969bda8d9b949149cdcb4e5eebe2f",
   "hostArtifacts": [
     {
       "host": "claude-code",
