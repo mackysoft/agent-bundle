@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 2,
+  "skillBundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "basic",
   "skillName": "claim-grounding",
@@ -8,7 +8,7 @@
   "description": "会話、スレッド、議事録、仕様、文書、実装、観測、外部情報から、後続の文章、設計、実装、レビュー、検証に使う命題を再確認できる根拠へ結び付け、利用目的に必要な採用状態、情報としての利用可能性、複数根拠の成立条件、適用範囲、命題間の関係、未確認事項を分けた根拠化結果にする。異なる発話機能が混在して命題の現在の地位を整理するとき、可変値、観測値、導出値、予測の根拠、適用範囲、再評価条件を確定するとき、または成果物との比較に必要な命題の状態、範囲、関係を入力から直接確定できないときに使う。確認済みの命題や受け入れ条件との直接比較は、比較を行う後続スキルが扱う。",
   "dependencies": [],
   "contentDigest": "219efce7850e90fa550245e6c24c012f34dd89655f44c6d966b80fd34a232a2d",
-  "manifestDigest": "1b103297805ef82c36ce8bfc89e8841f21a146ebe4b1bf2c327c88617c19a4d1",
+  "manifestDigest": "06e52c93b47f769a0b4b400a1bab7400fdb531c552465f8549a5d0127d2951e5",
   "hostArtifacts": [
     {
       "host": "codex",
