@@ -5,28 +5,31 @@
   "category": "development",
   "skillName": "ultra-review",
   "displayName": "Ultra Review",
-  "description": "タスク完了前の成果物、変更差分、または指定範囲に対し、指定された重点観点と対象から導いた失敗可能性を複数のサブエージェントで最終点検する。所見の妥当性と今回の対象との関係をトリアージし、対象内の修正、検証、再レビューを収束させる。任意の対象や観点を指定した深いレビュー、修正込みレビュー、または ultra-review が求められたときに使う。編集禁止やレビューのみの指定がある場合は所見と対応方針だけを返す。",
+  "description": "ユーザーの依頼または適用される作業規約が、成果物、変更差分、または指定範囲に対する複数の独立したレビュー作業による深い最終点検、修正込みの反復レビュー、または ultra-review を明示的に要求するときに使う。レビュー計画、個別レビュー、一つのトリアージ作業、採用所見の設計・実装・定型作業、検証判断、許可された検証手順の実行、検証手段の実装、再レビューをそれぞれの所有責務へ割り当てる。作業の生成、依存順序、実行担当の解決、入力と結果の配送、反復、収束状態を所有するオーケストレーション技能として、レビュー状態、所見判定、修正結果、受け入れ検証判定、未完了範囲を返す。",
   "dependencies": [
+    "change-framing",
+    "claim-grounding",
     "referent-modeling",
     "review-triage",
+    "verification-gate",
     "writing"
   ],
-  "contentDigest": "a4ec8802ae27dca8e1bc1cd343c69c01a48c5922c6bc8a3a53ae3f223a7b2e58",
-  "manifestDigest": "0a45bce072c33e4569df3a9b39b31d9e3819d4e6a7febe46a9a1e93ca46d84ed",
+  "contentDigest": "f51bca54d5a9965b70e43698ff6955708c06d571e20d8f96c1408b98d1da02ec",
+  "manifestDigest": "c908db564b728f2658eca849f48337daf2163eb31f2cb989d823019ef15f5c88",
   "hostArtifacts": [
     {
       "host": "claude",
-      "materializedFrontmatterDigest": "5dc21ae16a28786e1b7dc8de861219e3835ac4d2debe6ebb0933e17cd15a1b8c"
+      "materializedFrontmatterDigest": "56163047fc2ed935e6d356a00faf818ace0b5a4ca04e5c94b436cffed7d46c1b"
     },
     {
       "host": "copilot",
-      "materializedFrontmatterDigest": "28f02dc8c764196e58363c1343c63b59cdca060eaaabd21218bfbf6bff9db217"
+      "materializedFrontmatterDigest": "031fca49addc5f88b033dd2cf65d89a86d0a6ecf069b660c72e0f244829a41fa"
     },
     {
       "host": "openai",
       "path": "agents/openai.yaml",
-      "digest": "b7aae34c018efc1841dec0bbd5b421e05c717d1d16c13f2b6c86e97a1acf60ee",
-      "materializedFrontmatterDigest": "4855a6fa0eaad78aabceb39dad9b4ac9f6595ccc900a701dc7ac45887ea90cdd"
+      "digest": "3f4da8adc7e1304f4fbba9a1d5e83c624bb46c338acd219d6b1560b26a36b23b",
+      "materializedFrontmatterDigest": "e913d1e097fc64fab169ccb9c344ca3054d3026d6c814327ac7a217b1f4a4843"
     }
   ]
 }

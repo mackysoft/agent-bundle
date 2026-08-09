@@ -5,26 +5,28 @@
   "category": "development",
   "skillName": "test-authoring",
   "displayName": "Test Authoring",
-  "description": "自動テストを新規作成、更新、見直すときに、契約の根拠、独自の検出価値、所有境界、代表ケース、観測範囲、実行境界を判断し、重複、役割を失ったテスト、実装詳細だけを固定するテストを統合または削除して最小のテスト集合にする。テスト実行や変更全体の検証だけが目的のときは使わない。",
+  "description": "自動テスト成果物を新規作成、更新、見直すときに、契約の根拠、独自の検出価値、所有境界、代表ケース、観測範囲、実行境界を判断し、重複、役割を失ったテスト、実装詳細だけを固定するテストを統合または削除して最小のテスト集合にする。テスト成果物の作成、更新、整理を成果とする依頼で使う。",
   "dependencies": [
-    "code-authoring-rules"
+    "change-framing",
+    "code-authoring-rules",
+    "test-oracle-assessment"
   ],
-  "contentDigest": "7ad4daa140781c15e66a09cdd8a8f736e6253a65fc844884820c19001b8a51ac",
-  "manifestDigest": "3da5f247e1a61c96623becfaf47441328c0c8c46c85bbd8538a76e52d2e90165",
+  "contentDigest": "a765779d93925f519946efaeb290fe9e13a3835a01934f7758f15518e5e7570c",
+  "manifestDigest": "988b5d230ac420484ed9e5919c9b05ee5deeb128782c5070b073550b281b2d0c",
   "hostArtifacts": [
     {
       "host": "claude",
-      "materializedFrontmatterDigest": "3b2d72368f682ff5cece5232fb50970bff36f783e42f8b70ce5efe9e38108f93"
+      "materializedFrontmatterDigest": "ffcb84fd810d6d8f9f6564c2c066bc771e4dc899d55e0d92b512fc8cf8d82be9"
     },
     {
       "host": "copilot",
-      "materializedFrontmatterDigest": "bc7d60b3e3887ac39aaaa16f906d591b6d4007bb5a8b9a25f7b24a615e41a06a"
+      "materializedFrontmatterDigest": "17b3058bfcfeb1d95636d7d8381c19c8898d9c3185c7546f226935c5c798509b"
     },
     {
       "host": "openai",
       "path": "agents/openai.yaml",
-      "digest": "3640183c882eebed02288220e543c2d4aae7b97bc9c80963ab92125f35fbd9bc",
-      "materializedFrontmatterDigest": "fe2183b3f98ffcfded437074e244154fa0ec4866cdac9ae4eeca05c763a56361"
+      "digest": "7f85b6f17b8be283394486c5868e38a6bc197b7b3cf8b7cdbc828e52d556344d",
+      "materializedFrontmatterDigest": "8fca74cd248ec4f7f4e89d2e26f85dca8c66d00385a970d69c76ed951cd7a2ad"
     }
   ]
 }

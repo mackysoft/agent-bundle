@@ -61,9 +61,11 @@ SkillsPack includes these reusable skills:
 | --- | --- | --- |
 | `branch-create` | `development` | Create or reuse task branches while preserving detached or uncommitted work. |
 | `changelog` | `development` | Write reader-facing changelogs, release notes, and PR change summaries. |
+| `change-framing` | `basic` | Reconstruct change purpose, authority, contract changes, permissions, acceptance conditions, implementation constraints, and unresolved decisions into a traceable framing result. |
 | `code-authoring-rules` | `development` | Apply language-independent code design and authoring rules. |
 | `commit` | `development` | Create responsibility-scoped Conventional Commit messages. |
 | `csharp-authoring-rules` | `development` | Apply C#-specific implementation and review judgment rules. |
+| `claim-grounding` | `basic` | Ground claims in their sources, evidence composition, adoption status, information validity, scope, and relationships. |
 | `issue-planner` | `development` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | `development` | Write, create, update, or review structured GitHub Issue bodies. |
 | `pr-submit` | `development` | Verify, push, and create or update pull requests. |
@@ -75,10 +77,11 @@ SkillsPack includes these reusable skills:
 | `skill-usage-analysis` | `development` | Analyze real agent usage and identify evidence-backed skill improvements. |
 | `sync-latest` | `development` | Fetch remotes and safely synchronize the target worktree with the right base. |
 | `test-authoring` | `development` | Design, update, and consolidate minimal contract-based test suites. |
-| `ultra-review` | `development` | Run deeper multi-pass review and apply safe fixes. |
+| `test-oracle-assessment` | `development` | Assess whether test pass/fail judgments are contract-aligned, independently derived, and supported by detection evidence. |
+| `ultra-review` | `development` | Orchestrate review planning, independent reviews, triage, responsibility-owned fixes, verification, and re-review until the work converges. |
 | `unity-authoring-rules` | `development` | Apply Unity-specific implementation and review judgment rules with C# rules. |
 | `verification-gate` | `development` | Run the verification needed before PRs or final checks. |
-| `writing` | `basic` | Write, revise, review, summarize, and localize natural-language text while preserving meaning and structure. |
+| `writing` | `basic` | Write, revise, review, summarize, and localize text while preserving meaning and routing content by reader flow or ownership boundaries. |
 | `xml-doc-writer` | `development` | Write contract-focused XML documentation comments. |
 
 ## Categories
