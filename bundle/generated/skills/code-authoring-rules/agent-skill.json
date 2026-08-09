@@ -11,8 +11,8 @@
     "referent-modeling",
     "writing"
   ],
-  "contentDigest": "f1bdbfb99610470d0d704d71f6f5483afb0bff76021d5139805b918e884d8621",
-  "manifestDigest": "a9219aebed1808c32b0299bf4fd7e6de2cae02afcdf2490ab55dbf3456da5c9f",
+  "contentDigest": "ccf9560a8c1f2556d31df2f42125a9ec6694ddf6705c23153d8fefc1fff8a36b",
+  "manifestDigest": "92a3cae623b56c835e4ca25f2f8be2b740ea29265f89f1f94a9a947531acfb21",
   "hostArtifacts": [
     {
       "host": "codex",
