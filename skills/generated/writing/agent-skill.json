@@ -10,8 +10,8 @@
     "claim-grounding",
     "referent-modeling"
   ],
-  "contentDigest": "3bae2ab2c126abdf27aefd538a88f7def83f06aa78fbb2868fa72b7117b11abc",
-  "manifestDigest": "02d886e714d087d33c60c0556e21e4417fa09334282b10b296e5876b61edc0bc",
+  "contentDigest": "1b8efae8cd5dfb403c4ccd7175094d9b42ac9f3d8c47109e8d77631bc56cc857",
+  "manifestDigest": "a63361beb1b606b7593a678631f8cc86f7c44d9b9b863fd7b5b606f0d3756557",
   "hostArtifacts": [
     {
       "host": "claude",
