@@ -9,8 +9,8 @@
   "dependencies": [
     "code-authoring-rules"
   ],
-  "contentDigest": "2d9db0382784d2478bebae51e8eb5327fec39a33556f1ec472186a30eabb482b",
-  "manifestDigest": "8fe23c9404dc4c7866251c4c7805ca83218b477defaa86ad0a255c799385b52b",
+  "contentDigest": "1d7e3a0d0fc13e44a5e9713409dc3c3cc35dbbd224ca463c3dd30b878940da8b",
+  "manifestDigest": "0da6536bf6a67715294cccd36345cdad509ca27f92d42c1dcc265011fab762a6",
   "hostArtifacts": [
     {
       "host": "claude",
