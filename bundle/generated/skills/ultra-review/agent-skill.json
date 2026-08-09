@@ -5,30 +5,31 @@
   "category": "development",
   "skillName": "ultra-review",
   "displayName": "Ultra Review",
-  "description": "ユーザーの依頼または適用される作業規約が、成果物、変更差分、または指定範囲に対する複数のサブエージェントによる深い最終点検、修正込みの反復レビュー、または ultra-review を明示的に要求するときに使う。指定された重点観点、対象から導いた失敗可能性、要求や正本への根拠忠実性をレビューし、所見の妥当性と今回の対象との関係をトリアージする。許可される作用が読み取りに限定されるか、要求成果がレビュー結果に限定される場合はレビューのみとする。それ以外の ultra-review は、採用所見の対象内修正、受け入れ検証、再レビューを反復して収束させる。継続中の現在タスクがある場合は、その対象、受け入れ条件、権限を保持し、完了済みの依頼や現在タスクに属さない旧依頼は再開しない。",
+  "description": "ユーザーの依頼または適用される作業規約が、成果物、変更差分、または指定範囲に対する複数の独立したレビュー作業による深い最終点検、修正込みの反復レビュー、または ultra-review を明示的に要求するときに使う。レビュー計画、個別レビュー、一つのトリアージ作業、採用所見の設計・実装・定型作業、検証判断、許可された検証手順の実行、検証手段の実装、再レビューをそれぞれの所有責務へ割り当てる。読み取りまたはレビュー結果に限定された依頼を除き、採用所見の修正、検証、再レビューを収束まで反復し、レビュー状態、所見判定、修正結果、受け入れ検証判定、収束状態を返す。",
   "dependencies": [
+    "change-framing",
     "claim-grounding",
     "referent-modeling",
     "review-triage",
     "verification-gate",
     "writing"
   ],
-  "contentDigest": "8321f0bf19afa49618193162e86f4c4c9737caf122a17c2f1de379c4383f1264",
-  "manifestDigest": "92139cce26345cb5894e648847021dfd970dc54d0cc6e99a1afcf084b1e791ed",
+  "contentDigest": "07bc8f72f9321ed10495a7cf35321fee1f452279da21082f14a44e14ad439ce2",
+  "manifestDigest": "0d2b4183733ce2d45729d8b33fba7b3eb13029cbd4b9f4124fff4c90d79bc11d",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "2281205e14d0024a18edcd29d8ab7a61c72ecb731097009491b5bc2db942ba20",
-      "materializedFrontmatterDigest": "5d832c9cae3f3a3c1a38ce2279871f689d3671924d646c3b1605367b54dd826d"
+      "digest": "a4c88adb156473316b79757df5f7bd8e9c83b6f3fdf60649a06f7acb9bb648c2",
+      "materializedFrontmatterDigest": "36c12a74d35087d1f14e60917a881fbdf8282059fc2cd2a15f91cd162b1f7442"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "fbfedddc3a6ddb92f050f54d882a7ed1d44ab67e62504044cf92d7ca58e1dde1"
+      "materializedFrontmatterDigest": "e320169d2d7ee4831b2f82d8b707208571b73be96cb595a1daab5efafb5a9e17"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "358b790928afe6ceba2dab0dd5d3eb647bc7719efc60ff7227295983a96beca6"
+      "materializedFrontmatterDigest": "99352f27a7ee86e322196836e821b60a6bfc1cdd9fc6ac5566350850324e838c"
     }
   ]
 }

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 1,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "test-oracle-assessment",
+  "displayName": "Test Oracle Assessment",
+  "description": "既存または候補の自動テストについて、アサート、例外期待、スナップショット、ゴールデン値、モック検証、プロパティ、終了条件などの合否判定が、確認済みの契約に適合し、現在実装を期待結果へ写した自己充足的な判定になっていないかを読み取り専用で評価するときに使う。契約根拠、期待結果と観測結果の導出経路、共通依存、許容される変化、対象とする契約違反、検出証拠を対応付け、契約適合性、独立性、検出証拠の状態と未確認事項を返す。テストの作成、修正、実行、変更全体の受け入れ、セキュリティー、CI判定は扱わない。",
+  "dependencies": [
+    "claim-grounding",
+    "referent-modeling"
+  ],
+  "contentDigest": "0ea1abf871a60b99c43a3ec78084d34235bf0a769a29777bceb4f4f335b6ad1b",
+  "manifestDigest": "7ba78b3a6a43bcdc290e1dfa126e1cbf22388ece73be3086bdb346517a30c60f",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "e8381f72ea0801926afb588b9feab0d119d6b9b317f2f3811ffbd08bbd36cd9b",
+      "materializedFrontmatterDigest": "3e193522b1bdce72cb98e8543c57640bfa41ef021a4ef4c431699f4ecca438be"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "eb1fcfe6588b2189e48a263894c86be5d8dc0785bc694abe3de575fd0cc02d54"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "4e72c981b4c640036b46be36909dccbfd9b7e998c5688661f67fd76b3ddb232f"
+    }
+  ]
+}

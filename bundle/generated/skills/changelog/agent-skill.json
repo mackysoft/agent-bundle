@@ -5,26 +5,26 @@
   "category": "development",
   "skillName": "changelog",
   "displayName": "Changelog",
-  "description": "CHANGELOG.md、リリースノート、PR Changelog、コメント用差分ログ、changeset風の人間向け変更要約を、commits、Issues、PRs、diff、既存履歴から作成、編集するときに使う。Keep a Changelogを基準に、既存形式と対象読者に合わせ、開発ログではなく読者が利用、移行、運用判断に使える変更説明へ再構成する。",
+  "description": "CHANGELOG.md、リリースノート、PR Changelog、コメント用差分ログ、changeset風の人間向け変更要約を、commits、Issues、PRs、diff、既存履歴から作成、編集するときに使う。Keep a Changelogを基準に、既存形式と対象読者に合わせ、開発ログではなく読者が変更内容と影響を理解し、利用、移行、運用を判断できる変更説明へ再構成する。",
   "dependencies": [
     "writing"
   ],
-  "contentDigest": "6911f206c5a7042d4348eb816dfa36852355465f763faf0cb9854393c6be3030",
-  "manifestDigest": "a0cf752ea4d1b9703e35711770a0ebc6a0e25703f66b87336ee761ea95455a4f",
+  "contentDigest": "61e73060e7e87c654c63101c88201dc97cc990254e94dba4ef1fd7bf557e39cd",
+  "manifestDigest": "da0956293de64ea22089cf2bf7aba594d4069d6abcfe5f0ca88493659b3ffa69",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "8a331c9729770ec8623c6ed0c57325c1c768a16e5de53eec92da2a8eb596acbe",
-      "materializedFrontmatterDigest": "5cc81940338d64839b85d820633c43d7729ecfc251ab39b2be0387a7f066ff67"
+      "digest": "8b794ed4e312508919ef29a62a9bb32ad7095d9452809506b5238410b9702723",
+      "materializedFrontmatterDigest": "15382653080206a5c0c61a2bd43e665ee6a1ee4adc841cd0a3239103be415078"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "68084dbfafb4f6678f108e7c07f53b4cafa7960bf2df890bd19cfe8ef60704c1"
+      "materializedFrontmatterDigest": "f6804e0589c8c01949171596db2b4de0531de25202a742c5767e4701dea1b3f0"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "9caa055c18a9847e643e491c4a643c5e810cf77ebc6e5011c35c8c69ad96d912"
+      "materializedFrontmatterDigest": "63276c0db95b0962c5cb49d91db979c467851810abdc6ddba580eba476552092"
     }
   ]
 }

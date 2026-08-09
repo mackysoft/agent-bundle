@@ -7,23 +7,23 @@
   "displayName": "Orchestrator",
   "description": "一つの目的について、依頼者が定めた要求、範囲、制約、許可、受入条件を確認し、必要な成果へ分解して所有責務へ割り当て、依存関係、結果、レビュー、検証、完了を管理する。単一目的に属する複数作業の進行を調整するときに使う。",
   "skillDependencies": [],
-  "contentDigest": "88d41d9fffbe3f94442e046672a70e8d7744211701e466c85ecbb4e83faee064",
-  "manifestDigest": "585c63f5267b91afd05cf66d19ea38d346dc16aa12b2ac7f27882d022a1518d9",
+  "contentDigest": "8aa92fef51a7d98b00845bb938537150a54f6ce144ad010a557c9ada5db71a20",
+  "manifestDigest": "b117b38afb1192b4237218a103cabf788c793f4a4baf2982a912c1c66862a459",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/orchestrator.md",
-      "digest": "b59926319384b208d405c16ba1e08c49d524a1cc2b6d9610d19fc15523c760df"
+      "digest": "ae299c5063d2f4750bb1297f3fcd172611fbd2b3816a98a310933f90961f060b"
     },
     {
       "host": "codex",
       "path": "hosts/codex/orchestrator.toml",
-      "digest": "f8d4b73224002f0c3bf45991d244ebe50367d3760bfae447a268d93813a85ee5"
+      "digest": "546d8b359316618e0dbc02774d81ae7dbfc9ec811a9774bfc501a0b7525b8262"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/orchestrator.agent.md",
-      "digest": "f207281ac798773804eea95f48d8b31b228424d0c4eb696b57a7f685e9d09207"
+      "digest": "16c0970801f8c48e4d6af210887f1e21c4eb0646c4fa270d16da1e7cf31502ab"
     }
   ]
 }

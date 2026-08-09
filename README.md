@@ -121,6 +121,7 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | --- | --- | --- |
 | `branch-create` | `development` | Create or reuse task branches while preserving detached or uncommitted work. |
 | `changelog` | `development` | Write reader-facing changelogs, release notes, and pull request change summaries. |
+| `change-framing` | `basic` | Reconstruct change purpose, authority, contract changes, permissions, acceptance conditions, implementation constraints, and unresolved decisions. |
 | `code-authoring-rules` | `development` | Apply language-independent code design and authoring rules. |
 | `commit` | `development` | Create responsibility-scoped Conventional Commit messages. |
 | `csharp-authoring-rules` | `development` | Apply C#-specific implementation and review judgment rules. |
@@ -136,7 +137,8 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `skill-usage-analysis` | `development` | Analyze agent usage and identify evidence-backed skill improvements. |
 | `sync-latest` | `development` | Fetch remotes and safely synchronize a worktree with the right base. |
 | `test-authoring` | `development` | Design, update, and consolidate minimal contract-based test suites. |
-| `ultra-review` | `development` | Run deeper multi-pass review and apply safe fixes. |
+| `test-oracle-assessment` | `development` | Assess whether test judgments are contract-aligned, independently derived, and supported by detection evidence. |
+| `ultra-review` | `development` | Orchestrate review planning, independent reviews, triage, responsibility-owned fixes, verification, and re-review until the work converges. |
 | `unity-authoring-rules` | `development` | Apply Unity-specific implementation and review rules with the C# rules. |
 | `verification-gate` | `development` | Select and run the evidence needed for acceptance. |
 | `writing` | `basic` | Write, revise, review, summarize, and localize text while preserving meaning and ownership boundaries. |
