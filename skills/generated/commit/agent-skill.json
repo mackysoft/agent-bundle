@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.skills-pack",
   "category": "development",
   "skillName": "commit",
@@ -10,7 +10,7 @@
     "writing"
   ],
   "contentDigest": "7941e81faefcc2b832386886e78f76408e7334c124bf203d172b022b7a0624b5",
-  "manifestDigest": "14f7e78c1f9bbdf356623027373b4af04b3b7182759222cc7e25f94422945e67",
+  "manifestDigest": "74481e9c0d0de452233d3c7e0749c6827815280e6e1c5c4426e3f04ebd717499",
   "hostArtifacts": [
     {
       "host": "claude",

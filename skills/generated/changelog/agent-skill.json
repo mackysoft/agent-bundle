@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.skills-pack",
   "category": "development",
   "skillName": "changelog",
@@ -10,7 +10,7 @@
     "writing"
   ],
   "contentDigest": "6911f206c5a7042d4348eb816dfa36852355465f763faf0cb9854393c6be3030",
-  "manifestDigest": "bce661517f1d8fa3ddcf236d1b0cec9a8e139bcac00f24e37b3dfebf964677a8",
+  "manifestDigest": "c24a71366c7fdb45eb5db053ce0bdcf93087f2b52e316cd25a16162bcca57ae1",
   "hostArtifacts": [
     {
       "host": "claude",

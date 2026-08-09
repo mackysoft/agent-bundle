@@ -35,6 +35,12 @@ Install the development skill category into the current repository:
 skills-pack skills install --host openai --scope project --repo-root . --category development
 ```
 
+Install the game planning skill category into the current repository:
+
+```bash
+skills-pack skills install --host openai --scope project --repo-root . --category game-planning
+```
+
 Install the writing skill for the current user:
 
 ```bash
@@ -64,6 +70,8 @@ SkillsPack includes these reusable skills:
 | `code-authoring-rules` | `development` | Apply language-independent code design and authoring rules. |
 | `commit` | `development` | Create responsibility-scoped Conventional Commit messages. |
 | `csharp-authoring-rules` | `development` | Apply C#-specific implementation and review judgment rules. |
+| `decision-state-analysis` | `basic` | Reconstruct current decisions, unresolved questions, and derived results from conversations and project records. |
+| `game-design` | `game-planning` | Connect intended player experiences to player activity, game rules, feedback, and progression. |
 | `issue-planner` | `development` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | `development` | Write, create, update, or review structured GitHub Issue bodies. |
 | `pr-submit` | `development` | Verify, push, and create or update pull requests. |
@@ -89,6 +97,7 @@ SkillsPack includes these categories:
 | --- | --- |
 | `basic` | Foundational reusable skills. |
 | `development` | Code, review, test, Git, and pull request workflow skills. |
+| `game-planning` | Game design skills that connect intended player experiences to gameplay structures. |
 
 ## Skill Selection
 
@@ -104,8 +113,9 @@ skills-pack skills install --host openai --scope project --repo-root . --skill c
 `skills list` can run without selectors.
 For `export`, `install`, `update`, `doctor`, and `uninstall`, at least one package selector is required: `--category` or `--skill`.
 
-When both `--category` and `--skill` are specified, selected skills must match the selected categories.
-Exact skill selections also include transitive dependencies declared by the selected skills.
+Category and exact skill selections both include transitive dependencies declared by their selected root skills. Dependencies may belong to categories that were not selected explicitly.
+When both `--category` and `--skill` are specified, the explicitly selected root skills must match the selected categories; their transitive dependencies do not need to match those categories.
+For example, selecting the `game-planning` category selects `game-design` as the root and also includes its `basic` dependencies.
 For example, selecting `pr-merge` also exports or installs the Git and PR workflow skills it invokes.
 
 ## Command Reference

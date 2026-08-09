@@ -1,17 +1,18 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.skills-pack",
   "category": "development",
   "skillName": "skill-authoring",
   "displayName": "Skill Authoring",
   "description": "エージェントスキルを新規作成、更新、レビューするときに、必要性、単一責務、発火面、判断規則、自由度、フロー、スキル間の構成、本文と補助ファイルの情報配置を評価し、実際の利用文脈で意図した判断と成果へ到達できる作業契約に仕上げる。スキル本文の執筆、責務の分割、description と依存関係の設計、構造と挙動の検証で使う。",
   "dependencies": [
+    "decision-state-analysis",
     "referent-modeling",
     "writing"
   ],
-  "contentDigest": "316c262b899c9c2aa10d13973eb083d98689a56aaa3fa98fd5b6ce836eaad77d",
-  "manifestDigest": "a6a2bb102dc22a7c940920593bde243543c6989b6e524013c29229d5c2919e1f",
+  "contentDigest": "3c2887e4c13b12939b12e4ed5da0c50ff8d1b4da7d00fa01a365f1931a81f871",
+  "manifestDigest": "5492ecfebafbd58fa799a5a073cbc0f479dd37030f6612cb8c3e3b775937851d",
   "hostArtifacts": [
     {
       "host": "claude",

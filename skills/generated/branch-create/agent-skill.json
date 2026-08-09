@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.skills-pack",
   "category": "development",
   "skillName": "branch-create",
@@ -10,7 +10,7 @@
     "sync-latest"
   ],
   "contentDigest": "59c15af196da077cb102e31ce7eb7fa37dffcc89131d349890a234a3fa45860c",
-  "manifestDigest": "a86e7aca8fdf69fccaafd713e8d2d615c078ca509fad5d35c2d27ab7ab8b476e",
+  "manifestDigest": "3b0a37cd3930430d391c783146bd9b0c18be95b0024aa3bf3cd36d0cf7124906",
   "hostArtifacts": [
     {
       "host": "claude",

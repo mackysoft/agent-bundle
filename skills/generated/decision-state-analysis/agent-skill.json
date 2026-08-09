@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 2,
+  "catalogId": "com.mackysoft.skills-pack",
+  "category": "basic",
+  "skillName": "decision-state-analysis",
+  "displayName": "Decision State Analysis",
+  "description": "一つ以上の会話、回答、議事録、仕様、判断履歴、未決事項などから、複数の発言または命題について、決定論点と決定候補、対象と条件、決定主体、基準時点での状態、質問の解消状態、上書き関係、導出結果、競合、確認事項を根拠付きで復元する。何が決まり、何が未決か、回答によってどの質問が解消したか、提案、仮説、観測、導出結果が決定として扱われていないかを棚卸しするときや、複数の発言や記録に混在する決定状態を区別してから成果物へ反映する必要があるときに使う。単一の明示された決定や、確定した一つの正本をそのまま利用するだけの作業には使わない。",
+  "dependencies": [
+    "referent-modeling"
+  ],
+  "contentDigest": "77043b6002b449d9776a519a5d1c8d5ad9aaf1c60479faf770a445ee23a2a895",
+  "manifestDigest": "74739fd83ef18d661c516ae234b6138b351ad86b124b245b3f111415bb69c688",
+  "hostArtifacts": [
+    {
+      "host": "claude",
+      "materializedFrontmatterDigest": "1577006752bc06f6d980b849bc770d526063f06e2f0a84d17e40d87ab253a0a7"
+    },
+    {
+      "host": "copilot",
+      "materializedFrontmatterDigest": "e5a850b88254101ce857284fdb8bd71ce4f548e9035c6500317845a12a769ab3"
+    },
+    {
+      "host": "openai",
+      "path": "agents/openai.yaml",
+      "digest": "40351bdbfe983086b2262f897f55cc8591ad0729fba8fba8b67f2bbf255cb21e",
+      "materializedFrontmatterDigest": "6a8f0e085c5adb99de5250a1e1399c60a2003b15729cde81ef4d0a16be52fefd"
+    }
+  ]
+}

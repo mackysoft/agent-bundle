@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.skills-pack",
   "category": "development",
   "skillName": "issue-writer",
@@ -10,7 +10,7 @@
     "writing"
   ],
   "contentDigest": "1ab92e165940ebbb195b2b1f25de193da18ffea7f7ec0dd76651530469ad3341",
-  "manifestDigest": "b657fd7a907b87e7ac0cfa22e4883e202608b61b0e38095a9caeea2eab6a41cb",
+  "manifestDigest": "d147a2b17f60ff5ef42b113ce9bc65591346fdd16e3dad98e93da667e85443fc",
   "hostArtifacts": [
     {
       "host": "claude",

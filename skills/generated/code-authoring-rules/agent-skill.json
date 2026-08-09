@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.skills-pack",
   "category": "development",
   "skillName": "code-authoring-rules",
@@ -11,7 +11,7 @@
     "writing"
   ],
   "contentDigest": "61c5a64c4f9a94e88a8b2881847134b8f58edd88e1030c1895ebc984e15a40f1",
-  "manifestDigest": "f5a73233f5f95beaff5a56bb83cdeaa008e534378dd9d160e9d546e6774cd10e",
+  "manifestDigest": "73d37d61d83abc13d0aaba64a5cebfe313cacb1b7240f6f5417219435460ac18",
   "hostArtifacts": [
     {
       "host": "claude",

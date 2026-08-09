@@ -1,28 +1,30 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.skills-pack",
   "category": "development",
   "skillName": "review-triage",
   "displayName": "Review Triage",
-  "description": "レビュー所見を対象成果物、要求、契約、関連資料と照合し、妥当性と今回の対象との関係を分けて判断する。重複を統合し、`採用 / 却下 / 保留 / 要確認` に分類して対応方針へまとめる。",
-  "dependencies": [],
-  "contentDigest": "f0c4047aaad504a50495e609dd6b7806d9b91e7ec304872c4ed24845b8e3bdd5",
-  "manifestDigest": "7fe34e9de874d33ca3cd9fc09c63bd142410399b11bd5d078102ae543e483d6f",
+  "description": "レビュー所見を対象成果物、要求、契約、関連資料と照合し、妥当性と今回の対象との関係を分けて判断する。重複を統合し、`採用 / 却下 / 保留 / 要確認` に分類して対応方針へまとめる。過去に行われた採否の状態を記録から復元するだけの作業には使わない。",
+  "dependencies": [
+    "decision-state-analysis"
+  ],
+  "contentDigest": "e23a23871620f270ecbe424caea45c01737059e702d8da601163d061c8f9f7c7",
+  "manifestDigest": "8425fb0b0af4bc9151ee7e3f4b4594f9aa2c816c66ddd40635224977f4dcf3f5",
   "hostArtifacts": [
     {
       "host": "claude",
-      "materializedFrontmatterDigest": "9379a0e25350cc01d013727699f7867e7cf09572abd6e330be9f174e755eba87"
+      "materializedFrontmatterDigest": "c7abe627bb1fff360907ec0584a5599e19a191ac9c8c8a835694ef6958924862"
     },
     {
       "host": "copilot",
-      "materializedFrontmatterDigest": "a06bb72ba68338223ad7cf06b5023640d60743793526ab9be4475c851ec780bf"
+      "materializedFrontmatterDigest": "e019551cf604117cae8429a529c554bcb29b1400a3c1fc84630619a70153f530"
     },
     {
       "host": "openai",
       "path": "agents/openai.yaml",
-      "digest": "48868d9b9d030f02fd9c0cfb5498248b0f5a3f541ab40f658a510ab478ce64fd",
-      "materializedFrontmatterDigest": "894dd64dc14a9682ebfe28778dbfe20392043613ee558894aafd1a4fa52c7258"
+      "digest": "f1c739139c2701bdae5a31efb047255f370e4f457e676b73eb49888a2da4b601",
+      "materializedFrontmatterDigest": "2c739b705e1307e80ef8215ef359244f449759f9a655c45e874265f16dd81ba2"
     }
   ]
 }

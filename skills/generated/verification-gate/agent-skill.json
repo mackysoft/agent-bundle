@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.skills-pack",
   "category": "development",
   "skillName": "verification-gate",
@@ -8,7 +8,7 @@
   "description": "変更が受け入れ可能かを判断するために、受け入れ条件へ対応する検証面を選び、リポジトリの専用スクリプトや CI と同じコマンドを優先して実行する。成功、失敗原因、未検証範囲、次に必要な作業を残す。",
   "dependencies": [],
   "contentDigest": "f8a26b065b62369a4baaf599c6c8eca48150bb55ad42e01b5aeb6107a78acb39",
-  "manifestDigest": "4f92c37588c731c3adb06367922980db644c1dba03c4154399c8d9162767b781",
+  "manifestDigest": "a0a79e20cfb0982999fe570e04250a6f9fabf365af6c9ff9740c651347b65695",
   "hostArtifacts": [
     {
       "host": "claude",

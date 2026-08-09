@@ -1,30 +1,31 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.skills-pack",
   "category": "basic",
   "skillName": "writing",
   "displayName": "Writing",
-  "description": "自然言語の文章を作成、変更、レビュー、要約、翻訳、ローカライズ、返信するときに、対象、読者、媒体、言語、出力形式を文章前提として固定し、意味保持、事実性、論理構造、文章構造、文体、表記を整える。会話、スレッド、コメント、メール、案内、告知、提案、報告、説明文、記事、原稿、専門文書などの文章成果物や、やりとりの読みやすさを改善したいときに使う。",
+  "description": "自然言語の文章を作成、変更、レビュー、要約、翻訳、ローカライズ、返信するときに、対象、読者、媒体、言語、出力形式を文章前提として固定し、意味保持、事実性、論理構造、文章構造、文体、表記を整える。会話、スレッド、コメント、メール、案内、告知、提案、報告、説明文、記事、原稿、専門文書などの文章成果物や、やりとりの読みやすさを改善したいときに使う。複数の発言や記録から現在の決定状態を復元すること自体が主目的の作業には使わない。",
   "dependencies": [
+    "decision-state-analysis",
     "referent-modeling"
   ],
-  "contentDigest": "6cdcb9d9c37183dfc51755ffb6a3f3dcaa7c7680107f71d71bce2d41374c699d",
-  "manifestDigest": "423456c292aa1d9e75425f4f0da3ea9a9ea2d4f8641e6b66a2029168db2ea06a",
+  "contentDigest": "1d8a2a9a6644290d60be26271676673c90e2a4bc041e29382f3a2e095f0ef8c7",
+  "manifestDigest": "977cb545b308a8e0e4dd3e6612933c70785bc9f8ec5440179c6f181bb683092a",
   "hostArtifacts": [
     {
       "host": "claude",
-      "materializedFrontmatterDigest": "8cd173163a812819cf380b97333ef3f92f4f273c839e101176fb86c985ca5af2"
+      "materializedFrontmatterDigest": "d5726ded6b7515927511dba5439f6850dd0501287105d7ae2442416ba08abbbb"
     },
     {
       "host": "copilot",
-      "materializedFrontmatterDigest": "30184022b07919ec97e05f067c26d4e829269b9c4d5cb775c4a03225f109ab8a"
+      "materializedFrontmatterDigest": "99754e7cd27e632f6bb3c8710202d3920f008b5ed6a174e1c2227cd877875a03"
     },
     {
       "host": "openai",
       "path": "agents/openai.yaml",
-      "digest": "c14e2d25fa8c494849c9b31b3775edea053bd08bc9e1ac2fcf9c04b875516844",
-      "materializedFrontmatterDigest": "1bf73421582d891a453b5471138a4d0808d8cf93342004c9b99e720c75b4f113"
+      "digest": "e4f9ec58bff975970c2988e5d602a601f9ef2ee399e87285bd91023cafec20a0",
+      "materializedFrontmatterDigest": "55690d2c1e03a7baf5827e7fc7db074b1abe0fd0c3b10200a108b0a7f3eb2e51"
     }
   ]
 }

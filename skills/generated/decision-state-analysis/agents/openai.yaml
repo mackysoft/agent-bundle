@@ -1,0 +1,7 @@
+interface:
+  display_name: "Decision State Analysis"
+  short_description: "一つ以上の会話、回答、議事録、仕様、判断履歴、未決事項などから、複数の発言または命題について、決定論点と決定候補、対象と条件、決定主体、基準時点での状態、質問の解消状態、上書き関係、導出結果、競合、確認事項を根拠付きで復元する。何が決まり、何が未決か、回答によってどの質問が解消したか、提案、仮説、観測、導出結果が決定として扱われていないかを棚卸しするときや、複数の発言や記録に混在する決定状態を区別してから成果物へ反映する必要があるときに使う。単一の明示された決定や、確定した一つの正本をそのまま利用するだけの作業には使わない。"
+  default_prompt: "Use $decision-state-analysis to follow the Decision State Analysis workflow."
+
+policy:
+  allow_implicit_invocation: true

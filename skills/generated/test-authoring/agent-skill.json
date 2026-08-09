@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.skills-pack",
   "category": "development",
   "skillName": "test-authoring",
@@ -10,7 +10,7 @@
     "code-authoring-rules"
   ],
   "contentDigest": "7ad4daa140781c15e66a09cdd8a8f736e6253a65fc844884820c19001b8a51ac",
-  "manifestDigest": "3da5f247e1a61c96623becfaf47441328c0c8c46c85bbd8538a76e52d2e90165",
+  "manifestDigest": "35969a6124073d91f81caaa23277b927b91c9c6ef62b7d6adee0bf27e059b817",
   "hostArtifacts": [
     {
       "host": "claude",

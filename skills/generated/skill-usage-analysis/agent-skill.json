@@ -1,16 +1,17 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 1,
+  "skillBundleVersion": 2,
   "catalogId": "com.mackysoft.skills-pack",
   "category": "development",
   "skillName": "skill-usage-analysis",
   "displayName": "Skill Usage Analysis",
   "description": "エージェントのセッション、成果物、差分、レビュー、修正指示を調べ、期待した挙動との差、原因、再発性、影響を特定し、新規スキル、既存スキル、スキル基盤、製品やツールへの対応候補として整理する。実運用からスキルの不足、発火のずれ、判断規則の弱さ、責務の混在を分析するときに使う。",
   "dependencies": [
+    "decision-state-analysis",
     "writing"
   ],
-  "contentDigest": "5d918a327cd18db22b5c4d1f5b78a489d7fd496516aea79c9cf8ed1239d5b982",
-  "manifestDigest": "e7399d1ada33e494102e30eb7014849f1e548f852122094a9d404436afc88722",
+  "contentDigest": "e2fae356a0e20ee3d637de623c1461e00908b1ae9742b95823d08d65b19475a7",
+  "manifestDigest": "68b9d23ad37c17304c222f5e21d231ba6aad96d9b3cb5d6d894aa6af60b956ba",
   "hostArtifacts": [
     {
       "host": "claude",
