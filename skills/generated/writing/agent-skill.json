@@ -9,8 +9,8 @@
   "dependencies": [
     "referent-modeling"
   ],
-  "contentDigest": "6cdcb9d9c37183dfc51755ffb6a3f3dcaa7c7680107f71d71bce2d41374c699d",
-  "manifestDigest": "423456c292aa1d9e75425f4f0da3ea9a9ea2d4f8641e6b66a2029168db2ea06a",
+  "contentDigest": "3adf891f1823f876fa597a7508e057518380d4a5fdd13a263259ae37f6783cb8",
+  "manifestDigest": "d222386b87f9ac037f150f7cb1c6954d4f9e0e332f87cd89b1323aa1fdfaefdc",
   "hostArtifacts": [
     {
       "host": "claude",
