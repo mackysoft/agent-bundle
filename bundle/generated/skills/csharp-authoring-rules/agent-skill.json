@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 1,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "csharp-authoring-rules",
+  "displayName": "C# Authoring Rules",
+  "description": "C# のコードを実装、変更、レビューするときに、API 契約、例外、`null`、非同期処理、依存性注入、リソースの寿命、言語機能、XML ドキュメント、割り当てに関する C# 固有の判断規則を適用する。言語非依存の設計判断には $code-authoring-rules を併用する。",
+  "dependencies": [
+    "code-authoring-rules"
+  ],
+  "contentDigest": "1d7e3a0d0fc13e44a5e9713409dc3c3cc35dbbd224ca463c3dd30b878940da8b",
+  "manifestDigest": "fa833b691892456b07351c8e67c76be8bc337c372befe771937a4d917052771c",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "fa37567878e546803f18435de4c4a2b3777083e64d7367cc7f21af8978dc7be2",
+      "materializedFrontmatterDigest": "c5e51789869bb3f30fa332b315a2efeadffff7bc7c70810a9313da470ede2a39"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "39b2d1ffaf6a3d70264f6d8c8001fc5fb95aef8f36e5d8b1c3fb21bbc52ed6ce"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "548276a399f7b9854efa5d6a0c8e28300a16398ea9f1a61b9d71a302383ee3bd"
+    }
+  ]
+}

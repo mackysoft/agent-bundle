@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 1,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "code-authoring-rules",
+  "displayName": "Code Authoring Rules",
+  "description": "ソースコードを実装、変更、レビューするときに、確定した変更目的と変更対象の契約から、コードが所有する内部技術契約、責務と保証の境界、実現手段、依存関係と副作用を定め、既存実装へ収束させる判断規則を適用する。言語、フレームワーク、プロジェクト固有の規則と併用する。",
+  "dependencies": [
+    "change-framing",
+    "referent-modeling",
+    "writing"
+  ],
+  "contentDigest": "ccf9560a8c1f2556d31df2f42125a9ec6694ddf6705c23153d8fefc1fff8a36b",
+  "manifestDigest": "92a3cae623b56c835e4ca25f2f8be2b740ea29265f89f1f94a9a947531acfb21",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "cb0153e5519257d2bdf854a0235828ee0b85d0352f81337e42d3094a19425f9e",
+      "materializedFrontmatterDigest": "7be04b8e79a144f21b96f8b24eee13c996e6a6ab00ee83be607f5a721b87f09a"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "678b49354328c38053f3ebfc860e5542075a190e4d3eaa0025cd92a62cc14ac3"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "1fff82e07526c5df76d6a0aa471885c70fe7b55712406fdbaae743a84994ac57"
+    }
+  ]
+}

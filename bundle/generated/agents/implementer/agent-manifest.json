@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "bundleVersion": 1,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "orchestration",
+  "agentName": "implementer",
+  "displayName": "Implementer",
+  "description": "確定済みの設計契約に基づき、内部実現方法を選ぶ通常実装に使う。コード、設定、データ、文書、テストなどの成果物を作成または変更し、実装結果と実装時の検証結果を返す。",
+  "skillDependencies": [
+    "code-authoring-rules",
+    "writing"
+  ],
+  "contentDigest": "2fd8b9ff3d73b0124e0adddec60f712b4da8ee488632ada5a031cb2b15228f6c",
+  "manifestDigest": "948224f6502a4136274ffefe2ba0610b69c1178da90d4f520a945c0512423c20",
+  "hostArtifacts": [
+    {
+      "host": "claude-code",
+      "path": "hosts/claude-code/implementer.md",
+      "digest": "924de83b5c46f903ab51e61f4d0cea5aa7b355a8e02700c8b137c638b20123cb"
+    },
+    {
+      "host": "codex",
+      "path": "hosts/codex/implementer.toml",
+      "digest": "23cf72120bfe6c82f0910e5b67042f04e98644e38783deffaf76facee711f62a"
+    },
+    {
+      "host": "github-copilot",
+      "path": "hosts/github-copilot/implementer.agent.md",
+      "digest": "b03b986083920068868e2b47e272e1cb46236d24f18cf92bbe6922a1bed45625"
+    }
+  ]
+}

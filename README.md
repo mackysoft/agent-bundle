@@ -1,183 +1,193 @@
-# SkillsPack - Agent Skills CLI
+# AgentBundle
 
-[![verify](https://github.com/mackysoft/skills-pack/actions/workflows/verify.yaml/badge.svg)](https://github.com/mackysoft/skills-pack/actions/workflows/verify.yaml) [![NuGet](https://img.shields.io/nuget/v/MackySoft.SkillsPack?label=MackySoft.SkillsPack)](https://www.nuget.org/packages/MackySoft.SkillsPack) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![verify](https://github.com/mackysoft/skills-pack/actions/workflows/verify.yaml/badge.svg)](https://github.com/mackysoft/skills-pack/actions/workflows/verify.yaml) [![NuGet](https://img.shields.io/nuget/v/MackySoft.AgentBundle?label=MackySoft.AgentBundle)](https://www.nuget.org/packages/MackySoft.AgentBundle) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**Created by Hiroya Aramaki ([Makihiro](https://twitter.com/makihiro_dev))**
+AgentBundle is a .NET global tool that distributes a curated bundle of reusable skills and custom agents through [Agent Distribution](https://github.com/mackysoft/agent-distribution).
 
-SkillsPack is a .NET global tool for distributing reusable Agent Skills to supported agent hosts.
-
-Use it when the same curated skill set should be shared across repositories or user environments without copying `SKILL.md` files by hand.
-The package includes canonical skill definitions, generated host-specific skill files, and commands for listing, exporting, installing, updating, diagnosing, and uninstalling skills.
+The package contains the canonical Agent Distribution bundle, including host-independent agent instructions and adapters for Codex, Claude Code, and GitHub Copilot.
 
 ## Install
 
 ```bash
-dotnet tool install --global MackySoft.SkillsPack
+dotnet tool install --global MackySoft.AgentBundle
 ```
 
-Update the tool to receive the latest bundled skills:
+This installs the `agent-bundle` CLI and its embedded canonical bundle. It does not write Skills or custom agents into a host; use the `install` commands below for that.
+
+### Update AgentBundle
 
 ```bash
-dotnet tool update --global MackySoft.SkillsPack
+dotnet tool update --global MackySoft.AgentBundle
 ```
 
-## Quick Start
-
-List available skills and supported hosts:
+The tool update replaces the CLI and its embedded bundle. It does not change Skill or custom agent files that are already installed in a host. Update and prune those files separately for every host and scope where you installed them, using the same selectors and applicable target overrides. Reuse `--target-dir` for Skill update, prune, and doctor; `--agent-target-dir` for custom-agent update, prune, and doctor; and `--skill-target-dir` for custom-agent update and doctor. For example:
 
 ```bash
-skills-pack skills list
+agent-bundle skills update --host codex --scope user --category basic,development
+agent-bundle agents update --host codex --scope user --category orchestration
 ```
 
-Install the development skill category into the current repository:
+If a release removes or renames a managed Skill or custom agent, clean up each old name explicitly after updating the tool. `update` does not prune removed entries:
 
 ```bash
-skills-pack skills install --host openai --scope project --repo-root . --category development
+agent-bundle skills prune --host codex --scope user --skill <removed-or-renamed-skill>
+agent-bundle agents prune --host codex --scope user --agent <removed-or-renamed-agent>
 ```
 
-Install the writing skill for the current user:
+### Migrate from SkillsPack
+
+Migration from `MackySoft.SkillsPack`, the `skills-pack` CLI, and the `com.mackysoft.skills-pack` catalog is a one-time replacement. AgentBundle provides no compatibility aliases, and the new CLI does not own the old catalog or its installation state.
+
+Before uninstalling the old global tool, use the old CLI to remove every managed Skill installation. Run the applicable user-scope commands for each old host you used:
 
 ```bash
-skills-pack skills install --host openai --scope user --skill writing
+skills-pack skills uninstall --host openai --scope user --category basic,development
+skills-pack skills uninstall --host claude --scope user --category basic,development
+skills-pack skills uninstall --host copilot --scope user --category basic,development
 ```
 
-Preview changes before writing files:
+If an old installation used `--target-dir`, pass that exact target directory to its uninstall command. The old CLI must resolve the same managed installation that it originally created.
+
+For project-scope installations, run the applicable old CLI command in every repository where SkillsPack was installed. Preserve both the original `--repository-root` and any original `--target-dir` override:
 
 ```bash
-skills-pack skills install --host openai --scope project --repo-root . --category development --dry-run --print-diff
+skills-pack skills uninstall --host openai --scope project --repository-root /path/to/repository --category basic,development
+skills-pack skills uninstall --host claude --scope project --repository-root /path/to/repository --category basic,development
+skills-pack skills uninstall --host copilot --scope project --repository-root /path/to/repository --category basic,development
 ```
 
-Check installed project skills:
+The `openai`, `claude`, and `copilot` literals above belong only to these historical `skills-pack` migration commands; they are not host aliases for `agent-bundle`.
+
+After the old CLI has removed its managed files, replace the global tool:
 
 ```bash
-skills-pack skills doctor --host openai --scope project --repo-root . --category development
+dotnet tool uninstall --global MackySoft.SkillsPack
+dotnet tool install --global MackySoft.AgentBundle
 ```
 
-## Included Skills
+Finally, create installations owned by the new `com.mackysoft.agent-bundle` catalog with `agent-bundle`. For example:
 
-SkillsPack includes these reusable skills:
+```bash
+agent-bundle skills install --host codex --scope user --category basic,development
+agent-bundle agents install --host codex --scope user --category orchestration
+```
+
+Repeat the new installation for each required host and scope. Project-scope installations must be run for each repository with `--scope project --repository-root /path/to/repository`.
+
+## Skills
+
+List the bundled skills:
+
+```bash
+agent-bundle skills list
+```
+
+Install the development category into the current project for Codex:
+
+```bash
+agent-bundle skills install --host codex --scope project --repository-root . --category development
+```
+
+Select exact skills or multiple categories with comma-separated values:
+
+```bash
+agent-bundle skills install --host claude-code --scope user --skill writing
+agent-bundle skills install --host github-copilot --scope project --repository-root . --category basic,development
+```
+
+Use `--dry-run --print-diff` before an installation when you need its planned file changes. `export`, `install`, `update`, `doctor`, `uninstall`, and `prune` require `--category` or `--skill`; `list` does not.
+
+## Custom agents
+
+List the bundled agents and their direct skill dependencies:
+
+```bash
+agent-bundle agents list
+```
+
+Install an orchestration agent and its resolved skill dependencies:
+
+```bash
+agent-bundle agents install --host codex --scope project --repository-root . --agent architect
+agent-bundle agents install --host claude-code --scope user --category orchestration
+agent-bundle agents install --host github-copilot --scope project --repository-root . --agent reviewer --dry-run --print-diff
+```
+
+The `agents` resource group supports `list`, `export`, `install`, `update`, `doctor`, `uninstall`, and `prune`. Agent selection uses `--category` or `--agent`; installation and update start from the selected Agent → Skill dependencies and resolve their transitive Skill → Skill closure. Agent definitions never depend on other agents.
+
+## Included skills
 
 | Skill | Category | Purpose |
 | --- | --- | --- |
 | `branch-create` | `development` | Create or reuse task branches while preserving detached or uncommitted work. |
-| `changelog` | `development` | Write reader-facing changelogs, release notes, and PR change summaries. |
-| `change-framing` | `basic` | Reconstruct change purpose, authority, contract changes, permissions, acceptance conditions, implementation constraints, and unresolved decisions into a traceable framing result. |
+| `changelog` | `development` | Write reader-facing changelogs, release notes, and pull request change summaries. |
+| `change-framing` | `basic` | Reconstruct change purpose, authority, contract changes, permissions, acceptance conditions, implementation constraints, and unresolved decisions. |
 | `code-authoring-rules` | `development` | Apply language-independent code design and authoring rules. |
 | `commit` | `development` | Create responsibility-scoped Conventional Commit messages. |
 | `csharp-authoring-rules` | `development` | Apply C#-specific implementation and review judgment rules. |
-| `claim-grounding` | `basic` | Ground claims in their sources, evidence composition, adoption status, information validity, scope, and relationships. |
+| `claim-grounding` | `basic` | Ground claims in sources, evidence composition, adoption status, scope, and relationships. |
 | `issue-planner` | `development` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | `development` | Write, create, update, or review structured GitHub Issue bodies. |
+| `pr-merge` | `development` | Merge pull requests through continuous integration and branch cleanup. |
 | `pr-submit` | `development` | Verify, push, and create or update pull requests. |
-| `pr-merge` | `development` | Merge pull requests through CI and branch cleanup. |
 | `push` | `development` | Commit pending work when needed and push the current branch safely. |
-| `referent-modeling` | `basic` | Ground new terms and abstractions in concrete referents, roles, and relationships before naming. |
+| `referent-modeling` | `basic` | Ground terms and abstractions in concrete referents, roles, and relationships before naming. |
 | `review-triage` | `development` | Triage review comments against code, specifications, and evidence. |
 | `skill-authoring` | `development` | Create, update, and review behaviorally effective agent skills. |
-| `skill-usage-analysis` | `development` | Analyze real agent usage and identify evidence-backed skill improvements. |
-| `sync-latest` | `development` | Fetch remotes and safely synchronize the target worktree with the right base. |
+| `skill-usage-analysis` | `development` | Analyze agent usage and identify evidence-backed skill improvements. |
+| `sync-latest` | `development` | Fetch remotes and safely synchronize a worktree with the right base. |
 | `test-authoring` | `development` | Design, update, and consolidate minimal contract-based test suites. |
-| `test-oracle-assessment` | `development` | Assess whether test pass/fail judgments are contract-aligned, independently derived, and supported by detection evidence. |
+| `test-oracle-assessment` | `development` | Assess whether test judgments are contract-aligned, independently derived, and supported by detection evidence. |
 | `ultra-review` | `development` | Orchestrate review planning, independent reviews, triage, responsibility-owned fixes, verification, and re-review until the work converges. |
-| `unity-authoring-rules` | `development` | Apply Unity-specific implementation and review judgment rules with C# rules. |
-| `verification-gate` | `development` | Run the verification needed before PRs or final checks. |
-| `writing` | `basic` | Write, revise, review, summarize, and localize text while preserving meaning and routing content by reader flow or ownership boundaries. |
+| `unity-authoring-rules` | `development` | Apply Unity-specific implementation and review rules with the C# rules. |
+| `verification-gate` | `development` | Select and run the evidence needed for acceptance. |
+| `writing` | `basic` | Write, revise, review, summarize, and localize text while preserving meaning and ownership boundaries. |
 | `xml-doc-writer` | `development` | Write contract-focused XML documentation comments. |
 
-## Categories
+## Included custom agents
 
-SkillsPack includes these categories:
+Custom agents are grouped into `orchestration`:
 
-| Category | Purpose |
-| --- | --- |
-| `basic` | Foundational reusable skills. |
-| `development` | Code, review, test, Git, and pull request workflow skills. |
+| Agent | Purpose | Direct skill dependencies |
+| --- | --- | --- |
+| `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
+| `implementer` | Implements an agreed design, including natural-language artifacts, and reports implementation verification. | `code-authoring-rules`, `writing` |
+| `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
+| `verifier` | Determines acceptance evidence and its result. | `verification-gate` |
+| `researcher` | Collects bounded read-only evidence and reports unchecked areas. | `claim-grounding` |
+| `operator` | Performs a fully specified closed action and verifies its result. | None |
+| `orchestrator` | Coordinates one objective across responsible outcomes. | None |
+| `supervisor` | Routes independent objectives and aggregates their state. | None |
 
-## Skill Selection
+Agent bindings materialize as host-specific files while `AGENT.md` remains host-independent. The package intentionally does not install or maintain host-shared configuration files.
 
-`--category` selects one or more bundled skill categories.
-`--skill` selects exact `skillName` values.
-Selectors accept comma-separated values:
+The orchestrator assigns natural-language changes to an implementer and requires a separate read-only reviewer to audit the latest candidate with the `writing` contract. Accepted findings return to implementation, and the revised candidate is audited again before completion.
 
-```bash
-skills-pack skills install --host openai --scope project --repo-root . --category basic,development
-skills-pack skills install --host openai --scope project --repo-root . --skill changelog,commit
-```
+## Supported hosts
 
-`skills list` can run without selectors.
-For `export`, `install`, `update`, `doctor`, and `uninstall`, at least one package selector is required: `--category` or `--skill`.
+| Host literal | Skills | Custom agents |
+| --- | --- | --- |
+| `codex` | Codex skill directory | `.codex/agents` |
+| `claude-code` | Claude Code skill directory | `.claude/agents` |
+| `github-copilot` | GitHub Copilot skill directory | `.github/agents` |
 
-When both `--category` and `--skill` are specified, selected skills must match the selected categories.
-Exact skill selections also include transitive dependencies declared by the selected skills.
-For example, selecting `pr-merge` also exports or installs the Git and PR workflow skills it invokes.
+See the [Agent Distribution command reference](https://github.com/mackysoft/agent-distribution/blob/3.0.0/README.md#run-standard-commands) for selector, scope, target-directory, ownership-state, and reload details.
 
-## Command Reference
+## Development
 
-List bundled skills, supported hosts, categories, and package counts:
-
-```bash
-skills-pack skills list
-skills-pack skills list --category development
-skills-pack skills list --category basic,development
-skills-pack skills list --skill changelog
-skills-pack skills list --category development --skill changelog
-```
-
-Export host-specific skill files:
+The source of truth is `bundle/bundle.json` and `bundle/definitions`. Schema 2 separates `definitions/skills` from `definitions/agents`; `bundle/generated` is the checked-in canonical output.
 
 ```bash
-skills-pack skills export --host openai --category development --output ./exported-skills
-skills-pack skills export --host openai --skill changelog --output ./exported-skills
+dotnet tool restore
+dotnet restore AgentBundle.slnx
+bash scripts/generate-bundle.sh
+bash scripts/verify.sh
 ```
-
-Install skills into a repository:
-
-```bash
-skills-pack skills install --host openai --scope project --repo-root . --category development
-skills-pack skills install --host openai --scope project --repo-root . --skill changelog
-```
-
-Update installed skills:
-
-```bash
-skills-pack skills update --host openai --scope project --repo-root . --category development
-```
-
-Diagnose installed skills:
-
-```bash
-skills-pack skills doctor --host openai --scope project --repo-root . --category development
-```
-
-Uninstall managed skills:
-
-```bash
-skills-pack skills uninstall --host openai --scope project --repo-root . --category development
-```
-
-Install skills into the current user's host skill directory:
-
-```bash
-skills-pack skills install --host openai --scope user --category development
-skills-pack skills install --host openai --scope user --skill writing
-```
-
-Use `--dry-run` before changing installed files:
-
-```bash
-skills-pack skills install --host openai --scope project --repo-root . --category development --dry-run --print-diff
-skills-pack skills doctor --host openai --scope project --repo-root . --category development
-```
-
-Supported hosts are reported by `skills-pack skills list`.
 
 ## Author
 
-Hiroya Aramaki is an indie game developer in Japan.
-
-- Website: <https://mackysoft.net/>
-- GitHub: <https://github.com/mackysoft>
+Hiroya Aramaki ([Makihiro](https://twitter.com/makihiro_dev))
 
 ## License
 
-SkillsPack is under the [MIT License](LICENSE).
+AgentBundle is under the [MIT License](LICENSE).

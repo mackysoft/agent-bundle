@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Architect",
+  "description": "権限ある根拠から変更目的、変更対象、契約、範囲を設計入力として整理し、アーキテクチャ、責務境界、不変条件、外部契約、実装契約、検証要件を決めるときに使う。成果として、根拠付き設計判断と実装可能な設計契約を返す。",
+  "skillDependencies": [
+    "claim-grounding",
+    "referent-modeling"
+  ]
+}

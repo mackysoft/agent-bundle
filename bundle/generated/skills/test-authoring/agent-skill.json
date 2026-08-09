@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 1,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "test-authoring",
+  "displayName": "Test Authoring",
+  "description": "自動テスト成果物の作成、更新、整理を成果とする依頼で使う。権限ある契約根拠を実装やテスト設計より先に読み、具体的なケース、期待値、アサート、補助構造を作る前に、確定済み契約に対するテストの必要性を判定する。採用した対象だけについて、独自の検出価値、所有境界、代表ケース、観測範囲、実行境界、オラクルを確認し、契約外の現状、外部依存、実装詳細を固定するテストと重複を残さず、最小のテスト集合にする。",
+  "dependencies": [
+    "change-framing",
+    "code-authoring-rules",
+    "test-oracle-assessment"
+  ],
+  "contentDigest": "cead9ab18fbcb8ec81b8a0f063f0dc14172683e41ed8ba31d0eff4792bc6e46f",
+  "manifestDigest": "35f135049a0cda558cfb4ba5db72bc4bcd6830a4272590e355f376b00d99552d",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "ceee9118a0ad12bddd8c755bb388f72e017e7c1f3bb7cc6da7a15476ed5d9b76",
+      "materializedFrontmatterDigest": "c15fd6177c314dbd56e2838034aa9eff797c9be09c8d8763f1885369b72a8773"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "c4e8457b4d61776330b5989b993e08a4d04bac7748a6452ffd421b5dfc2842b4"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "1198b152aa910d50f3ddd995e55deb79b07bc6167301274e29f42d2b6e3a2596"
+    }
+  ]
+}
