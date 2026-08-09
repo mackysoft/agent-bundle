@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 2,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "game-planning",
+  "skillName": "game-design",
+  "displayName": "Game Design",
+  "description": "ゲーム企画の意図、対象プレイヤー、プレイ条件、既存設計、プレイテストの観測から、プレイヤーが得る情報、行う活動や選択、ルールによる状態変化、フィードバック、次の活動の因果を設計、更新、評価し、狙う体験につながるゲーム設計案または設計上の評価を作る。コアループ、選択の意味、資源とリスク、成功と失敗、回復、進行、ランダム性、システム間の誘因を検討するときに使う。",
+  "dependencies": [
+    "claim-grounding",
+    "referent-modeling",
+    "writing"
+  ],
+  "contentDigest": "afc58fc650fc0c8173eb21713192e4a73b38a06c912cab52b55de7f3eb4d2a43",
+  "manifestDigest": "261357ec189fc767f4adcea376d5ba5a07af19fb4f8bfb91eace7a0c928f8a85",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "2e9eaa3635da43bb8aa04ea222d867207a95116cd3ad5a4d046af46148fda633",
+      "materializedFrontmatterDigest": "6a612d0536461be257419683acc4d01304dff3ab56f983d8acaf5c841bed3167"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "2a115a6a07b9627daa4c3b9b71d65d4ed173a62196f09f2c2bb0efac245400b4"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "aa02d32d6a57bcd8b4c2b46c16157c78940d64b3a6f0a63f5423bb0f679ebfb2"
+    }
+  ]
+}

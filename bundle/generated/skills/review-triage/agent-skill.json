@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 2,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "review-triage",
+  "displayName": "Review Triage",
+  "description": "レビュー所見を対象成果物、要求、契約、関連資料と照合し、妥当性と今回の対象との関係を分けて判断する。重複を統合し、`採用 / 却下 / 保留 / 要確認` に分類して対応方針へまとめる。過去に行われた採否の状態を記録から復元するだけの作業には使わない。",
+  "dependencies": [
+    "claim-grounding"
+  ],
+  "contentDigest": "2b2b49cc6617f0b33569ea94ab7e0cfe20540994d416c24a623163e5b59bdbea",
+  "manifestDigest": "abc0b25dec848ac1c975166c0935b42bfc5f0e777d0e6504afeb018cd77b12c9",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "f1c739139c2701bdae5a31efb047255f370e4f457e676b73eb49888a2da4b601",
+      "materializedFrontmatterDigest": "2c739b705e1307e80ef8215ef359244f449759f9a655c45e874265f16dd81ba2"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "c7abe627bb1fff360907ec0584a5599e19a191ac9c8c8a835694ef6958924862"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "e019551cf604117cae8429a529c554bcb29b1400a3c1fc84630619a70153f530"
+    }
+  ]
+}

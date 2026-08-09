@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "bundleVersion": 2,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "orchestration",
+  "agentName": "reviewer",
+  "displayName": "Reviewer",
+  "description": "候補成果を作成した実行主体から独立して欠陥とリスクを評価し、単一または複数のレビュー所見の妥当性、重複、対象との関係を判定するときに使う。成果として、レビュー範囲における判定と根拠付き所見を返す。",
+  "skillDependencies": [
+    "review-triage",
+    "writing"
+  ],
+  "contentDigest": "c812284d21678d57bd677d11e0ab645405a3d24be1987d795c46550d90c279d9",
+  "manifestDigest": "84391edc1f10c064e5c24377095fa564ae5a771d0a3e6eba47647aa8b7ac0409",
+  "hostArtifacts": [
+    {
+      "host": "claude-code",
+      "path": "hosts/claude-code/reviewer.md",
+      "digest": "0709360a1e21ea725d3d644111dae182a9959322802c2b9b517b6a0ad848037c"
+    },
+    {
+      "host": "codex",
+      "path": "hosts/codex/reviewer.toml",
+      "digest": "c1eb79a4e0203ba35191980c648f702c7e6b08aedc56dc0b22117537abe32902"
+    },
+    {
+      "host": "github-copilot",
+      "path": "hosts/github-copilot/reviewer.agent.md",
+      "digest": "0d4526d2adfcc3f425476413045732d7d2cfd133bed0f1e4b3a60c766f22d141"
+    }
+  ]
+}

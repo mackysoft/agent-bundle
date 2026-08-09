@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 2,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "changelog",
+  "displayName": "Changelog",
+  "description": "CHANGELOG.md、リリースノート、PR Changelog、コメント用差分ログ、changeset風の人間向け変更要約を、commits、Issues、PRs、diff、既存履歴から作成、編集するときに使う。Keep a Changelogを基準に、既存形式と対象読者に合わせ、開発ログではなく読者が変更内容と影響を理解し、利用、移行、運用を判断できる変更説明へ再構成する。",
+  "dependencies": [
+    "writing"
+  ],
+  "contentDigest": "61e73060e7e87c654c63101c88201dc97cc990254e94dba4ef1fd7bf557e39cd",
+  "manifestDigest": "67c3dc9dffc6ef7cdcc789301685bec8826c5e35182079e1ec799f2461412589",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "8b794ed4e312508919ef29a62a9bb32ad7095d9452809506b5238410b9702723",
+      "materializedFrontmatterDigest": "15382653080206a5c0c61a2bd43e665ee6a1ee4adc841cd0a3239103be415078"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "f6804e0589c8c01949171596db2b4de0531de25202a742c5767e4701dea1b3f0"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "63276c0db95b0962c5cb49d91db979c467851810abdc6ddba580eba476552092"
+    }
+  ]
+}

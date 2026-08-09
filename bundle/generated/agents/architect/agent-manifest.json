@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "bundleVersion": 2,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "orchestration",
+  "agentName": "architect",
+  "displayName": "Architect",
+  "description": "権限ある根拠から変更目的、変更対象、契約、範囲を設計入力として整理し、アーキテクチャ、責務境界、不変条件、外部契約、実装契約、検証要件を決めるときに使う。成果として、根拠付き設計判断と実装可能な設計契約を返す。",
+  "skillDependencies": [
+    "claim-grounding",
+    "referent-modeling"
+  ],
+  "contentDigest": "b2b80c70a85338e1f2f5bedeffe91feed508adbc45398e3ca8ec09224fa931dd",
+  "manifestDigest": "c14dc0e556c9cc0290adffb37a75249cb029f52ef0baf562845d62b02e96d5dd",
+  "hostArtifacts": [
+    {
+      "host": "claude-code",
+      "path": "hosts/claude-code/architect.md",
+      "digest": "e5afad47bbd60a5a5f959516e057283f83c01f99bb246de537d8e772e87e3789"
+    },
+    {
+      "host": "codex",
+      "path": "hosts/codex/architect.toml",
+      "digest": "1b2629dc8c85109b715404d099c965a07d0100271d0ab5c60fed562004cb073c"
+    },
+    {
+      "host": "github-copilot",
+      "path": "hosts/github-copilot/architect.agent.md",
+      "digest": "eae92d54dff3b2b56585fcab09cebc746ed6a1d9785409d9f711cd191509970d"
+    }
+  ]
+}

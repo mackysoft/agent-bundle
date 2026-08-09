@@ -1,0 +1,7 @@
+interface:
+  display_name: "Code Authoring Rules"
+  short_description: "ソースコードを実装、変更、レビューするときに、確定した変更目的と変更対象の契約から、コードが所有する内部技術契約、責務と保証の境界、実現手段、依存関係と副作用を定め、既存実装へ収束させる判断規則を適用する。言語、フレームワーク、プロジェクト固有の規則と併用する。"
+  default_prompt: "Use $code-authoring-rules to follow the Code Authoring Rules workflow."
+
+policy:
+  allow_implicit_invocation: true

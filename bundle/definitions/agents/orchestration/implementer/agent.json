@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Implementer",
+  "description": "確定済みの設計契約に基づき、内部実現方法を選ぶ通常実装に使う。コード、設定、データ、文書、テストなどの成果物を作成または変更し、実装結果と実装時の検証結果を返す。",
+  "skillDependencies": [
+    "code-authoring-rules",
+    "writing"
+  ]
+}

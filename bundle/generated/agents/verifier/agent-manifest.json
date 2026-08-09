@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "bundleVersion": 2,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "orchestration",
+  "agentName": "verifier",
+  "displayName": "Verifier",
+  "description": "権限ある所有者が定めた受入条件について、検証面、必要な証拠、判定方法を定め、証拠を照合するときに使う。成果として、受入条件ごとの証拠と判定結果を返す。",
+  "skillDependencies": [
+    "verification-gate"
+  ],
+  "contentDigest": "fb99dccd5ba633b6b9865c53a80a98b0e55c357aa383b7088383bed5c95397d0",
+  "manifestDigest": "31ddd2fddf88a59ab369d11447f81f5d991c712ba37bd60b63c6af8411e37e83",
+  "hostArtifacts": [
+    {
+      "host": "claude-code",
+      "path": "hosts/claude-code/verifier.md",
+      "digest": "995fac4eac98bb5475857a5f46c25bfff3ae443994c2034104b4b86ecaf2f9a9"
+    },
+    {
+      "host": "codex",
+      "path": "hosts/codex/verifier.toml",
+      "digest": "ae53bb3574d822a7aba9d0761a5d928cdfb632bffdd2d96f36c891700535fb37"
+    },
+    {
+      "host": "github-copilot",
+      "path": "hosts/github-copilot/verifier.agent.md",
+      "digest": "3e72444c649595102acccbc3bfcb1a8abab83357741ee3f65308fb6ab63a01c4"
+    }
+  ]
+}

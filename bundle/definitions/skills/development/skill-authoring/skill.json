@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Skill Authoring",
+  "description": "エージェントスキルを新規作成、更新、レビューするときに、必要性、単一責務、発火面、判断規則、自由度、フロー、スキル間の構成、本文と補助ファイルの情報配置を評価し、実際の利用文脈で意図した判断と成果へ到達できる作業契約に仕上げる。スキル本文の執筆、責務の分割、description と依存関係の設計、構造と挙動の検証で使う。",
+  "dependencies": [
+    "claim-grounding",
+    "referent-modeling",
+    "skill-usage-analysis",
+    "writing"
+  ]
+}
