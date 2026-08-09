@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Ultra Review",
+  "description": "ユーザーの依頼または適用される作業規約が、成果物、変更差分、または指定範囲に対する複数の独立したレビュー作業による深い最終点検、修正込みの反復レビュー、または ultra-review を明示的に要求するときに使う。レビュー計画、個別レビュー、一つのトリアージ作業、採用所見の設計・実装・定型作業、検証判断、許可された検証手順の実行、検証手段の実装、再レビューをそれぞれの所有責務へ割り当てる。読み取りまたはレビュー結果に限定された依頼を除き、採用所見の修正、検証、再レビューを収束まで反復し、レビュー状態、所見判定、修正結果、受け入れ検証判定、収束状態を返す。",
+  "dependencies": [
+    "claim-grounding",
+    "referent-modeling",
+    "change-framing",
+    "review-triage",
+    "verification-gate",
+    "writing"
+  ]
+}

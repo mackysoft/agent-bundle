@@ -111,10 +111,10 @@ jobs:
           default-branch: ${{ github.event.repository.default_branch }}
           expected-release-sha: ${{ needs.prepare-release.outputs.release_sha }}
 
-      - name: Verify Agent Skills
-        uses: mackysoft/agent-skills/actions/verify@2.0.0
+      - name: Verify Agent Distribution
+        uses: mackysoft/agent-distribution/actions/verify@3.0.0
         with:
-          root: skills
+          root: bundle
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -125,17 +125,17 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('SkillsPack.slnx', '**/*.csproj') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('AgentBundle.slnx', '**/*.csproj') }}
 
       - name: Sync release package version
         run: ./scripts/sync-package-version.sh --version "${{ needs.prepare-release.outputs.package_version }}"
 
       - name: Restore
-        run: dotnet restore SkillsPack.slnx
+        run: dotnet restore AgentBundle.slnx
 
       - name: Pack CLI tool
         run: >-
-          dotnet pack src/SkillsPack/SkillsPack.csproj
+          dotnet pack src/AgentBundle/AgentBundle.csproj
           --configuration Release
           --no-restore
           -p:Version=${{ needs.prepare-release.outputs.package_version }}
@@ -152,7 +152,7 @@ jobs:
           mode: inspect
           package-version: ${{ needs.prepare-release.outputs.package_version }}
           package-ids: |
-            MackySoft.SkillsPack
+            MackySoft.AgentBundle
 
       - name: Validate NuGet trusted publishing user
         if: ${{ steps.nuget_state.outputs['publish-required'] == 'true' }}
@@ -179,7 +179,7 @@ jobs:
           mode: wait
           package-version: ${{ needs.prepare-release.outputs.package_version }}
           package-ids: |
-            MackySoft.SkillsPack
+            MackySoft.AgentBundle
           max-attempts: 90
           interval-seconds: 10
 

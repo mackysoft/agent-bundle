@@ -5,7 +5,7 @@ usage() {
   cat >&2 <<'EOF'
 Usage: scripts/sync-package-version.sh --version <version>
 
-Updates repository files that track the unified SkillsPack package version.
+Updates repository files that track the unified AgentBundle package version.
 EOF
 }
 
