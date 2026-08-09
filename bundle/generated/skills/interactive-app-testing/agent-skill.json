@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 4,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "interactive-app-testing",
+  "displayName": "Interactive App Testing",
+  "description": "Web、業務アプリ、デスクトップアプリ、モバイルアプリ、ゲームなどの変更または成果物を利用者経路で実際に使い、挙動を確認するときに使う。対象変更、権限ある期待、変更リスク、既知の所見から計画シナリオ、探索的な操作、再現確認を選び、許可された環境で実行する。確認範囲、候補所見、再現状態、スクリーンショット、録画、ログ、トレース、未確認範囲、後始末後の状態、共有用の証拠説明を返す。原因診断、修正案、実装、自動テスト成果物、変更全体の受入判定、外部サービスへの証拠投稿は扱わない。",
+  "dependencies": [
+    "claim-grounding",
+    "writing"
+  ],
+  "contentDigest": "da8ba5b32c1b4afd961fe37711d126a9f7b40d68391a4b63230a8f05d6820f69",
+  "manifestDigest": "829de63941cfc59b681d5dd85b53c9eece28d0ad29aa0639888306d0e289c4e1",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "808ac5b886409e3dac0fd8f5338eac60a0fd3b592469fddb56baba2ea83e05c6",
+      "materializedFrontmatterDigest": "a9cd7be25d855d381b697b630bdb1d6bba4e179e23c3d23b5d4a97a987069b3c"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "43c1bc52a1011e805f357f648557e505959bd9442310ba406610afe94dd554d1"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "60b8e65af7e6b58b42de97249058824d8c6ec2bba682dc76b344a63bd9380bdc"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 2,
+  "bundleVersion": 4,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "agentName": "interactive-tester",
+  "displayName": "Interactive Tester",
+  "description": "変更または成果物を利用者経路で実際に使い、変更リスクから計画シナリオと探索範囲を選び、範囲付きの候補所見、確認範囲、スクリーンショットや録画などの共有可能な証拠を作るときに使う。",
+  "skillDependencies": [
+    "interactive-app-testing"
+  ],
+  "contentDigest": "e1a7d68102085f17770e33ee7af89af7c933ee3897e17acc9705abef00447630",
+  "manifestDigest": "d8b692f8e0ab58dac03366b79116eadcf7d7fbd7ace2e5bd24dce2f8fbfe177f",
+  "hostArtifacts": [
+    {
+      "host": "claude-code",
+      "path": "hosts/claude-code/interactive-tester.md",
+      "digest": "255a81a754d2ff04564da957efdc421b74f1ccd869f9cd5abb3786826d7a4f68"
+    },
+    {
+      "host": "codex",
+      "path": "hosts/codex/interactive-tester.toml",
+      "digest": "20d12bb1c12e318c00b63933e66f023993eafa6f133e7660b93d1c2117b1d7a5"
+    },
+    {
+      "host": "github-copilot",
+      "path": "hosts/github-copilot/interactive-tester.agent.md",
+      "digest": "cc7abf47c3617e344ef336187c098882de61cc0881abc064531752339cf9bf65"
+    }
+  ]
+}

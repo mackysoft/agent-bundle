@@ -24,7 +24,7 @@ The tool update replaces the CLI and its embedded bundle. It does not change Ski
 
 ```bash
 agent-bundle skills update --host codex --scope user --category basic,development
-agent-bundle agents update --host codex --scope user --agent architect,implementer,operator,researcher,reviewer,verifier
+agent-bundle agents update --host codex --scope user --agent architect,implementer,interactive-tester,operator,researcher,reviewer,verifier
 ```
 
 If a release removes or renames a managed Skill or custom agent, clean up each old name explicitly after updating the tool. `update` does not prune removed entries:
@@ -69,7 +69,7 @@ Finally, create installations owned by the new `com.mackysoft.agent-bundle` cata
 
 ```bash
 agent-bundle skills install --host codex --scope user --category basic,development
-agent-bundle agents install --host codex --scope user --agent architect,implementer,operator,researcher,reviewer,verifier
+agent-bundle agents install --host codex --scope user --agent architect,implementer,interactive-tester,operator,researcher,reviewer,verifier
 ```
 
 Repeat the new installation for each required host and scope. Project-scope installations must be run for each repository with `--scope project --repository-root /path/to/repository`.
@@ -128,6 +128,7 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `claim-grounding` | `basic` | Ground claims in sources, evidence composition, adoption status, scope, and relationships. |
 | `issue-planner` | `development` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | `development` | Write, create, update, or review structured GitHub Issue bodies. |
+| `interactive-app-testing` | `development` | Exercise application changes through user paths and produce scoped findings and shareable evidence. |
 | `orchestrator` | `development` | Manage one objective in the current task and bridge context and results among responsible subagents. |
 | `pr-merge` | `development` | Merge pull requests through continuous integration and branch cleanup. |
 | `pr-submit` | `development` | Verify, push, and create or update pull requests. |
@@ -156,6 +157,7 @@ Custom agents use one flat catalog namespace:
 | --- | --- | --- |
 | `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
 | `implementer` | Implements an agreed design, including natural-language artifacts, and reports implementation verification. | `code-authoring-rules`, `writing` |
+| `interactive-tester` | Exercises application changes through user paths and produces scoped findings and shareable media evidence. | `interactive-app-testing` |
 | `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
 | `verifier` | Determines acceptance evidence and its result. | `verification-gate` |
 | `researcher` | Collects bounded read-only evidence and reports unchecked areas. | `claim-grounding` |

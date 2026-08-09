@@ -133,6 +133,9 @@ skill_names = {item["SkillName"] for item in skills_payload.get("Skills", [])}
 if "writing" not in skill_names:
     print("skills list did not report the writing Skill used by the Agent dependency smoke test.", file=sys.stderr)
     sys.exit(1)
+if "interactive-app-testing" not in skill_names:
+    print("skills list did not report the interactive-app-testing Skill.", file=sys.stderr)
+    sys.exit(1)
 for orchestration_skill in ("orchestrator", "supervisor"):
     if orchestration_skill not in skill_names:
         print(
@@ -148,6 +151,9 @@ agents_payload = agents.get("Payload") or {}
 agent_names = {item["AgentName"] for item in agents_payload.get("Agents", [])}
 if "reviewer" not in agent_names:
     print("agents list did not report the reviewer used by the export smoke test.", file=sys.stderr)
+    sys.exit(1)
+if "interactive-tester" not in agent_names:
+    print("agents list did not report the interactive-tester Agent.", file=sys.stderr)
     sys.exit(1)
 for orchestration_skill in ("orchestrator", "supervisor"):
     if orchestration_skill in agent_names:
@@ -337,7 +343,7 @@ PY
 
 reviewer_skill_closure="$(resolve_skill_closure agent reviewer)"
 architect_skill_closure="$(resolve_skill_closure agent architect)"
-implementer_skill_closure="$(resolve_skill_closure agent implementer)"
+interactive_tester_skill_closure="$(resolve_skill_closure agent interactive-tester)"
 supervisor_skill_closure="$(resolve_skill_closure skill supervisor)"
 branch_create_skill_closure="$(resolve_skill_closure skill branch-create)"
 
@@ -602,29 +608,29 @@ skill_doctor_report="$("${tool_path}/agent-bundle" skills doctor \
   --skill branch-create)"
 verify_doctor_report "${skill_doctor_report}" "skills.doctor"
 
-implementer_agent_target="${consumer_root}/transitive-install/agents"
-implementer_skill_target="${consumer_root}/transitive-install/skills"
-implementer_install_report="$("${tool_path}/agent-bundle" agents install \
+interactive_tester_agent_target="${consumer_root}/transitive-install/agents"
+interactive_tester_skill_target="${consumer_root}/transitive-install/skills"
+interactive_tester_install_report="$("${tool_path}/agent-bundle" agents install \
   --host codex \
   --scope project \
   --repository-root "${consumer_root}" \
-  --agent implementer \
-  --agent-target-dir "${implementer_agent_target}" \
-  --skill-target-dir "${implementer_skill_target}")"
+  --agent interactive-tester \
+  --agent-target-dir "${interactive_tester_agent_target}" \
+  --skill-target-dir "${interactive_tester_skill_target}")"
 verify_agent_install_report \
-  "${implementer_install_report}" \
-  "implementer" \
-  "${implementer_agent_target}" \
+  "${interactive_tester_install_report}" \
+  "interactive-tester" \
+  "${interactive_tester_agent_target}" \
   "${consumer_root}/transitive-install/.agent-distribution/agents" \
-  "${implementer_skill_target}" \
+  "${interactive_tester_skill_target}" \
   ".toml" \
-  "${implementer_skill_closure}"
+  "${interactive_tester_skill_closure}"
 
-implementer_doctor_report="$("${tool_path}/agent-bundle" agents doctor \
+interactive_tester_doctor_report="$("${tool_path}/agent-bundle" agents doctor \
   --host codex \
   --scope project \
   --repository-root "${consumer_root}" \
-  --agent implementer \
-  --agent-target-dir "${implementer_agent_target}" \
-  --skill-target-dir "${implementer_skill_target}")"
-verify_doctor_report "${implementer_doctor_report}" "agents.doctor"
+  --agent interactive-tester \
+  --agent-target-dir "${interactive_tester_agent_target}" \
+  --skill-target-dir "${interactive_tester_skill_target}")"
+verify_doctor_report "${interactive_tester_doctor_report}" "agents.doctor"
