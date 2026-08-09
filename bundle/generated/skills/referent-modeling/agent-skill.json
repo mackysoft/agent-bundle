@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 2,
+  "skillBundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "basic",
   "skillName": "referent-modeling",
@@ -10,7 +10,7 @@
     "claim-grounding"
   ],
   "contentDigest": "333a16eaff74f4763d2e62eea65da42395c2d68d043eb76096efae11192a99bb",
-  "manifestDigest": "e74d3062121fcf8bd4832fb3afca8b939c775ff7ab8471c243a9eeea60cd8ea1",
+  "manifestDigest": "c5d0cb8b2fae4dad9f9f92c0e506ceacf569669174ac0386cd100b1a92aa3718",
   "hostArtifacts": [
     {
       "host": "codex",

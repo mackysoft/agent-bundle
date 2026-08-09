@@ -1,0 +1,7 @@
+interface:
+  display_name: "Orchestrator"
+  short_description: "利用者が直接操作する現在のタスクを、一つの目的のオーケストレーターとして使うときに適用する。タスク全体の進行と完了責任を持ち、必要な成果へ分解し、判断難度、専門性、作業量、リスクに合うサブエージェントへ実務を割り当て、担当間の成果と文脈の引き渡し、修正、レビュー、検証、完了を管理する。"
+  default_prompt: "Use $orchestrator to follow the Orchestrator workflow."
+
+policy:
+  allow_implicit_invocation: true

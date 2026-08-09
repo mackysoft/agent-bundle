@@ -129,17 +129,33 @@ require_equal("skills list product", "AgentBundle", skills.get("Product"))
 require_equal("skills list command", "skills.list", skills.get("Command"))
 require_equal("skills list status", "ok", skills.get("Status"))
 skills_payload = skills.get("Payload") or {}
-if "writing" not in {item["SkillName"] for item in skills_payload.get("Skills", [])}:
-    print("skills list did not report the writing Skill used by the export smoke test.", file=sys.stderr)
+skill_names = {item["SkillName"] for item in skills_payload.get("Skills", [])}
+if "writing" not in skill_names:
+    print("skills list did not report the writing Skill used by the Agent dependency smoke test.", file=sys.stderr)
     sys.exit(1)
+for orchestration_skill in ("orchestrator", "supervisor"):
+    if orchestration_skill not in skill_names:
+        print(
+            f"skills list did not report the orchestration Skill: {orchestration_skill}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
 require_equal("agents list product", "AgentBundle", agents.get("Product"))
 require_equal("agents list command", "agents.list", agents.get("Command"))
 require_equal("agents list status", "ok", agents.get("Status"))
 agents_payload = agents.get("Payload") or {}
-if "reviewer" not in {item["AgentName"] for item in agents_payload.get("Agents", [])}:
+agent_names = {item["AgentName"] for item in agents_payload.get("Agents", [])}
+if "reviewer" not in agent_names:
     print("agents list did not report the reviewer used by the export smoke test.", file=sys.stderr)
     sys.exit(1)
+for orchestration_skill in ("orchestrator", "supervisor"):
+    if orchestration_skill in agent_names:
+        print(
+            f"agents list reported an orchestration entry Skill as a custom agent: {orchestration_skill}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 require_equal(
     "supported custom-agent hosts",
     expected_agent_hosts,
@@ -322,7 +338,7 @@ PY
 reviewer_skill_closure="$(resolve_skill_closure agent reviewer)"
 architect_skill_closure="$(resolve_skill_closure agent architect)"
 implementer_skill_closure="$(resolve_skill_closure agent implementer)"
-writing_skill_closure="$(resolve_skill_closure skill writing)"
+supervisor_skill_closure="$(resolve_skill_closure skill supervisor)"
 branch_create_skill_closure="$(resolve_skill_closure skill branch-create)"
 
 for legacy_host in openai claude copilot; do
@@ -338,11 +354,11 @@ done
 skill_export_target="${consumer_root}/skill-export"
 skill_export_report="$("${tool_path}/agent-bundle" skills export \
   --host codex \
-  --skill writing \
+  --skill supervisor \
   --output "${skill_export_target}")"
 SKILL_EXPORT_REPORT="${skill_export_report}" \
   EXPECTED_OUTPUT_PATH="${skill_export_target}" \
-  EXPECTED_SKILLS="${writing_skill_closure}" \
+  EXPECTED_SKILLS="${supervisor_skill_closure}" \
   python3 - <<'PY'
 import json
 import os
@@ -366,8 +382,8 @@ require_equal(
     os.environ["EXPECTED_OUTPUT_PATH"],
     payload.get("OutputPath"),
 )
-if "writing" not in (payload.get("SkillNames") or []):
-    print("skills export did not report the requested writing Skill.", file=sys.stderr)
+if "supervisor" not in (payload.get("SkillNames") or []):
+    print("skills export did not report the requested supervisor Skill.", file=sys.stderr)
     sys.exit(1)
 
 expected_skills = set(json.loads(os.environ["EXPECTED_SKILLS"]))
@@ -377,6 +393,12 @@ require_equal(
     sorted(expected_skills),
     sorted(reported_skills),
 )
+if "orchestrator" not in reported_skills:
+    print(
+        "skills export did not resolve the supervisor Skill's orchestrator dependency.",
+        file=sys.stderr,
+    )
+    sys.exit(1)
 
 output_path = Path(payload["OutputPath"])
 required_files = [
