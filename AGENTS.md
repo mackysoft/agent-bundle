@@ -18,7 +18,7 @@ AgentBundle は、再利用可能な Skill と custom agent を一つの正規 b
 | --- | --- |
 | `bundle/bundle.json` | カタログ ID と bundle version を定める正本。 |
 | `bundle/definitions/skills/<category>/<skill>/` | Skill の正本。`skill.json` が表示情報と依存関係、`SKILL.md.template` が本文、`references/*.template` が参照資料を持つ。 |
-| `bundle/definitions/agents/<category>/<agent>/` | custom agent の正本。`agent.json` が表示情報と直接 Skill 依存、`AGENT.md.template` がホスト非依存の指示、`hosts/*.json` が host binding を持つ。 |
+| `bundle/definitions/agents/<agent>/` | custom agent の正本。`agent.json` が表示情報と直接 Skill 依存、`AGENT.md.template` がホスト非依存の指示、`hosts/*.json` が host binding を持つ。 |
 | `bundle/generated/` | 正本から生成され、コミットと NuGet パッケージへ含める派生物。手作業では編集しない。 |
 | `src/AgentBundle/` | .NET CLI 本体とパッケージ設定。 |
 | `src/AgentBundle/Hosting/Cli/Common/` | Agent Distribution の `skills` と `agents` resource group を登録する CLI 境界。 |
@@ -34,7 +34,7 @@ AgentBundle は、再利用可能な Skill と custom agent を一つの正規 b
 - `bundle/generated/**` にある digest、manifest、`agent-skill.json`、`agent-manifest.json`、host artifact は直接編集しない。
 - 正本を変更したら `bash scripts/generate-bundle.sh` を実行し、対応する生成差分を正本と同じ変更へ含める。
 - 公開パッケージの利用方法、カテゴリ、同梱 Skill または custom agent が変わる場合は、正本の内容を利用者向けに `README.md` へ反映する。
-- カテゴリ、Skill または Agent 数、依存閉包、同梱物が変わる場合は、`scripts/verify-cli-package.sh` にあるカタログ、選択、`export`、`install` の期待値も確認する。
+- Skill カテゴリ、Skill または Agent 数、依存閉包、同梱物が変わる場合は、`scripts/verify-cli-package.sh` にあるカタログ、選択、`export`、`install` の期待値も確認する。
 - `.github/workflows/bundle-sync.yaml` による push 後の同期を、ローカルでの生成と確認の代わりにしない。
 
 ## CLI と C# の変更
@@ -105,7 +105,7 @@ NuGet.org へのパッケージ公開が成功したら、公開した同じバ�
    agent-bundle --version
    ```
 
-3. 更新した CLI が提供する Skill と custom agent のカテゴリを確認する。
+3. 更新した CLI が提供する Skill カテゴリと custom agent 名を確認する。
 
    ```bash
    agent-bundle skills list
@@ -118,10 +118,10 @@ NuGet.org へのパッケージ公開が成功したら、公開した同じバ�
    agent-bundle skills update --host codex --scope user --category <comma-separated-skill-categories>
    ```
 
-5. 一覧に含まれるすべての custom agent カテゴリを指定し、同梱されている custom agent とその依存 Skill を Codex の user scope へ更新する。
+5. 一覧に含まれるすべての custom agent 名を指定し、同梱されている custom agent とその依存 Skill を Codex の user scope へ更新する。
 
    ```bash
-   agent-bundle agents update --host codex --scope user --category <comma-separated-agent-categories>
+   agent-bundle agents update --host codex --scope user --agent <comma-separated-agent-names>
    ```
 
 6. リリースで Skill または custom agent を削除または改名した場合は、旧名を指定して管理済み成果物を明示的に削除する。`update` は削除済み項目を prune しない。同じ host、scope、および導入時の target override を使って必要な各名前へ実行する。
@@ -133,11 +133,11 @@ NuGet.org へのパッケージ公開が成功したら、公開した同じバ�
 
 ### 反映後の確認
 
-`update` が成功したら、同じカテゴリを指定して、Codex の user scope に配置した Skill と custom agent に問題がないことを確認する。
+`update` が成功したら、同じ Skill カテゴリと custom agent 名を指定して、Codex の user scope に配置した Skill と custom agent に問題がないことを確認する。
 
 ```bash
 agent-bundle skills doctor --host codex --scope user --category <comma-separated-skill-categories>
-agent-bundle agents doctor --host codex --scope user --category <comma-separated-agent-categories>
+agent-bundle agents doctor --host codex --scope user --agent <comma-separated-agent-names>
 ```
 
 反映した Skill と custom agent を読み込ませるため、Codex アプリを再起動するか、新しいセッションを開始する。

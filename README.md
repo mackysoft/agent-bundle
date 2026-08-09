@@ -24,7 +24,7 @@ The tool update replaces the CLI and its embedded bundle. It does not change Ski
 
 ```bash
 agent-bundle skills update --host codex --scope user --category basic,development
-agent-bundle agents update --host codex --scope user --category orchestration
+agent-bundle agents update --host codex --scope user --agent architect,implementer,operator,orchestrator,researcher,reviewer,supervisor,verifier
 ```
 
 If a release removes or renames a managed Skill or custom agent, clean up each old name explicitly after updating the tool. `update` does not prune removed entries:
@@ -69,7 +69,7 @@ Finally, create installations owned by the new `com.mackysoft.agent-bundle` cata
 
 ```bash
 agent-bundle skills install --host codex --scope user --category basic,development
-agent-bundle agents install --host codex --scope user --category orchestration
+agent-bundle agents install --host codex --scope user --agent architect,implementer,operator,orchestrator,researcher,reviewer,supervisor,verifier
 ```
 
 Repeat the new installation for each required host and scope. Project-scope installations must be run for each repository with `--scope project --repository-root /path/to/repository`.
@@ -105,15 +105,15 @@ List the bundled agents and their direct skill dependencies:
 agent-bundle agents list
 ```
 
-Install an orchestration agent and its resolved skill dependencies:
+Install exact custom agents and their resolved skill dependencies:
 
 ```bash
 agent-bundle agents install --host codex --scope project --repository-root . --agent architect
-agent-bundle agents install --host claude-code --scope user --category orchestration
+agent-bundle agents install --host claude-code --scope user --agent architect,reviewer
 agent-bundle agents install --host github-copilot --scope project --repository-root . --agent reviewer --dry-run --print-diff
 ```
 
-The `agents` resource group supports `list`, `export`, `install`, `update`, `doctor`, `uninstall`, and `prune`. Agent selection uses `--category` or `--agent`; installation and update start from the selected Agent → Skill dependencies and resolve their transitive Skill → Skill closure. Agent definitions never depend on other agents.
+The `agents` resource group supports `list`, `export`, `install`, `update`, `doctor`, `uninstall`, and `prune`. Agent selection uses exact names through `--agent`; installation and update start from the selected Agent → Skill dependencies and resolve their transitive Skill → Skill closure. Agent definitions never depend on other agents.
 
 ## Included skills
 
@@ -146,7 +146,7 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 
 ## Included custom agents
 
-Custom agents are grouped into `orchestration`:
+Custom agents use one flat catalog namespace:
 
 | Agent | Purpose | Direct skill dependencies |
 | --- | --- | --- |
@@ -171,11 +171,11 @@ The orchestrator assigns natural-language changes to an implementer and requires
 | `claude-code` | Claude Code skill directory | `.claude/agents` |
 | `github-copilot` | GitHub Copilot skill directory | `.github/agents` |
 
-See the [Agent Distribution command reference](https://github.com/mackysoft/agent-distribution/blob/3.0.0/README.md#run-standard-commands) for selector, scope, target-directory, ownership-state, and reload details.
+See the [Agent Distribution command reference](https://github.com/mackysoft/agent-distribution/blob/4.0.0/README.md#run-standard-commands) for selector, scope, target-directory, ownership-state, and reload details.
 
 ## Development
 
-The source of truth is `bundle/bundle.json` and `bundle/definitions`. Schema 2 separates `definitions/skills` from `definitions/agents`; `bundle/generated` is the checked-in canonical output.
+The source of truth is `bundle/bundle.json` and `bundle/definitions`. Schema 3 keeps categorized Skill definitions under `definitions/skills` and flat custom-agent definitions under `definitions/agents`; `bundle/generated` is the checked-in canonical output.
 
 ```bash
 dotnet tool restore
