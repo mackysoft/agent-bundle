@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 4,
+  "skillBundleVersion": 5,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "sync-latest",
@@ -10,7 +10,7 @@
     "commit"
   ],
   "contentDigest": "10ca674e36f7d090f9048218c7dc047e920b69a622812d5ecfbd9df027610e0c",
-  "manifestDigest": "396827107206e4cfb38b9d466f7fd31d66fc5097b4c3ba9139684e21814af3fa",
+  "manifestDigest": "ee349accbac46a18b5fef28c6d204b652a6ddcd0554acdd6b457e6200c1f0aaf",
   "hostArtifacts": [
     {
       "host": "codex",

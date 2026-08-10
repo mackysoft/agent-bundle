@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 5,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "behavior-deviation-analysis",
+  "displayName": "Behavior Deviation Analysis",
+  "description": "エージェントのセッション、Skillまたはcustom agentの挙動検証結果、成果物、差分、レビュー、修正指示を調べ、期待した挙動から最初に逸脱した地点、主原因、従原因、再発性、影響を特定する。原因をSkill、custom agent定義、選択とオーケストレーション、host bindingとruntime、配布基盤、製品またはツール、作業条件、検証手段、実行上の逸脱へ帰属させ、修正責任と再検証範囲を示すときに使う。",
+  "dependencies": [
+    "claim-grounding",
+    "referent-modeling",
+    "subagent-execution-analysis",
+    "writing"
+  ],
+  "contentDigest": "16a75a4064a138e7de3cf75730071b8eab91bcd37bc8cd09c0d7d22231f30540",
+  "manifestDigest": "b779c12dbe05238d79eb52d5458578ced1a99345f3e3f8516fcab230974af8aa",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "0b24047c224f0e1b9c96c6567319b4edd09bbdec46258c957f84bfce1628e614",
+      "materializedFrontmatterDigest": "63e91f383e59e35d23fb16a30eb215834f743aa26d8289a125799f0bb3e923fd"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "fd58a5ca983314fb851c4846627ad5cae9db10751d0aa3032024c93c98ecbe60"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "6421de96d45860e164737e441770880eb337cda8489de98d08036b8a3c0dcfe6"
+    }
+  ]
+}
