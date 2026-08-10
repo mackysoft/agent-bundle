@@ -5,26 +5,27 @@
   "category": "basic",
   "skillName": "challenge",
   "displayName": "Challenge",
-  "description": "目的、要求、権限ある規範、局所文脈に照らして、成果物、設計、コード、構造上の選択の存在理由を問い、未説明の複雑さ、具体的な問い、確認済みの契約を維持するより小さい反実仮想を、採否前の異議形成結果として返すときに使う。対象の正当化に必要な根拠が揃う場合は、確認範囲を伴う候補なしの結果を返す。",
+  "description": "現在の問題設定、主要前提、作業分解、責務境界、設計または実装方針が後続作業を拘束する場面で、全体目的、権限ある規範、周辺責務、既存経路、下流影響、作業経過に照らしてその方向を反証し、進行方向を再検討するための採否前の異議候補と影響範囲を返す。異議候補がない場合は確認範囲を、判断材料が不足する場合は不足する評価文脈と再評価条件を返す。",
   "dependencies": [
+    "change-framing",
     "claim-grounding"
   ],
-  "contentDigest": "a20f6ea6043982972b6e3f463a9b59cc1d6d20b7ce8517d5785347bddd93ace5",
-  "manifestDigest": "0e25be766860756c9a5e0b5757280215dadfa35ba8669a106abb0580db27d066",
+  "contentDigest": "1630468adc69688f4623cae6d2e17a19666babfc3dc2c3996277ff2d1ea82b71",
+  "manifestDigest": "0f5c55c3c1a7a7ff0c58f0a5c267cc3623b7cf2cc698a2928b5c9f918f3cae25",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "2dff32bca376cd36846aec33fe1d021e827c2d3478af088a2629256a609ae760",
-      "materializedFrontmatterDigest": "a1031510eac1a2fded156d6e8038439b91ed70a33593e0d590f64f5f904527b8"
+      "digest": "956238190d8066078422744f0bd575a9cb0634927db67a78ce2a0129e8e3c559",
+      "materializedFrontmatterDigest": "c126bdea9a6f4b3ee7c93c7943626bd1aec728d3be6e9c7c3b32a2bd8eb6f5d4"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "03a6d202af4fffc9e8aa9e1940fd1591ebba5e9801dc79921837b9437fe9df58"
+      "materializedFrontmatterDigest": "72bc9368af9baa8b2a4c34b6d97fcb096862d77cb6596e3f66feca747841bdeb"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "348a10a0f4d1823fbb4c0e188d01eeaa5172cf552c5236768ad22392e9c81242"
+      "materializedFrontmatterDigest": "f09afbacec9e998e17c34ea6c3d1aee8c118b4e5f6f524d2baf7bef2638d67dd"
     }
   ]
 }

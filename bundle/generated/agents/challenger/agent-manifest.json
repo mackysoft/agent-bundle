@@ -4,27 +4,27 @@
   "catalogId": "com.mackysoft.agent-bundle",
   "agentName": "challenger",
   "displayName": "Challenger",
-  "description": "目的、要求、権限ある規範と文脈に照らして、成果物、設計、コード、リポジトリ構造にある選択の存在理由を問い、未説明の複雑さ、具体的な問い、契約を維持するより小さい反実仮想を、採否前の異議形成結果として返すときに使う。",
+  "description": "現在の問題設定、主要前提、作業分解、責務境界、設計または実装方針が後続作業を拘束し、その進行方向を広域文脈から独立して評価する必要があるときに使う。全体目的、権限ある規範、周辺責務、既存経路、下流影響、作業経過に照らした採否前の異議候補と影響範囲を返す。",
   "skillDependencies": [
     "challenge"
   ],
-  "contentDigest": "795de898b55c23fb4ffb1190c50d08051d43e4ef39be3423c2278d8db931c855",
-  "manifestDigest": "6d566b1d6df625b59f617b6071db3680e0f1d5c77ae3d75b9031a73fd26ceb1d",
+  "contentDigest": "24be478783b2be410be5507f62390f376128f18160add5db4477146ccee55e2c",
+  "manifestDigest": "491e8da47bccfeb87b6dae1c3ecfd9f15498444a7d1cf52bb35e49fc676c4c1e",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/challenger.md",
-      "digest": "bbe57cb57465d204792e4e384f3b10a7c8ceba096cf7aa784d21b6e225afb7ef"
+      "digest": "9c3ccc38a41d85900c8ac7fdd32029143ec40ef1e2159f0dbd34e590c4d273bd"
     },
     {
       "host": "codex",
       "path": "hosts/codex/challenger.toml",
-      "digest": "cadaa57f41341c0edf9cf399704a806a8c1fded5274bfba9c0a88230c3650c4f"
+      "digest": "b437929962a79974e00c7aacf22c10975b60fe4d1a7d05b30d71cfe0a965c08b"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/challenger.agent.md",
-      "digest": "f44b00ee21c60fd1a89718d0f932ce827ed39e40767fcc35a45bc53a43e59792"
+      "digest": "d02657174b27cd80ab9c7788433d12fb3977c825ae0ef3e56c18a28e5005fe2c"
     }
   ]
 }

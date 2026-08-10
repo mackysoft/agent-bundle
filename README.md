@@ -122,7 +122,7 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | --- | --- | --- |
 | `behavior-deviation-analysis` | `development` | Attribute behavior deviations to evidence-backed causes, repair owners, and revalidation scope. |
 | `branch-create` | `development` | Create or reuse task branches while preserving detached or uncommitted work. |
-| `challenge` | `basic` | Form pre-adoption objections by questioning structural choices and constructing smaller contract-preserving counterfactuals. |
+| `challenge` | `basic` | Challenge a candidate work direction against broader goals, responsibilities, existing paths, downstream effects, and work trajectory. |
 | `changelog` | `development` | Write reader-facing changelogs, release notes, and pull request change summaries. |
 | `change-framing` | `basic` | Reconstruct change purpose, authority, contract changes, permissions, acceptance conditions, implementation constraints, and unresolved decisions. |
 | `code-authoring-rules` | `development` | Apply language-independent code design and authoring rules. |
@@ -164,7 +164,7 @@ Custom agents use one flat catalog namespace:
 | `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
 | `implementer` | Implements an agreed design, including natural-language artifacts, and reports implementation verification. | `code-authoring-rules`, `writing` |
 | `interactive-tester` | Exercises application changes through user paths and produces scoped findings and shareable media evidence. | `interactive-app-testing` |
-| `challenger` | Independently applies the `challenge` contract and returns pre-adoption objections, questions, evidence gaps, or a scoped no-candidate result. | `challenge` |
+| `challenger` | Independently questions a candidate work direction from broad context and returns pre-adoption direction challenges with their impact scope. | `challenge` |
 | `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
 | `verifier` | Determines acceptance evidence and its result. | `verification-gate` |
 | `researcher` | Collects bounded read-only evidence and reports unchecked areas. | `claim-grounding` |
