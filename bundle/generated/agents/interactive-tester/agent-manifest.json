@@ -8,23 +8,23 @@
   "skillDependencies": [
     "interactive-app-testing"
   ],
-  "contentDigest": "3f12238d179b553bf01eab9be833c82f354ea0256f2bc0d03c93d65944982bec",
-  "manifestDigest": "ccf6a3942551f8bd5d30e0a8d29832a793ea0d68731b6cec60873ec27619adde",
+  "contentDigest": "a4d5b7d840ead972b665aec7ed7ed337bc99e3ab6976f030e07341cdd75cf8f4",
+  "manifestDigest": "b0bddec5d4bc79e6a2552c48729b834fce2d6afc152f03b5b9c958ef43b90b74",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/interactive-tester.md",
-      "digest": "b041f61ff481f10248be3abbc91986e353c8ba9213cb0cd58422eb6a426b9972"
+      "digest": "cadc915c505ccca73c296fb5e48f7ffb8b714a2e799af7423994847603d7ab28"
     },
     {
       "host": "codex",
       "path": "hosts/codex/interactive-tester.toml",
-      "digest": "417bb496597b1768bf0672a82c3e469d37767063f06d179d3325c921001b6dc9"
+      "digest": "699f199d6016a491159d4883264e750d9f653caca3cf9aeb023cc2bd854b0f96"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/interactive-tester.agent.md",
-      "digest": "9743f289cc1cbef50c9153ab20875a175364f47a9fd016da512219ae05761670"
+      "digest": "c7a30a9c7932914b60d9685a138c0e63b3e94a44315d78ba49c4d8f4382fd104"
     }
   ]
 }
