@@ -119,6 +119,7 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 
 | Skill | Category | Purpose |
 | --- | --- | --- |
+| `behavior-deviation-analysis` | `development` | Attribute behavior deviations to evidence-backed causes, repair owners, and revalidation scope. |
 | `branch-create` | `development` | Create or reuse task branches while preserving detached or uncommitted work. |
 | `changelog` | `development` | Write reader-facing changelogs, release notes, and pull request change summaries. |
 | `change-framing` | `basic` | Reconstruct change purpose, authority, contract changes, permissions, acceptance conditions, implementation constraints, and unresolved decisions. |
@@ -126,6 +127,8 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `commit` | `development` | Create responsibility-scoped Conventional Commit messages. |
 | `csharp-authoring-rules` | `development` | Apply C#-specific implementation and review judgment rules. |
 | `claim-grounding` | `basic` | Ground claims in sources, evidence composition, adoption status, scope, and relationships. |
+| `custom-agent-authoring` | `development` | Create, update, and validate host-independent custom agent definitions and host bindings. |
+| `custom-agent-behavior-validation` | `development` | Exercise custom agents in isolated subagent runs and assess dispatch, runtime binding, behavior, handoff, and termination. |
 | `issue-planner` | `development` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | `development` | Write, create, update, or review structured GitHub Issue bodies. |
 | `interactive-app-testing` | `development` | Exercise application changes through user paths and produce scoped findings and shareable evidence. |
@@ -136,8 +139,9 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `referent-modeling` | `basic` | Ground terms and abstractions in concrete referents, roles, and relationships before naming. |
 | `review-triage` | `development` | Triage review comments against code, specifications, and evidence. |
 | `skill-authoring` | `development` | Create, update, and review behaviorally effective agent skills. |
-| `skill-usage-analysis` | `development` | Analyze agent usage and identify evidence-backed skill improvements. |
+| `skill-behavior-validation` | `development` | Exercise agent Skills in isolated scenarios and report contract conformance, gaps, and rerun scope. |
 | `supervisor` | `development` | Route independent objectives to user-operable tasks that apply the orchestrator Skill. |
+| `subagent-execution-analysis` | `development` | Reconstruct and assess subagent spawn attempts and child executions from runtime evidence. |
 | `sync-latest` | `development` | Fetch remotes and safely synchronize a worktree with the right base. |
 | `test-authoring` | `development` | Design, update, and consolidate minimal contract-based test suites. |
 | `test-oracle-assessment` | `development` | Assess whether test judgments are contract-aligned, independently derived, and supported by detection evidence. |
