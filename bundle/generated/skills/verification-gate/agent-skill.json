@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 5,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "verification-gate",
+  "displayName": "Verification Gate",
+  "description": "変更が受け入れ可能かを判断するために、受け入れ条件へ対応する検証面と検証方法を選び、リポジトリの専用スクリプト、CI と同じコマンド、根拠との比較、表示や操作の確認などを実行する。成功、失敗原因、未検証範囲、次に必要な作業を残す。",
+  "dependencies": [
+    "claim-grounding",
+    "test-oracle-assessment"
+  ],
+  "contentDigest": "a2bc468faa9906a50742dfaa8b8133761140cdce749462bb9d763c8290584cc1",
+  "manifestDigest": "f710a0d8d717c7e1fc718d4a57d60941de5506951e3006082bba25db71ea107f",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "ad0aa35d274d85689077da5bd6278728ae86043acaad06ae40dc817be0cfc4a1",
+      "materializedFrontmatterDigest": "444faea6eb47a968aac98c8b8946954025bf67dd270043248b909837be8ea6e7"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "82fd285a32bd8ab327ca22906bbc40ea4d511073654336884c223288aea7f279"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "0823837771d8de6ddb7d111d5753f1ffce084d02710c58d8187ce084b006a390"
+    }
+  ]
+}

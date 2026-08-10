@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 5,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "orchestrator",
+  "displayName": "Orchestrator",
+  "description": "利用者が直接操作する現在のタスクを、一つの目的のオーケストレーターとして使うときに適用する。タスク全体の進行と完了責任を持ち、必要な成果へ分解し、判断難度、専門性、作業量、リスクに合うサブエージェントへ実務を割り当て、担当間の成果と文脈の引き渡し、修正、レビュー、検証、完了を管理する。",
+  "dependencies": [
+    "writing"
+  ],
+  "contentDigest": "1f5054807a63e9c93b99ed6da48d015caeea7e012cde25f9faceafa039b4f88b",
+  "manifestDigest": "cd2533a5db78f306707b70b30f3d164fa84cd79b0134beaa905b87f13aa6c237",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "c148da2bea92d2d98148e14218ec5ffc73bce48eabcff7f951c7e71c285531de",
+      "materializedFrontmatterDigest": "06558d357d0473498224f26da1a6c4021f057d0385cc2fff2c5c86b4526a9f18"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "bb7e3511a5f17314d32d769bdff25469556037d032441d7dfc031489cf60f46e"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "e1ce3e1d32eb6b372a523bd26bc7c12fac4c5f45c5a9b6eb4418d9a1b94b2509"
+    }
+  ]
+}

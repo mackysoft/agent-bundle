@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Verifier",
+  "description": "権限ある所有者が定めた受入条件について、検証面、必要な証拠、判定方法を定め、証拠を照合するときに使う。成果として、受入条件ごとの証拠と判定結果を返す。",
+  "skillDependencies": [
+    "verification-gate"
+  ]
+}

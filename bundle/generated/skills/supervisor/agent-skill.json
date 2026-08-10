@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 5,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "supervisor",
+  "displayName": "Supervisor",
+  "description": "利用者が直接操作する現在のタスクで、複数の独立した目的をそれぞれの実行タスクへ割り当てるときに適用する。目的と既存タスクの対応から新規、継続、重複、要確認を判定し、許可された新規タスクへ $orchestrator と受領内容を引き渡すか、既存タスクへ追加内容を届け、目的と割当先の対応を返す。",
+  "dependencies": [
+    "orchestrator"
+  ],
+  "contentDigest": "569978782601d2e76dd9bbb494a028b8cc144097cded210bd7b96cb548aa32d5",
+  "manifestDigest": "e37528872b23dfce8048ab0b8a3cfd1adf60fbfd0d4259fddf715244aae79d57",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "06a4f8850c2f59cc8be1b0c0c9325292d292ee522cc25e0cdff4393cb3c1d3d4",
+      "materializedFrontmatterDigest": "5a5ec9f892e3fd640b45e315aff21a9e55c458ad5627f5cddc2e69ecde6ec063"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "ab9f4bdea6b01734846070f664f86fe2859c827fa40a90652f951f9da90ca28f"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "cabf0823eb36ac4d057e8cf2f0ad6324d8ca407a16a67ae8c9451f998da748b4"
+    }
+  ]
+}

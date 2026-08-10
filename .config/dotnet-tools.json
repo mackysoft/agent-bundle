@@ -2,10 +2,10 @@
   "version": 1,
   "isRoot": true,
   "tools": {
-    "mackysoft.agentskills.cli": {
-      "version": "2.0.0",
+    "mackysoft.agentdistribution.cli": {
+      "version": "4.0.0",
       "commands": [
-        "agent-skills"
+        "agent-distribution"
       ],
       "rollForward": false
     }

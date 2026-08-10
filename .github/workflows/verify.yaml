@@ -1,7 +1,7 @@
 name: verify
 
 env:
-  DOTNET_SOLUTION: SkillsPack.slnx
+  DOTNET_SOLUTION: AgentBundle.slnx
 
 on:
   pull_request:
@@ -38,8 +38,8 @@ jobs:
             exit 1
           fi
 
-  skills:
-    name: agent skills
+  bundle:
+    name: agent distribution bundle
     needs: source
     runs-on: ubuntu-latest
 
@@ -47,10 +47,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Verify Agent Skills
-        uses: mackysoft/agent-skills/actions/verify@2.0.0
+      - name: Verify Agent Distribution
+        uses: mackysoft/agent-distribution/actions/verify@4.0.0
         with:
-          root: skills
+          root: bundle
 
   dotnet:
     name: dotnet (${{ matrix.os }})
@@ -84,7 +84,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('SkillsPack.slnx', '**/*.csproj', '.config/dotnet-tools.json') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('AgentBundle.slnx', '**/*.csproj', '.config/dotnet-tools.json') }}
 
       - name: Restore
         run: dotnet restore "$DOTNET_SOLUTION"
@@ -110,7 +110,7 @@ jobs:
   package:
     name: package
     needs:
-      - skills
+      - bundle
       - dotnet
     runs-on: ubuntu-latest
 
@@ -131,14 +131,14 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('SkillsPack.slnx', '**/*.csproj', '.config/dotnet-tools.json') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('AgentBundle.slnx', '**/*.csproj', '.config/dotnet-tools.json') }}
 
       - name: Restore
         run: dotnet restore "$DOTNET_SOLUTION"
 
       - name: Pack CLI tool
         run: >-
-          dotnet pack src/SkillsPack/SkillsPack.csproj
+          dotnet pack src/AgentBundle/AgentBundle.csproj
           --configuration Release
           --no-restore
           --output artifacts/packages
@@ -151,7 +151,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - source
-      - skills
+      - bundle
       - dotnet
       - package
     if: always()
@@ -161,13 +161,13 @@ jobs:
         shell: bash
         env:
           SOURCE_RESULT: ${{ needs.source.result }}
-          SKILLS_RESULT: ${{ needs.skills.result }}
+          BUNDLE_RESULT: ${{ needs.bundle.result }}
           DOTNET_RESULT: ${{ needs.dotnet.result }}
           PACKAGE_RESULT: ${{ needs.package.result }}
         run: |
           set -euo pipefail
 
-          for job in SOURCE SKILLS DOTNET PACKAGE; do
+          for job in SOURCE BUNDLE DOTNET PACKAGE; do
             result_variable="${job}_RESULT"
             result="${!result_variable}"
             if [[ "${result}" != "success" ]]; then
