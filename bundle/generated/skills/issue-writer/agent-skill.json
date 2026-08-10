@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 3,
+  "skillBundleVersion": 5,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "issue-writer",
@@ -10,7 +10,7 @@
     "writing"
   ],
   "contentDigest": "4c31e1cd8958752a4b70eb8350ed1eab5e8937a328fd94665ea5d9dae809755b",
-  "manifestDigest": "b4f1f51c34c7fce3231ff0e2cbe20a284340bb56ae3bd273a02def125a9c5239",
+  "manifestDigest": "c718bdb533ef33bb3a213faf3a9004f4aa1f96923b1da3f1a4af7edfe99436e0",
   "hostArtifacts": [
     {
       "host": "codex",

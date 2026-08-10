@@ -1,7 +1,0 @@
-interface:
-  display_name: "Skill Usage Analysis"
-  short_description: "エージェントのセッション、成果物、差分、レビュー、修正指示を調べ、期待した挙動との差、原因、再発性、影響を特定し、新規スキル、既存スキル、スキル基盤、製品やツールへの対応候補として整理する。実運用からスキルの不足、発火のずれ、判断規則の弱さ、責務の混在を分析するときに使う。"
-  default_prompt: "Use $skill-usage-analysis to follow the Skill Usage Analysis workflow."
-
-policy:
-  allow_implicit_invocation: true

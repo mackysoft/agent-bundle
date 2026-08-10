@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 3,
+  "skillBundleVersion": 5,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "issue-planner",
@@ -10,7 +10,7 @@
     "writing"
   ],
   "contentDigest": "23876db9e0815d8d6fdf8871db2b8ac84753a3228d7395048484a4ba62aa2803",
-  "manifestDigest": "bc29ca7e99143172108258a5aa38ceb1000d8ada7b5b50824026bc3a2ce12b28",
+  "manifestDigest": "fa712be13a017a56692a9e33da89d08da6dfa78a20daf59342f69eb03df5e344",
   "hostArtifacts": [
     {
       "host": "codex",

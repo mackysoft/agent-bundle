@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Skill Behavior Validation",
+  "description": "候補または更新済みのエージェントSkillについて、責務、発火面、判断、成果、完了状態を検証条件へ変換し、作成時の文脈から切り離した実行で、明示利用、自然な選択、非発火、主要分岐、停止、未確認、回帰の挙動を観測する。シナリオごとの契約適合、逸脱、未検証範囲、再実行条件を残すときに使う。",
+  "dependencies": [
+    "claim-grounding",
+    "referent-modeling",
+    "writing"
+  ]
+}

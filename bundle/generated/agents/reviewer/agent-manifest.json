@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "bundleVersion": 3,
+  "bundleVersion": 5,
   "catalogId": "com.mackysoft.agent-bundle",
   "agentName": "reviewer",
   "displayName": "Reviewer",
@@ -10,7 +10,7 @@
     "writing"
   ],
   "contentDigest": "c812284d21678d57bd677d11e0ab645405a3d24be1987d795c46550d90c279d9",
-  "manifestDigest": "dbde1e280ec55f21148d9c9836df49d81097f278f582418d263a912788c70f4c",
+  "manifestDigest": "d26818dfe02d7372ed6dd970d5214b66a5f89b133428b4ac99bff309184ed464",
   "hostArtifacts": [
     {
       "host": "claude-code",

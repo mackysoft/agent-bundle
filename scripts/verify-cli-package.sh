@@ -141,6 +141,20 @@ for orchestration_skill in ("orchestrator", "supervisor"):
         )
         sys.exit(1)
 
+for behavior_skill in (
+    "behavior-deviation-analysis",
+    "custom-agent-authoring",
+    "custom-agent-behavior-validation",
+    "skill-behavior-validation",
+    "subagent-execution-analysis",
+):
+    if behavior_skill not in skill_names:
+        print(
+            f"skills list did not report the behavior contract Skill: {behavior_skill}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
 require_equal("agents list product", "AgentBundle", agents.get("Product"))
 require_equal("agents list command", "agents.list", agents.get("Command"))
 require_equal("agents list status", "ok", agents.get("Status"))
@@ -335,11 +349,93 @@ if missing_files:
 PY
 }
 
+verify_skill_export() {
+  local skill_name="$1"
+  local expected_skills="$2"
+  local required_resource_paths="$3"
+  local export_target="${consumer_root}/${skill_name}-export"
+  local export_report
+
+  export_report="$("${tool_path}/agent-bundle" skills export \
+    --host codex \
+    --skill "${skill_name}" \
+    --output "${export_target}")"
+
+  SKILL_EXPORT_REPORT="${export_report}" \
+    REQUESTED_SKILL="${skill_name}" \
+    EXPECTED_OUTPUT_PATH="${export_target}" \
+    EXPECTED_SKILLS="${expected_skills}" \
+    REQUIRED_RESOURCE_PATHS="${required_resource_paths}" \
+    python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+import sys
+
+report = json.loads(os.environ["SKILL_EXPORT_REPORT"])
+payload = report.get("Payload") or {}
+requested_skill = os.environ["REQUESTED_SKILL"]
+
+
+def require_equal(label, expected, actual):
+    if actual != expected:
+        print(f"Unexpected {label}. Expected: {expected}. Actual: {actual}", file=sys.stderr)
+        sys.exit(1)
+
+
+require_equal("skills export command", "skills.export", report.get("Command"))
+require_equal("skills export status", "ok", report.get("Status"))
+require_equal(
+    "skills export output path",
+    os.environ["EXPECTED_OUTPUT_PATH"],
+    payload.get("OutputPath"),
+)
+if requested_skill not in (payload.get("SkillNames") or []):
+    print(
+        f"skills export did not report the requested Skill: {requested_skill}",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+
+expected_skills = set(json.loads(os.environ["EXPECTED_SKILLS"]))
+reported_skills = set(payload.get("Skills") or [])
+require_equal(
+    f"{requested_skill} export resolved Skill set",
+    sorted(expected_skills),
+    sorted(reported_skills),
+)
+
+output_path = Path(payload["OutputPath"])
+required_files = [
+    path
+    for exported_skill in reported_skills
+    for path in (
+        output_path / exported_skill / "SKILL.md",
+        output_path / exported_skill / "agent-skill.json",
+    )
+]
+required_files.extend(
+    output_path / relative_path
+    for relative_path in json.loads(os.environ["REQUIRED_RESOURCE_PATHS"])
+)
+missing_files = [str(path) for path in required_files if not path.is_file()]
+if missing_files:
+    print(
+        f"skills export did not create required {requested_skill} artifacts: "
+        + ", ".join(missing_files),
+        file=sys.stderr,
+    )
+    sys.exit(1)
+PY
+}
+
 reviewer_skill_closure="$(resolve_skill_closure agent reviewer)"
 architect_skill_closure="$(resolve_skill_closure agent architect)"
 implementer_skill_closure="$(resolve_skill_closure agent implementer)"
 supervisor_skill_closure="$(resolve_skill_closure skill supervisor)"
 branch_create_skill_closure="$(resolve_skill_closure skill branch-create)"
+skill_authoring_skill_closure="$(resolve_skill_closure skill skill-authoring)"
+custom_agent_authoring_skill_closure="$(resolve_skill_closure skill custom-agent-authoring)"
 
 for legacy_host in openai claude copilot; do
   if "${tool_path}/agent-bundle" skills export \
@@ -418,6 +514,16 @@ if missing_files:
     )
     sys.exit(1)
 PY
+
+verify_skill_export \
+  skill-authoring \
+  "${skill_authoring_skill_closure}" \
+  '["skill-behavior-validation/references/report-schema.md","subagent-execution-analysis/references/codex-runtime-evidence.md","subagent-execution-analysis/references/report-schema.md"]'
+
+verify_skill_export \
+  custom-agent-authoring \
+  "${custom_agent_authoring_skill_closure}" \
+  '["custom-agent-behavior-validation/references/report-schema.md","subagent-execution-analysis/references/codex-runtime-evidence.md","subagent-execution-analysis/references/report-schema.md"]'
 
 agent_export_target="${consumer_root}/agent-export"
 agent_export_report="$("${tool_path}/agent-bundle" agents export \
