@@ -8,23 +8,23 @@
   "skillDependencies": [
     "claim-grounding"
   ],
-  "contentDigest": "f7453019fa18ddb98fad922bf8c1b6bde5468db707864fa1375571f921508064",
-  "manifestDigest": "207fe05ea6789a1058ba41d075b44caa928babd297023122c19b540900fd4411",
+  "contentDigest": "1fb585e2fabcc64a472961c8cce2175157d00f18316c6134bb274243578c4553",
+  "manifestDigest": "3dfe4e818109b0fa59a82506fce1b8267c9b220a8b7a9212a1460c4102d22bfa",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/researcher.md",
-      "digest": "5f20b2d183b4476125861122a7d26ba968e1f2485db242246c960dbbff69ac8e"
+      "digest": "810e4f8ab12707f49cf2ae3ed6018da0cb276fe1313d633a8e870bdae593465a"
     },
     {
       "host": "codex",
       "path": "hosts/codex/researcher.toml",
-      "digest": "1a62a02577884a72f0deb325f557be5578bbc1ca65a220f7cf842f24b2615f2f"
+      "digest": "d4720502e3896cdc973d939a10e399df1b7a8ea5047b04bdf312b2bdbd4168d7"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/researcher.agent.md",
-      "digest": "dcf9b86018ec0bc1e880494e370594d9592c7846eb7136279054773409c60b7a"
+      "digest": "cf9bcd4aa4d5c5d88d3722cce68900a3e937869f12c1dc25b655ad71449f13b4"
     }
   ]
 }

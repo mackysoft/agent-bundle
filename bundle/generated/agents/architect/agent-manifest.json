@@ -9,23 +9,23 @@
     "claim-grounding",
     "referent-modeling"
   ],
-  "contentDigest": "b2b80c70a85338e1f2f5bedeffe91feed508adbc45398e3ca8ec09224fa931dd",
-  "manifestDigest": "c9321d6a011fa14d592b921c106d4ef1e784860ef73285157eecc09a28a75da6",
+  "contentDigest": "39634b9dd590d9a11825302f43fe10d324fc99f6854c6df68aa9d4ddd243e4a9",
+  "manifestDigest": "042b98ea52e0fe666517a0bb63f053e564e935f77856877299011bc1d8195d6d",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/architect.md",
-      "digest": "e5afad47bbd60a5a5f959516e057283f83c01f99bb246de537d8e772e87e3789"
+      "digest": "ea234d7be61833513d37629257f6b53af92fd9b1151dd9caa49c4563b75b8cc2"
     },
     {
       "host": "codex",
       "path": "hosts/codex/architect.toml",
-      "digest": "1b2629dc8c85109b715404d099c965a07d0100271d0ab5c60fed562004cb073c"
+      "digest": "8ed296762f8d5fc34841dc53197854ee4e148bd9441bc824f0500674b0f0c94c"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/architect.agent.md",
-      "digest": "eae92d54dff3b2b56585fcab09cebc746ed6a1d9785409d9f711cd191509970d"
+      "digest": "e1c1d1398f2b95582421bcf44ef0d0fdb75187f8bbbbe923d8f1a115b6d993b0"
     }
   ]
 }

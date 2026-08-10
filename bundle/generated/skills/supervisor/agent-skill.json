@@ -9,8 +9,8 @@
   "dependencies": [
     "orchestrator"
   ],
-  "contentDigest": "9a8b7a9441c6cb5e1e7acd240acfcdbd61a08859f879e48461e7fef2d2670e14",
-  "manifestDigest": "64ed573c2bafbe880a2e5d1b9e619ee078e0b79fd91701469934819997fa84c4",
+  "contentDigest": "569978782601d2e76dd9bbb494a028b8cc144097cded210bd7b96cb548aa32d5",
+  "manifestDigest": "21fc464d926d8a5432d1fae71e959bfebc02fb8b6916c5fa07ae44117fe3afe0",
   "hostArtifacts": [
     {
       "host": "codex",

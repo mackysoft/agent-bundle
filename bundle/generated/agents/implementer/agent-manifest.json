@@ -9,23 +9,23 @@
     "code-authoring-rules",
     "writing"
   ],
-  "contentDigest": "2fd8b9ff3d73b0124e0adddec60f712b4da8ee488632ada5a031cb2b15228f6c",
-  "manifestDigest": "fa8a81b8032baaa931e2de436ad0f71ed8b759eec5bbe8c800860a7e94e306ef",
+  "contentDigest": "82bdcc2da3ac25f7a8472967be19db09f113fa0fb911e933c62e1b42678b1bd4",
+  "manifestDigest": "2668e4e89ce79fcdb92c9ccec1b548878deb8678d61340d661b4d9578a24605f",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/implementer.md",
-      "digest": "924de83b5c46f903ab51e61f4d0cea5aa7b355a8e02700c8b137c638b20123cb"
+      "digest": "99c3546b6dd18d91bcaaad63da98c2499e6213c40c80405bf8f475490ebed449"
     },
     {
       "host": "codex",
       "path": "hosts/codex/implementer.toml",
-      "digest": "23cf72120bfe6c82f0910e5b67042f04e98644e38783deffaf76facee711f62a"
+      "digest": "b592c8f143ef287e5ff6bb44f496ce83a0fd1f48b35a6afbc0ba30f550f4b7c9"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/implementer.agent.md",
-      "digest": "b03b986083920068868e2b47e272e1cb46236d24f18cf92bbe6922a1bed45625"
+      "digest": "d72921512ba8d496a7e8861d76d7780762cc69f4a3657ed084fba8b097de0be9"
     }
   ]
 }

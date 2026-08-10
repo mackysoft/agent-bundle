@@ -8,23 +8,23 @@
   "skillDependencies": [
     "verification-gate"
   ],
-  "contentDigest": "fb99dccd5ba633b6b9865c53a80a98b0e55c357aa383b7088383bed5c95397d0",
-  "manifestDigest": "fe1518d32440fed07a5dd465b28def136708079eacb6a529f8e8f1fd744cf874",
+  "contentDigest": "e67de711a44acc66a122b54ca9186b84c009608aee40aa5ed71180f36fa2e16d",
+  "manifestDigest": "9d7eec059fa8ca5c56c36cfee3dd4940cc26e0b223048290c79f3cea6516d069",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/verifier.md",
-      "digest": "995fac4eac98bb5475857a5f46c25bfff3ae443994c2034104b4b86ecaf2f9a9"
+      "digest": "640ca6c696de7f7e466a67263559252a5a2d47653c7ef2a65b4ac8dd1818ccd7"
     },
     {
       "host": "codex",
       "path": "hosts/codex/verifier.toml",
-      "digest": "ae53bb3574d822a7aba9d0761a5d928cdfb632bffdd2d96f36c891700535fb37"
+      "digest": "c86ef67d69c4141bbb53007eb9b989a20f36e5c9004569c61d5f2cbf7db424a6"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/verifier.agent.md",
-      "digest": "3e72444c649595102acccbc3bfcb1a8abab83357741ee3f65308fb6ab63a01c4"
+      "digest": "9183dd5649949b46091ec923f6361db45b3d0f1f958fa97d768dd6461595ca06"
     }
   ]
 }
