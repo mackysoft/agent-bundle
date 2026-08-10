@@ -5,29 +5,29 @@
   "category": "development",
   "skillName": "custom-agent-authoring",
   "displayName": "Custom Agent Authoring",
-  "description": "custom agentを新規作成、更新、レビューするときに、単一の成果責務、選択面、入力、判断、行動、作用、成果、handoff、停止条件、下位委譲方針を定め、host非依存の指示、Skill依存、host bindingへ正しく分離する。構造検証と隔離した挙動検証を反復し、実際に選択・起動されたagentが意図した責務を果たす定義へ仕上げるときに使う。",
+  "description": "custom agentを新規作成、更新、レビューするときに、単一の成果責務、選択面、入力、判断、行動、作用、成果、handoff、停止条件、実行担当の割当方針を定め、host非依存の指示、Skill依存、host bindingへ正しく分離する。構造検証と隔離した挙動検証を反復し、実際に選択・起動されたagentが意図した責務を果たす定義へ仕上げるときに使う。",
   "dependencies": [
     "behavior-deviation-analysis",
     "custom-agent-behavior-validation",
     "referent-modeling",
     "writing"
   ],
-  "contentDigest": "722cfe9d00f2131966644922eadad5e333a8fa90f52e6d20f37a7a0e32b17740",
-  "manifestDigest": "95b221e89b4b783618b9d53baec47d7656993cd63cd75e530015f0f706452fec",
+  "contentDigest": "75f25adfdcb9cfeb0865cbf67812edf26d7dadfdc54efc5a0a3a7b8af96162f8",
+  "manifestDigest": "3016fb0cf0a4e14942ff026dcd92f162ae0dc153e1fe12b2fa729f442fbb573f",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "8de2e452fefd41f01db2726feed1a1ac584bb719e136c2e578ad88316f030889",
-      "materializedFrontmatterDigest": "075fc4a4407d9309bec556ad2266cb61ca7f50eb8c16176869e42bf30b771211"
+      "digest": "8a7d8fe716130abe6663fbe842d62dbd1e7307fdb7ef68db8c192127c6b9016c",
+      "materializedFrontmatterDigest": "03bef67ddfa4126c77c897cf87c314fc3c07dbbe45e17463f0a34a695d0371e0"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "9a9b05a9b4d3c3b187eb29b0ff32c3eae394e5a773adfa0dfce8ba6e89aa431c"
+      "materializedFrontmatterDigest": "c235c96a72f20f4e233df86f3a8cfeb28839ce61b7534718e193e476c35b97d0"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "080e4db573f31ae93dbead8a905ab6c9cb4c5cfc721c6db27edef9ece701b7e5"
+      "materializedFrontmatterDigest": "be950b727d517c0c0d0f73cd873cd881d5e6828c47369a4030e26e6a82e53c00"
     }
   ]
 }

@@ -9,23 +9,23 @@
     "review-triage",
     "writing"
   ],
-  "contentDigest": "ccaa41ae7e2f92600071c582a1a478a452dd6104282af8ddcaa53c018ee0578e",
-  "manifestDigest": "1baa76030021746562dbd0e736d2a63e0c718288ba5c05eb29f208a1aa749afb",
+  "contentDigest": "ce9eed4154f77b1ba5b5c3137d1d1015b8a99fdab2f0f1a72618f23aa5e7cc5e",
+  "manifestDigest": "58818f8425fca603fcb5907351a7da969f56737a8d16a3a6a8ca7cc78f21f433",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/reviewer.md",
-      "digest": "0f079446e5873779b9d657429fea8d27ef7576f7ddc4cf17b3cfbeae5ed236ce"
+      "digest": "f6b8f7e83a22cf924928bd407eabbd603514444d1b3a842dd581f2406b4e27a6"
     },
     {
       "host": "codex",
       "path": "hosts/codex/reviewer.toml",
-      "digest": "d7cfb4920466c67e8bdca510eb8764a196255f8759daf35035d2381fde56c867"
+      "digest": "bea7a2dc8c974fcd36197df98fae59d4909afe83ce6efe9416d8f738120f2946"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/reviewer.agent.md",
-      "digest": "b98ac6625d5a816a9581041f30e34bae1e91cfee45b0dc271aea87b4297bdb11"
+      "digest": "f3cfd421e32ab33ab19957ca6fd8b4cb2bc2d750a23ae2f6265007982e601a7f"
     }
   ]
 }
