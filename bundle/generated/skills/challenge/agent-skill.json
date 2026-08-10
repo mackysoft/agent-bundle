@@ -10,8 +10,8 @@
     "change-framing",
     "claim-grounding"
   ],
-  "contentDigest": "71c85c95c3f8656c28cfe7a6ca90375f417af7d2a7d31142586240542e7baade",
-  "manifestDigest": "477013d9e9e5e5f7be33cafc4f7555f34b6dbbeaee2bba1102fe7eed192bd474",
+  "contentDigest": "9484cde2c49b2fb7ed22b899b9672461207c329b8fcc724496deb71515a82355",
+  "manifestDigest": "3739fb1c266f2720b4039b0214852c72086cec4f1ba2dea92810e7ee9eb86e7f",
   "hostArtifacts": [
     {
       "host": "codex",
