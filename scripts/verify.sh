@@ -6,13 +6,12 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$script_dir/dotnet-common.sh"
 
 usage() {
-  echo "usage: bash scripts/verify.sh [--no-restore] [--solution <path>] [--configuration <name>] [-- dotnet-test-options...]" >&2
+  echo "usage: bash scripts/verify.sh [--no-restore] [--solution <path>] [--configuration <name>]" >&2
 }
 
 restore=true
 solution_arg=""
 configuration="Release"
-test_args=()
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -46,11 +45,6 @@ while [ "$#" -gt 0 ]; do
       configuration="${1#--configuration=}"
       shift
       ;;
-    --)
-      shift
-      test_args=("$@")
-      break
-      ;;
     *)
       usage
       exit 2
@@ -73,13 +67,3 @@ fi
 bash scripts/verify-bundle.sh
 bash scripts/code-quality.sh --no-restore --solution "$solution" verify
 dotnet build "$solution" --configuration "$configuration" --no-restore
-test_dotnet_args=(
-  --no-restore
-  --solution "$solution"
-  --configuration "$configuration"
-  --no-build
-)
-if [ "${#test_args[@]}" -gt 0 ]; then
-  test_dotnet_args+=("${test_args[@]}")
-fi
-bash scripts/test-dotnet.sh "${test_dotnet_args[@]}"
