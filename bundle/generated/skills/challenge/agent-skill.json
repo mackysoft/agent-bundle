@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 6,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "basic",
+  "skillName": "challenge",
+  "displayName": "Challenge",
+  "description": "目的、要求、権限ある規範、局所文脈に照らして、成果物、設計、コード、構造上の選択の存在理由を問い、未説明の複雑さ、具体的な問い、確認済みの契約を維持するより小さい反実仮想を、採否前の異議形成結果として返すときに使う。対象の正当化に必要な根拠が揃う場合は、確認範囲を伴う候補なしの結果を返す。",
+  "dependencies": [
+    "claim-grounding"
+  ],
+  "contentDigest": "a20f6ea6043982972b6e3f463a9b59cc1d6d20b7ce8517d5785347bddd93ace5",
+  "manifestDigest": "0e25be766860756c9a5e0b5757280215dadfa35ba8669a106abb0580db27d066",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "2dff32bca376cd36846aec33fe1d021e827c2d3478af088a2629256a609ae760",
+      "materializedFrontmatterDigest": "a1031510eac1a2fded156d6e8038439b91ed70a33593e0d590f64f5f904527b8"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "03a6d202af4fffc9e8aa9e1940fd1591ebba5e9801dc79921837b9437fe9df58"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "348a10a0f4d1823fbb4c0e188d01eeaa5172cf552c5236768ad22392e9c81242"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 5,
+  "skillBundleVersion": 6,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "verification-gate",
@@ -11,7 +11,7 @@
     "test-oracle-assessment"
   ],
   "contentDigest": "c8afb6082b38e97f618d5886ea0747b527fff7e74e9ab74fb7835329dbc432a2",
-  "manifestDigest": "bd3d3895e4287b69ae41459c75f55b205ca6f9d8ff2daf4796fc2d4967507706",
+  "manifestDigest": "a3f9a68b56181f0e26a599d65868a2e021f0ec58b3c4491bbf06dcb606f8233d",
   "hostArtifacts": [
     {
       "host": "codex",

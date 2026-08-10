@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Challenger",
+  "description": "目的、要求、権限ある規範と文脈に照らして、成果物、設計、コード、リポジトリ構造にある選択の存在理由を問い、未説明の複雑さ、具体的な問い、契約を維持するより小さい反実仮想を、採否前の異議形成結果として返すときに使う。",
+  "skillDependencies": [
+    "challenge"
+  ]
+}

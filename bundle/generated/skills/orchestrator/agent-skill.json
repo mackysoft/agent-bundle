@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 5,
+  "skillBundleVersion": 6,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "orchestrator",
@@ -9,8 +9,8 @@
   "dependencies": [
     "writing"
   ],
-  "contentDigest": "5f27a6c9f87cdae8e003aecbbc04dd3b34cc9adc38cb1a2a64e40cccb6dcdb58",
-  "manifestDigest": "3d85f9c0cf2eaf512d56ccf4f04b7f7fce2f93672fe5e5425814f3e6482f367c",
+  "contentDigest": "f6dabbc42821f90b6101db9f4c05f229fad74644f871f758463e3822424cbe05",
+  "manifestDigest": "2be332abc3d67eeda370c02290d3174fc3f70b66dfaf642526d16ce469b58866",
   "hostArtifacts": [
     {
       "host": "codex",

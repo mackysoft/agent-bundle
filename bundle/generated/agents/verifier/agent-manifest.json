@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "bundleVersion": 5,
+  "bundleVersion": 6,
   "catalogId": "com.mackysoft.agent-bundle",
   "agentName": "verifier",
   "displayName": "Verifier",
@@ -9,7 +9,7 @@
     "verification-gate"
   ],
   "contentDigest": "e67de711a44acc66a122b54ca9186b84c009608aee40aa5ed71180f36fa2e16d",
-  "manifestDigest": "503d508c5c2acdba225040432bae43e2d0e7059d9f29c4d3f72cd5846e0866d9",
+  "manifestDigest": "8ee03e5e93789204f3c309d5239e04e9043677856bc47acb809678ffb69ed4d9",
   "hostArtifacts": [
     {
       "host": "claude-code",
