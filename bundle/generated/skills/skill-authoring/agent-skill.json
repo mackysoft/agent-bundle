@@ -12,8 +12,8 @@
     "skill-behavior-validation",
     "writing"
   ],
-  "contentDigest": "0eccc91b2937de03231a55c08a973aaf83462f2f0d58b9c27069c978ae7c3ce8",
-  "manifestDigest": "839094ee27f964da949b7f668a6a02820c853c315d19b509eb227787644702b9",
+  "contentDigest": "259b94b11170069ae0b0ef8b8c528d8489dbf8ee389afdcf2b506ba507b977d2",
+  "manifestDigest": "2d67dc0d1c5494564b125faf47d36dca6479ac60962dc87506376a38ee9b9e57",
   "hostArtifacts": [
     {
       "host": "codex",

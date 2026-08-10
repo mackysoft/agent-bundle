@@ -6,23 +6,23 @@
   "displayName": "Operator",
   "description": "対象、作用、許可、期待結果、確認方法が確定した閉じた作業の履行に使う。長時間処理または外部実行では、必要な開始、終了状態までの待機、実行後確認を同じ作業として行い、停止条件に達した場合は現在状態と再開条件を返す。",
   "skillDependencies": [],
-  "contentDigest": "254dc2efb1fe9a4d8398b93394e6bcfc418ae829f26a4dc316af96c052090dfb",
-  "manifestDigest": "422590ec7a29415d46f3d4a129c94d143b7599b817c298d109912a01cc0e10dd",
+  "contentDigest": "8c9216a0640e5c17c50b34afd64486fc1d90ee754e68f49bd4be920f792cdc87",
+  "manifestDigest": "fec8f0e2837d86e88754e2212683a457a0091c5564c2e26603c336e738289d89",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/operator.md",
-      "digest": "0d0ea7164163140abb28870b3d0b4c3076f118b39aad8d04130b3f1173ce5f24"
+      "digest": "11f2afaa556efb87afa7df32ab12be4a20906a8b05247442ae81475e15a8c401"
     },
     {
       "host": "codex",
       "path": "hosts/codex/operator.toml",
-      "digest": "3d52c5611759c5f0333f013aabcdc6d404c94ccf3b33a62840af0236aa1fb46d"
+      "digest": "c73ecf6c4ae28565446c0ac49163ecee8d0f7c26ac5f5fa73f6834c9fe52df9e"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/operator.agent.md",
-      "digest": "b1de534c4abd348d6e077e85eb18da149f4c311a06cce3a4101ec79c37b0e75f"
+      "digest": "d7119e4c57c81714586bc44f60a3927b998b8ab2b2681cd34fc1a435ca1a3fa4"
     }
   ]
 }

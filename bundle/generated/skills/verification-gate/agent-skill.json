@@ -10,8 +10,8 @@
     "claim-grounding",
     "test-oracle-assessment"
   ],
-  "contentDigest": "a2bc468faa9906a50742dfaa8b8133761140cdce749462bb9d763c8290584cc1",
-  "manifestDigest": "f710a0d8d717c7e1fc718d4a57d60941de5506951e3006082bba25db71ea107f",
+  "contentDigest": "c8afb6082b38e97f618d5886ea0747b527fff7e74e9ab74fb7835329dbc432a2",
+  "manifestDigest": "bd3d3895e4287b69ae41459c75f55b205ca6f9d8ff2daf4796fc2d4967507706",
   "hostArtifacts": [
     {
       "host": "codex",
