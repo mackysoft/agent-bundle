@@ -2,7 +2,7 @@
 
 指定時点と範囲の親 task または session から、すべての subagent 起動試行と child execution を復元する。実行主体と適用定義の同定確度を示し、委譲から終了までを契約へ照合した分析結果を作る。
 
-成果は読み取り専用の SubagentExecutionAnalysis である。このスキルは runtime 記録、定義、成果物を変更せず、期待との差、原因、対応候補、再検証範囲は `behavior-deviation-analysis`、受入条件への最終判定は `verification-gate` が所有する。
+成果は、対象範囲のspawn attemptと開始済みexecutionを復元し、実行主体、適用定義、設定、行動、成果、handoff、終了を根拠に対応付けた、読み取り専用の分析結果である。このスキルは runtime 記録、定義、成果物を変更せず、期待との差、原因、対応候補、再検証範囲は `behavior-deviation-analysis`、受入条件への最終判定は `verification-gate` が所有する。
 
 ## 入力
 
@@ -95,7 +95,7 @@ execution ごとに、次の観点を独立に契約と照合する。
 
 ## 出力
 
-SubagentExecutionAnalysis は次の項目を持つ。
+subagentの実行分析結果は次の項目を持つ。
 
 | 項目 | 内容 |
 | --- | --- |

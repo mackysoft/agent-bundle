@@ -1,4 +1,4 @@
-# SkillBehaviorValidation report schema
+# Skillの挙動検証結果の形式
 
 ## 目的
 

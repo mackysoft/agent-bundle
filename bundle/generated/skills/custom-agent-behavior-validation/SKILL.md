@@ -4,7 +4,7 @@
 
 候補または更新済みのcustom agentを実際のsubagentとして起動し、選択からparent handoffと終了までの挙動を、確認済みのagent契約へ照合する。
 
-成果は読み取り専用の CustomAgentBehaviorValidation である。このスキルは対象agentの定義とhost bindingを変更せず、実行記録の復元は `subagent-execution-analysis`、逸脱の原因と対応候補は `behavior-deviation-analysis`、custom agentの作成と修正は `custom-agent-authoring`、変更全体の受入判定は `verification-gate` が所有する。
+成果は、対象agentの契約と実行時の挙動をシナリオごとに照合した、読み取り専用の検証結果である。このスキルは対象agentの定義とhost bindingを変更せず、実行記録の復元は `subagent-execution-analysis`、逸脱の原因と対応候補は `behavior-deviation-analysis`、custom agentの作成と修正は `custom-agent-authoring`、変更全体の受入判定は `verification-gate` が所有する。
 
 ## 入力
 

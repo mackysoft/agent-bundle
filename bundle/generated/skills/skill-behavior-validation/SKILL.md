@@ -4,7 +4,7 @@
 
 候補または更新済みのエージェントSkillを、作成時の文脈から切り離した実行で観測し、確認済みの作業契約へ照合する。
 
-成果は読み取り専用の SkillBehaviorValidation である。このスキルは対象Skillを変更せず、逸脱の原因と対応候補は `behavior-deviation-analysis`、Skillの作成と修正は `skill-authoring`、変更全体の受入判定は `verification-gate` が所有する。
+成果は、対象Skillの契約と実行時の挙動をシナリオごとに照合した、読み取り専用の検証結果である。このスキルは対象Skillを変更せず、逸脱の原因と対応候補は `behavior-deviation-analysis`、Skillの作成と修正は `skill-authoring`、変更全体の受入判定は `verification-gate` が所有する。
 
 ## 入力
 

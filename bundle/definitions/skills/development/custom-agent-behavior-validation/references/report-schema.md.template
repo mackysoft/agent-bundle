@@ -1,4 +1,4 @@
-# CustomAgentBehaviorValidation report schema
+# custom agentの挙動検証結果の形式
 
 ## 目的
 
@@ -14,7 +14,7 @@ custom agentの挙動検証について、対象definition、host条件、シナ
 | `scenarios` | 計画した各シナリオの契約。 |
 | `spawn_attempts` | 親から開始した各attempt、結果、対応するexecution。 |
 | `executions` | 成立したchild execution、follow-up、terminal state。 |
-| `runtime_analysis_refs` | 各シナリオへ対応するSubagentExecutionAnalysis。 |
+| `runtime_analysis_refs` | 各シナリオに対応するsubagentの実行分析結果への参照。 |
 | `assessments` | シナリオと契約要素ごとの照合結果。 |
 | `coverage` | 必須契約要素とシナリオの対応、runtime sourceの範囲、未実行または未解決の範囲。 |
 | `validation_status` | `conforms`、`violates`、`unverified`、`in_progress`、`blocked`。 |
@@ -46,7 +46,7 @@ custom agentの挙動検証について、対象definition、host条件、シナ
 
 ## execution binding
 
-各scenarioについて、次をSubagentExecutionAnalysisへ対応付ける。
+各scenarioについて、次をsubagentの実行分析結果へ対応付ける。
 
 - parent taskまたはsession
 - 時間範囲と端点の包含性

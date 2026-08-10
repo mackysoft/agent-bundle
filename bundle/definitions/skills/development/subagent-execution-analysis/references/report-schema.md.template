@@ -1,6 +1,6 @@
-## Report schema
+## subagentの実行分析結果の形式
 
-SubagentExecutionAnalysis は JSON、表、または構造化した文章で表現できる。表現形式にかかわらず、各項目は `evidence_refs` と、該当する場合は `claim_kind`、identity confidence、definition binding、assessment、unverified reason を保持する。
+subagentの実行分析結果はJSON、表、または構造化した文章で表現できる。表現形式にかかわらず、各項目は `evidence_refs` と、該当する場合は `claim_kind`、identity confidence、definition binding、assessment、unverified reason を保持する。
 
 ```text
 analysis_scope

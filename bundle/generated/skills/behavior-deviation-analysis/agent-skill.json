@@ -12,8 +12,8 @@
     "subagent-execution-analysis",
     "writing"
   ],
-  "contentDigest": "cc288ba21c70df658ffb85e532175f060528119bbb14f0f00dd0b36ca386a48a",
-  "manifestDigest": "f1508ac1e13c62c48114986b0a672d06ac3aa0c31cecb715945cb1bb5f944126",
+  "contentDigest": "16a75a4064a138e7de3cf75730071b8eab91bcd37bc8cd09c0d7d22231f30540",
+  "manifestDigest": "b779c12dbe05238d79eb52d5458578ced1a99345f3e3f8516fcab230974af8aa",
   "hostArtifacts": [
     {
       "host": "codex",
