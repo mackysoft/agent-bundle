@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 5,
+  "skillBundleVersion": 6,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "code-authoring-rules",
@@ -12,7 +12,7 @@
     "writing"
   ],
   "contentDigest": "ccf9560a8c1f2556d31df2f42125a9ec6694ddf6705c23153d8fefc1fff8a36b",
-  "manifestDigest": "08c1e7f74bee3b4228afaeab56ab94514cc19fe03316a251260b1882b8dcfd00",
+  "manifestDigest": "d6bb94454c84d8e671d730d1a94b31dc8f9859099f183d3772742f90be3792aa",
   "hostArtifacts": [
     {
       "host": "codex",

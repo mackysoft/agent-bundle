@@ -24,7 +24,8 @@ The tool update replaces the CLI and its embedded bundle. It does not change Ski
 
 ```bash
 agent-bundle skills update --host codex --scope user --category basic,development
-agent-bundle agents update --host codex --scope user --agent architect,implementer,interactive-tester,operator,researcher,reviewer,verifier
+agent-bundle agents update --host codex --scope user --agent architect,challenger,implementer,interactive-tester,operator,researcher,reviewer,verifier
+agent-bundle agents doctor --host codex --scope user --agent architect,challenger,implementer,interactive-tester,operator,researcher,reviewer,verifier
 ```
 
 If a release removes or renames a managed Skill or custom agent, clean up each old name explicitly after updating the tool. `update` does not prune removed entries:
@@ -69,7 +70,7 @@ Finally, create installations owned by the new `com.mackysoft.agent-bundle` cata
 
 ```bash
 agent-bundle skills install --host codex --scope user --category basic,development
-agent-bundle agents install --host codex --scope user --agent architect,implementer,interactive-tester,operator,researcher,reviewer,verifier
+agent-bundle agents install --host codex --scope user --agent architect,challenger,implementer,interactive-tester,operator,researcher,reviewer,verifier
 ```
 
 Repeat the new installation for each required host and scope. Project-scope installations must be run for each repository with `--scope project --repository-root /path/to/repository`.
@@ -109,8 +110,8 @@ Install exact custom agents and their resolved skill dependencies:
 
 ```bash
 agent-bundle agents install --host codex --scope project --repository-root . --agent architect
-agent-bundle agents install --host claude-code --scope user --agent architect,reviewer
-agent-bundle agents install --host github-copilot --scope project --repository-root . --agent reviewer --dry-run --print-diff
+agent-bundle agents install --host claude-code --scope user --agent architect,challenger,reviewer
+agent-bundle agents install --host github-copilot --scope project --repository-root . --agent challenger --dry-run --print-diff
 ```
 
 The `agents` resource group supports `list`, `export`, `install`, `update`, `doctor`, `uninstall`, and `prune`. Agent selection uses exact names through `--agent`; installation and update start from the selected Agent → Skill dependencies and resolve their transitive Skill → Skill closure. Agent definitions never depend on other agents.
@@ -121,6 +122,7 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | --- | --- | --- |
 | `behavior-deviation-analysis` | `development` | Attribute behavior deviations to evidence-backed causes, repair owners, and revalidation scope. |
 | `branch-create` | `development` | Create or reuse task branches while preserving detached or uncommitted work. |
+| `challenge` | `basic` | Challenge a candidate work direction against broader goals, responsibilities, existing paths, downstream effects, and work trajectory. |
 | `changelog` | `development` | Write reader-facing changelogs, release notes, and pull request change summaries. |
 | `change-framing` | `basic` | Reconstruct change purpose, authority, contract changes, permissions, acceptance conditions, implementation constraints, and unresolved decisions. |
 | `code-authoring-rules` | `development` | Apply language-independent code design and authoring rules. |
@@ -162,6 +164,7 @@ Custom agents use one flat catalog namespace:
 | `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
 | `implementer` | Implements an agreed design, including natural-language artifacts, and reports implementation verification. | `code-authoring-rules`, `writing` |
 | `interactive-tester` | Exercises application changes through user paths and produces scoped findings and shareable media evidence. | `interactive-app-testing` |
+| `challenger` | Independently questions a candidate work direction from broad context and returns pre-adoption direction challenges with their impact scope. | `challenge` |
 | `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
 | `verifier` | Determines acceptance evidence and its result. | `verification-gate` |
 | `researcher` | Collects bounded read-only evidence and reports unchecked areas. | `claim-grounding` |

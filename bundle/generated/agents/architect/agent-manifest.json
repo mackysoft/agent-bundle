@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "bundleVersion": 5,
+  "bundleVersion": 6,
   "catalogId": "com.mackysoft.agent-bundle",
   "agentName": "architect",
   "displayName": "Architect",
@@ -10,7 +10,7 @@
     "referent-modeling"
   ],
   "contentDigest": "39634b9dd590d9a11825302f43fe10d324fc99f6854c6df68aa9d4ddd243e4a9",
-  "manifestDigest": "1f45fc254f20e688fc0dc514cd227868ca5954dcf8f9b74109b2933e662293e2",
+  "manifestDigest": "82ac117b8548c03ebadfd1df0eb0762aaddbfc7e4eee633157d01d2689f10119",
   "hostArtifacts": [
     {
       "host": "claude-code",

@@ -130,6 +130,10 @@ require_equal("skills list command", "skills.list", skills.get("Command"))
 require_equal("skills list status", "ok", skills.get("Status"))
 skills_payload = skills.get("Payload") or {}
 skill_names = {item["SkillName"] for item in skills_payload.get("Skills", [])}
+require_equal("skills list count", 32, len(skill_names))
+if "challenge" not in skill_names:
+    print("skills list did not report the challenge Skill.", file=sys.stderr)
+    sys.exit(1)
 if "writing" not in skill_names:
     print("skills list did not report the writing Skill used by the Agent dependency smoke test.", file=sys.stderr)
     sys.exit(1)
@@ -163,8 +167,9 @@ require_equal("agents list command", "agents.list", agents.get("Command"))
 require_equal("agents list status", "ok", agents.get("Status"))
 agents_payload = agents.get("Payload") or {}
 agent_names = {item["AgentName"] for item in agents_payload.get("Agents", [])}
-if "reviewer" not in agent_names:
-    print("agents list did not report the reviewer used by the export smoke test.", file=sys.stderr)
+require_equal("agents list count", 8, len(agent_names))
+if "challenger" not in agent_names:
+    print("agents list did not report the challenger used by the export smoke test.", file=sys.stderr)
     sys.exit(1)
 if "interactive-tester" not in agent_names:
     print("agents list did not report the interactive-tester Agent.", file=sys.stderr)
@@ -435,7 +440,85 @@ if missing_files:
 PY
 }
 
+verify_agent_export() {
+  local agent_name="$1"
+  local expected_skills="$2"
+  local export_target="$3"
+  local export_report
+
+  export_report="$("${tool_path}/agent-bundle" agents export \
+    --host codex \
+    --agent "${agent_name}" \
+    --output "${export_target}")"
+
+  AGENT_EXPORT_REPORT="${export_report}" \
+    REQUESTED_AGENT="${agent_name}" \
+    EXPECTED_OUTPUT_PATH="${export_target}" \
+    EXPECTED_SKILLS="${expected_skills}" \
+    python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+import sys
+
+report = json.loads(os.environ["AGENT_EXPORT_REPORT"])
+payload = report.get("Payload") or {}
+requested_agent = os.environ["REQUESTED_AGENT"]
+
+
+def require_equal(label, expected, actual):
+    if actual != expected:
+        print(f"Unexpected {label}. Expected: {expected}. Actual: {actual}", file=sys.stderr)
+        sys.exit(1)
+
+
+require_equal("agents export command", "agents.export", report.get("Command"))
+require_equal("agents export status", "ok", report.get("Status"))
+require_equal(
+    "agents export output path",
+    os.environ["EXPECTED_OUTPUT_PATH"],
+    payload.get("OutputPath"),
+)
+
+agent_names = payload.get("Agents") or []
+if requested_agent not in agent_names:
+    print(
+        f"agents export did not report the requested {requested_agent} Agent.",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+
+expected_skills = set(json.loads(os.environ["EXPECTED_SKILLS"]))
+reported_skills = set(payload.get("Skills") or [])
+require_equal(
+    f"{requested_agent} export resolved Skill set",
+    sorted(expected_skills),
+    sorted(reported_skills),
+)
+
+output_path = Path(payload["OutputPath"])
+required_files = [output_path / "agents" / f"{agent_name}.toml" for agent_name in agent_names]
+required_files.extend(
+    path
+    for skill_name in reported_skills
+    for path in (
+        output_path / "skills" / skill_name / "SKILL.md",
+        output_path / "skills" / skill_name / "agent-skill.json",
+    )
+)
+missing_files = [str(path) for path in required_files if not path.is_file()]
+if missing_files:
+    print(
+        "agents export did not create the artifacts declared by its report: "
+        + ", ".join(missing_files),
+        file=sys.stderr,
+    )
+    sys.exit(1)
+PY
+}
+
 reviewer_skill_closure="$(resolve_skill_closure agent reviewer)"
+challenger_skill_closure="$(resolve_skill_closure agent challenger)"
 architect_skill_closure="$(resolve_skill_closure agent architect)"
 interactive_tester_skill_closure="$(resolve_skill_closure agent interactive-tester)"
 supervisor_skill_closure="$(resolve_skill_closure skill supervisor)"
@@ -531,70 +614,15 @@ verify_skill_export \
   "${custom_agent_authoring_skill_closure}" \
   '["custom-agent-behavior-validation/references/report-schema.md","subagent-execution-analysis/references/codex-runtime-evidence.md","subagent-execution-analysis/references/report-schema.md"]'
 
-agent_export_target="${consumer_root}/agent-export"
-agent_export_report="$("${tool_path}/agent-bundle" agents export \
-  --host codex \
-  --agent reviewer \
-  --output "${agent_export_target}")"
-AGENT_EXPORT_REPORT="${agent_export_report}" \
-  EXPECTED_OUTPUT_PATH="${agent_export_target}" \
-  EXPECTED_SKILLS="${reviewer_skill_closure}" \
-  python3 - <<'PY'
-import json
-import os
-from pathlib import Path
-import sys
+verify_agent_export \
+  reviewer \
+  "${reviewer_skill_closure}" \
+  "${consumer_root}/agent-export"
 
-report = json.loads(os.environ["AGENT_EXPORT_REPORT"])
-payload = report.get("Payload") or {}
-
-
-def require_equal(label, expected, actual):
-    if actual != expected:
-        print(f"Unexpected {label}. Expected: {expected}. Actual: {actual}", file=sys.stderr)
-        sys.exit(1)
-
-
-require_equal("agents export command", "agents.export", report.get("Command"))
-require_equal("agents export status", "ok", report.get("Status"))
-require_equal(
-    "agents export output path",
-    os.environ["EXPECTED_OUTPUT_PATH"],
-    payload.get("OutputPath"),
-)
-
-agent_names = payload.get("Agents") or []
-if "reviewer" not in agent_names:
-    print("agents export did not report the requested reviewer Agent.", file=sys.stderr)
-    sys.exit(1)
-
-expected_skills = set(json.loads(os.environ["EXPECTED_SKILLS"]))
-reported_skills = set(payload.get("Skills") or [])
-require_equal(
-    "agents export resolved Skill set",
-    sorted(expected_skills),
-    sorted(reported_skills),
-)
-
-output_path = Path(payload["OutputPath"])
-required_files = [output_path / "agents" / f"{agent_name}.toml" for agent_name in agent_names]
-required_files.extend(
-    path
-    for skill_name in reported_skills
-    for path in (
-        output_path / "skills" / skill_name / "SKILL.md",
-        output_path / "skills" / skill_name / "agent-skill.json",
-    )
-)
-missing_files = [str(path) for path in required_files if not path.is_file()]
-if missing_files:
-    print(
-        "agents export did not create the artifacts declared by its report: "
-        + ", ".join(missing_files),
-        file=sys.stderr,
-    )
-    sys.exit(1)
-PY
+verify_agent_export \
+  challenger \
+  "${challenger_skill_closure}" \
+  "${consumer_root}/challenger-agent-export"
 
 for host in codex claude-code github-copilot; do
   install_report="$("${tool_path}/agent-bundle" agents install \
