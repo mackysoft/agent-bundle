@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 3,
+  "skillBundleVersion": 4,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "ultra-review",
@@ -15,7 +15,7 @@
     "writing"
   ],
   "contentDigest": "07bc8f72f9321ed10495a7cf35321fee1f452279da21082f14a44e14ad439ce2",
-  "manifestDigest": "0f533b81f92695c07277ee08dafb1a56cace4f08b79bf9c42beb530dd4d72815",
+  "manifestDigest": "a689384030f9807d72b14ee0f03ec8505860ea34aab44f516d8653cdfdafaac1",
   "hostArtifacts": [
     {
       "host": "codex",
