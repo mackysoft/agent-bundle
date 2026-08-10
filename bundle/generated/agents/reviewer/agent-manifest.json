@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": 2,
+  "bundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "orchestration",
   "agentName": "reviewer",
@@ -11,7 +11,7 @@
     "writing"
   ],
   "contentDigest": "c812284d21678d57bd677d11e0ab645405a3d24be1987d795c46550d90c279d9",
-  "manifestDigest": "84391edc1f10c064e5c24377095fa564ae5a771d0a3e6eba47647aa8b7ac0409",
+  "manifestDigest": "75c048951c274b6f73a9e44083621139d3b09c60de1f3e7bc0eb6d6c850d0e5e",
   "hostArtifacts": [
     {
       "host": "claude-code",

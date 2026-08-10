@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 3,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "game-planning",
+  "skillName": "game-planning",
+  "displayName": "Game Planning",
+  "description": "ゲーム企画の目的、対象範囲、制約、決定状態、未解決の問い、完了条件が混在または未確定で、専門作業へ渡す入力契約を作る必要があるとき、またはゲーム設計、定量分析、インターフェース設計、プレイテストの複数領域を選択して一つの企画成果へ統合する必要があるときに使う。企画全体の入力契約、専門作業の選択と反復、成果の統合、完了責任を持つ。",
+  "dependencies": [
+    "change-framing",
+    "claim-grounding",
+    "game-balance-analysis",
+    "game-design",
+    "game-interface-design",
+    "playtest",
+    "referent-modeling",
+    "writing"
+  ],
+  "contentDigest": "7c636890e2d51024846bfc5eac83d47371fbc71d5ab7f7934f9c16695b81a171",
+  "manifestDigest": "a5c51e7c943d4c0018d60c6297d4edcc0d4f9fef2655124bdc562586954f641e",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "73497697803800bd7f8b97468f95e4c0e8bedebad7998343e0d5b3d4ad0463c2",
+      "materializedFrontmatterDigest": "a48c61cbe886f712a9afca3f0715e27e762a25b5f19ab9d91c12103c709b9dbe"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "6421fcf19cf5c6f3bbed3da1d6b570c9cc9e5c7a3228dbdfc24480c391091aea"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "970b197ea6220b301c9ec1b7b38c8561c1142c0deccfe87f7b1e67bf0d92f854"
+    }
+  ]
+}

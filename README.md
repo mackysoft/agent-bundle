@@ -132,7 +132,11 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `commit` | `development` | Create responsibility-scoped Conventional Commit messages. |
 | `csharp-authoring-rules` | `development` | Apply C#-specific implementation and review judgment rules. |
 | `claim-grounding` | `basic` | Ground claims in sources, evidence composition, adoption status, scope, and relationships. |
+| `game-balance-analysis` | `game-planning` | Quantitatively model game rules to find viable ranges, dominant choices, failure conditions, and recovery paths. |
 | `game-design` | `game-planning` | Connect intended player experiences to player activity, game rules, feedback, and progression. |
+| `game-interface-design` | `game-planning` | Map gameplay information, actions, and outcomes to player-facing displays, controls, and interface states. |
+| `game-planning` | `game-planning` | Coordinate mixed game-planning work through a shared input contract, specialist work selection, iteration, and integrated outcomes. |
+| `playtest` | `game-planning` | Observe real play across development stages through exploratory or hypothesis-driven playtests. |
 | `issue-planner` | `development` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | `development` | Write, create, update, or review structured GitHub Issue bodies. |
 | `pr-merge` | `development` | Merge pull requests through continuous integration and branch cleanup. |

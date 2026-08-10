@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": 2,
+  "bundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "orchestration",
   "agentName": "implementer",
@@ -11,7 +11,7 @@
     "writing"
   ],
   "contentDigest": "2fd8b9ff3d73b0124e0adddec60f712b4da8ee488632ada5a031cb2b15228f6c",
-  "manifestDigest": "76c1086b90097c88de54c3bd466c9f04aaa53be693b0c963ad9f497466ea9e25",
+  "manifestDigest": "22eba30fe55ad0cb0e71b67c9ca9bdd047af9c394b26a05567b0f50405970b84",
   "hostArtifacts": [
     {
       "host": "claude-code",

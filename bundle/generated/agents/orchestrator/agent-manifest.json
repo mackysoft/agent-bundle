@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": 2,
+  "bundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "orchestration",
   "agentName": "orchestrator",
@@ -8,7 +8,7 @@
   "description": "一つの目的について、依頼者が定めた要求、範囲、制約、許可、受入条件を確認し、必要な成果へ分解して所有責務へ割り当て、依存関係、結果、レビュー、検証、完了を管理する。単一目的に属する複数作業の進行を調整するときに使う。",
   "skillDependencies": [],
   "contentDigest": "8aa92fef51a7d98b00845bb938537150a54f6ce144ad010a557c9ada5db71a20",
-  "manifestDigest": "d269fc3464c8c3eae22c1786d469ae23fe28c5a58cb10c09bddb6315fc14fcf3",
+  "manifestDigest": "1116994f7647619e0a6abbefcbf920a53cc72550ea31605827bdff89b1eeebab",
   "hostArtifacts": [
     {
       "host": "claude-code",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": 2,
+  "bundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "orchestration",
   "agentName": "researcher",
@@ -10,7 +10,7 @@
     "claim-grounding"
   ],
   "contentDigest": "f7453019fa18ddb98fad922bf8c1b6bde5468db707864fa1375571f921508064",
-  "manifestDigest": "4c3fe228a54518eacf73d992dcfe63e3984e7209ec46a2dfb3ec63f10da8b499",
+  "manifestDigest": "eccbf64652b4aa46825de53bcf412f22270e54ab436cc33f74f39136c49b9ae8",
   "hostArtifacts": [
     {
       "host": "claude-code",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": 2,
+  "bundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "orchestration",
   "agentName": "operator",
@@ -8,7 +8,7 @@
   "description": "対象、作用、許可、期待結果、確認方法が確定した閉じた作業の履行に使う。成果として、指定された作用結果と実行後の確認結果を返す。",
   "skillDependencies": [],
   "contentDigest": "34313ad9ca24976639ee4a00503bdfb99d18879b80040e4e1ff12cefa346b0c6",
-  "manifestDigest": "f701ce297485f5c1054264062d7812a0f5e580c5327121b86b1ea3fcdc1f0c83",
+  "manifestDigest": "bb9e0478a59bdaf16b74b15b741735d60bffeb8b914a6763bd1b51ef8fd0bc77",
   "hostArtifacts": [
     {
       "host": "claude-code",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "bundleVersion": 2,
+  "bundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "orchestration",
   "agentName": "architect",
@@ -11,7 +11,7 @@
     "referent-modeling"
   ],
   "contentDigest": "b2b80c70a85338e1f2f5bedeffe91feed508adbc45398e3ca8ec09224fa931dd",
-  "manifestDigest": "c14dc0e556c9cc0290adffb37a75249cb029f52ef0baf562845d62b02e96d5dd",
+  "manifestDigest": "951dd9f1bb34af1611d2a79acc9252c0a3c20e51a7438613d5a9e0d408a741b6",
   "hostArtifacts": [
     {
       "host": "claude-code",

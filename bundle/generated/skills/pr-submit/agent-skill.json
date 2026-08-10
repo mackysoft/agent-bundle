@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 2,
+  "skillBundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "pr-submit",
@@ -15,7 +15,7 @@
     "writing"
   ],
   "contentDigest": "d40cc380a9bbe26f115b0f3d1b3d329d4b385a6d354b9aacb912b801a3a8e768",
-  "manifestDigest": "e996903193e3e808145ce24a7b225040ddfbec6498193c298cf1d267fd4923f9",
+  "manifestDigest": "99e9d64ecd54b2e7232f305d056717ec3b7b6396bcc42f45e5fee50183b00587",
   "hostArtifacts": [
     {
       "host": "codex",

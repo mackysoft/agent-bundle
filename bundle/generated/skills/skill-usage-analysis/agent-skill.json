@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 2,
+  "skillBundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "skill-usage-analysis",
@@ -11,7 +11,7 @@
     "writing"
   ],
   "contentDigest": "8eda6847f651f8ae2f4a301e95697e132e2cbb711f2724c88d2437f4510697ea",
-  "manifestDigest": "a9ffb5d521786b5561f817f162534c0119493a7ef478bc51b53510ee266eb952",
+  "manifestDigest": "b1e6dc4e118e90e40f1fdfaa0b58dfeb2c29bde95147f1b29df413cb4e8831cb",
   "hostArtifacts": [
     {
       "host": "codex",
