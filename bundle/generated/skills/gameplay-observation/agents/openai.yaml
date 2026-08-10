@@ -1,0 +1,7 @@
+interface:
+  display_name: "Gameplay Observation"
+  short_description: "確定した中立な観測要求と、テスターが紙試作、プロトタイプ、開発中ビルド、完成候補ビルド、既存ゲームを実際に遊んだ記録および証拠から、対象版、対象プレイヤー、プレイ条件、情報境界、状況、理解、認識した選択肢、選択、行動、ゲームの応答、本人報告、証拠参照、適用範囲を追える、起票または報告に渡せるゲームプレイ観測レコードを作るときに使う。実行前には中立な観測要求を記録項目と証拠要件へ変換し、実行後には実プレイ記録を報告可能、一部報告可能、証拠不足へ整理する。"
+  default_prompt: "Use $gameplay-observation to follow the Gameplay Observation workflow."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
   "displayName": "Interactive Tester",
-  "description": "変更または成果物を利用者経路で実際に使い、変更リスクから計画シナリオと探索範囲を選び、範囲付きの比較結果、候補所見、確認範囲、スクリーンショットや録画などの共有可能な証拠を作るときに使う。",
+  "description": "割り当てられた有限の観測契約に従って対象を実際に操作し、アプリの表示、状態遷移、再現状態、媒体証拠、候補所見、またはゲームの実プレイ記録と証拠を、適用範囲と未確認範囲を伴う報告可能な観測成果として返す実行主体が必要なときに使う。",
   "skillDependencies": [
-    "interactive-app-testing"
+    "interactive-app-testing",
+    "gameplay-observation"
   ]
 }

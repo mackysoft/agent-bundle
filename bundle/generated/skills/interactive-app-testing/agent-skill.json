@@ -1,31 +1,31 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 7,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "interactive-app-testing",
   "displayName": "Interactive App Testing",
-  "description": "Web、業務アプリ、デスクトップアプリ、モバイルアプリ、ゲームなどの変更または成果物を利用者経路で実際に使い、表示、操作、状態遷移、既知問題の再現を確認するときに使う。対象変更、権限ある期待、変更リスク、既知の所見から計画シナリオ、探索的な操作、再現確認を選び、許可された環境で実行する。確認範囲、比較結果、候補所見、再現状態、スクリーンショット、録画、ログ、トレース、未確認範囲、後始末後の状態、共有用の証拠説明を返す。原因診断、修正案、実装、自動テスト成果物、変更全体の受入判定、外部サービスへの証拠投稿は扱わない。",
+  "description": "Web、業務アプリ、デスクトップアプリ、モバイルアプリ、ゲームなどの対話型アプリを利用者経路で実際に操作し、表示、状態遷移、既知問題の再現、媒体証拠、後始末を確認するときに使う。固定済みの実行契約、または対象変更、権限ある期待、変更リスク、既知の所見から有限の操作範囲を定め、許可された環境で実行する。確認範囲、比較結果、直接観測した候補所見、再現状態、スクリーンショット、録画、ログ、トレース、未確認範囲、後始末後の状態、共有用の証拠説明を返す。",
   "dependencies": [
     "claim-grounding",
     "writing"
   ],
-  "contentDigest": "1873d126bedb16b3e93d2f172ea809371b7958594cc3b94758845379f0e1d0af",
-  "manifestDigest": "d089940260971256a02bff28a843f48c84b0798fdb5a210ab788be6f845982be",
+  "contentDigest": "b1f1dafb6e94dee971e680e2d3a404b3f522c72f303bc0bae05a41f0e6d525f9",
+  "manifestDigest": "f13a39990aeea9da88ab798bde35ffff7d291b9c64d692fcf4f6196a1d460b4e",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "12136f801fd893c8ded3a5529d48b35154f0b7f9755c67b70f3a2731f4d23024",
-      "materializedFrontmatterDigest": "6fdff2ec12e751a3fe6bb60611a33ed2e221708d662ae6d164b99f41e27c6f25"
+      "digest": "c7c25572aa986cb537742d8804fe82e90f2a1fcfef0dc65ed7a8b1ce4254dd49",
+      "materializedFrontmatterDigest": "ac27193dcb811ff5d9b4f2ead376a37187c6c9e9b33b1acee8b9e419ebcfccec"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "b06d40e9e801c3186ab18c43a0eb7d51d14789bcf1d9b214cbc26eb0e5475437"
+      "materializedFrontmatterDigest": "8f106e58f45f65a865f53ee641702135d3daa65027aab9427ca3c23d89a5a85a"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "66f411797ab2ccbfcb151180a989aa77ede891172db42222da597ed2212666ba"
+      "materializedFrontmatterDigest": "df82353540f33212efe9d2fcc304387e8ab79bbb2140b0db84d7055b9a82d236"
     }
   ]
 }

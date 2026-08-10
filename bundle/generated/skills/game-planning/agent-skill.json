@@ -1,37 +1,37 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 7,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "game-planning",
   "skillName": "game-planning",
   "displayName": "Game Planning",
-  "description": "ゲーム企画の目的、対象範囲、制約、決定状態、未解決の問い、完了条件が混在または未確定で、専門作業へ渡す入力契約を作る必要があるとき、またはゲーム設計、定量分析、インターフェース設計、プレイテストの複数領域を選択して一つの企画成果へ統合する必要があるときに使う。企画全体の入力契約、専門作業の選択と反復、成果の統合、完了責任を持つ。",
+  "description": "ゲーム企画の目的、対象範囲、制約、決定状態、未解決の問い、完了条件が混在または未確定で、専門作業へ渡す入力契約を作る必要があるとき、またはゲーム設計、定量分析、インターフェース設計、報告可能なゲームプレイ観測レコードの複数領域を一つの企画成果へ統合する必要があるときに使う。企画全体の入力契約、必要な専門成果と意味上の成立依存、成果の統合、企画成果の成立状態を持つ。",
   "dependencies": [
     "change-framing",
     "claim-grounding",
     "game-balance-analysis",
     "game-design",
     "game-interface-design",
-    "playtest",
+    "gameplay-observation",
     "referent-modeling",
     "writing"
   ],
-  "contentDigest": "7c636890e2d51024846bfc5eac83d47371fbc71d5ab7f7934f9c16695b81a171",
-  "manifestDigest": "16393668d08149a33bb35ff6abe4904072227318466f31a5ca4825d2a3c2206f",
+  "contentDigest": "35df59e5b3d438894adbfa9ca15a77ceed4f0afdfc36f024122abaa2713f8b47",
+  "manifestDigest": "b590df4858438dea1a2ffd0efd21f4ee3b75eea03a557871903f3a53e9a44380",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "73497697803800bd7f8b97468f95e4c0e8bedebad7998343e0d5b3d4ad0463c2",
-      "materializedFrontmatterDigest": "a48c61cbe886f712a9afca3f0715e27e762a25b5f19ab9d91c12103c709b9dbe"
+      "digest": "8320f2f1363bbf4c311daae842a469da5ecb1a4077002f137b694a322479b000",
+      "materializedFrontmatterDigest": "4c1835313b00fd3dd57e165dd775814fcac9962786a2e3ae95d1b8e4bfb6ab39"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "6421fcf19cf5c6f3bbed3da1d6b570c9cc9e5c7a3228dbdfc24480c391091aea"
+      "materializedFrontmatterDigest": "c9e35ec915f00f74ed9fc46c2febf0eecd5cb22f2ece0ccc32850857c604b878"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "970b197ea6220b301c9ec1b7b38c8561c1142c0deccfe87f7b1e67bf0d92f854"
+      "materializedFrontmatterDigest": "3385537f7bddcb6248bd1c49d9f7ab193a5cb31e0828421fbc98aeb1decbf901"
     }
   ]
 }

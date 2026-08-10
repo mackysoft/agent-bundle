@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 7,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "test-oracle-assessment",
@@ -11,7 +11,7 @@
     "referent-modeling"
   ],
   "contentDigest": "5cab1b3b28154af5a87370dda941afa8db3c0bba2dee047370ada8c6aa090c9d",
-  "manifestDigest": "0900389499012ad048e4acb2be6d6f2579a8c10a1ac8726bbbc8a00ff409330f",
+  "manifestDigest": "2d5863b97ee226b31f15be8a27262b9f59cfdebefa298fbb66e9b88ed89a7ee1",
   "hostArtifacts": [
     {
       "host": "codex",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 7,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "game-planning",
   "skillName": "game-balance-analysis",
@@ -8,7 +8,7 @@
   "description": "意味と適用範囲が確定したゲームルール、定量的な問い、結果が影響する設計判断から、変数、単位、時間幅、戦略またはシナリオを持つ再現可能なモデルを作り、計算、表計算、シミュレーション、感度分析によって成立範囲、支配条件、破綻条件、回復可能性、数値候補を分析する。ゲーム内経済、資源収支、確率、需要、成長、戦略利得、失敗後の回復を定量的に調整または評価するときに使う。",
   "dependencies": [],
   "contentDigest": "783f920544d678d82db062b7a4f6032b69aab7df3a8ebe59863a190b7c1b4e84",
-  "manifestDigest": "6a8ef1847aa911a3077fc866456cdd00ed86824b88df92ad286d7229dfc68f42",
+  "manifestDigest": "c5b636e92caf71c07cf01b31e63d358f3c8f45958ba82e6293df109b145d3dc6",
   "hostArtifacts": [
     {
       "host": "codex",

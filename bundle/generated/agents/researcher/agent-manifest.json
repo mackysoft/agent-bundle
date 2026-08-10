@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "bundleVersion": 6,
+  "bundleVersion": 7,
   "catalogId": "com.mackysoft.agent-bundle",
   "agentName": "researcher",
   "displayName": "Researcher",
@@ -9,7 +9,7 @@
     "claim-grounding"
   ],
   "contentDigest": "f7453019fa18ddb98fad922bf8c1b6bde5468db707864fa1375571f921508064",
-  "manifestDigest": "538e77a8ae7f322b945ba70ebf861495dd6564c0997eb3d1d22dbd39ea735998",
+  "manifestDigest": "207fe05ea6789a1058ba41d075b44caa928babd297023122c19b540900fd4411",
   "hostArtifacts": [
     {
       "host": "claude-code",

@@ -136,10 +136,10 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `custom-agent-authoring` | `development` | Create, update, and validate host-independent custom agent definitions and host bindings. |
 | `custom-agent-behavior-validation` | `development` | Exercise custom agents in isolated subagent runs and assess dispatch, runtime binding, behavior, handoff, and termination. |
 | `game-balance-analysis` | `game-planning` | Quantitatively model game rules to find viable ranges, dominant choices, failure conditions, and recovery paths. |
-| `game-design` | `game-planning` | Connect intended player experiences to player activity, game rules, feedback, and progression. |
+| `game-design` | `game-planning` | Connect intended player experiences to player activity, game rules, feedback, and progression, and evaluate design hypotheses from gameplay observation records. |
 | `game-interface-design` | `game-planning` | Map gameplay information, actions, and outcomes to player-facing displays, controls, and interface states. |
-| `game-planning` | `game-planning` | Coordinate mixed game-planning work through a shared input contract, specialist work selection, iteration, and integrated outcomes. |
-| `playtest` | `game-planning` | Observe real play across development stages through exploratory or hypothesis-driven playtests. |
+| `game-planning` | `game-planning` | Define the shared contract and semantic dependencies for mixed game-planning outcomes, then integrate specialist results. |
+| `gameplay-observation` | `game-planning` | Turn neutral observation requests and real-play records with evidence into report-ready gameplay observation records without interpreting them. |
 | `issue-planner` | `development` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | `development` | Write, create, update, or review structured GitHub Issue bodies. |
 | `interactive-app-testing` | `development` | Exercise application changes through user paths and produce scoped findings and shareable evidence. |
@@ -172,7 +172,7 @@ Custom agents use one flat catalog namespace:
 | --- | --- | --- |
 | `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
 | `implementer` | Implements an agreed design, including natural-language artifacts, and reports implementation verification. | `code-authoring-rules`, `writing` |
-| `interactive-tester` | Exercises application changes through user paths and produces scoped findings and shareable media evidence. | `interactive-app-testing` |
+| `interactive-tester` | Operates an interactive target once under an assigned observation contract, then separately returns application testing results and report-ready gameplay observation records when requested. | `interactive-app-testing`, `gameplay-observation` |
 | `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
 | `verifier` | Determines acceptance evidence and its result. | `verification-gate` |
 | `researcher` | Collects bounded read-only evidence and reports unchecked areas. | `claim-grounding` |

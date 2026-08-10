@@ -1,28 +1,28 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 7,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "game-planning",
   "skillName": "game-design",
   "displayName": "Game Design",
-  "description": "目的、対象範囲、判断を委ねられた範囲、現在有効な前提が確定したゲーム企画について、テーマ、追求する遊びの方向を示すコンセプト、設計仮説、実現手段となるゲームシステムを分け、プレイヤーが利用できる情報と不確実性、活動や選択、ルールによる状態変化、結果として理解する意味、次の活動の因果を定性的に設計、更新、評価し、狙う体験につながるゲーム設計案または設計上の評価を作る。コンセプト、コアループ、仕様や調整案、選択の意味、資源とリスク、成功と失敗、回復、進行、ランダム性、システム間の誘因を検討するときに使う。",
+  "description": "目的、対象範囲、判断を委ねられた範囲、現在有効な前提が確定したゲーム企画について、テーマ、追求する遊びの方向を示すコンセプト、設計仮説、実現手段となるゲームシステムを分け、プレイヤーが利用できる情報と不確実性、活動や選択、ルールによる状態変化、結果として理解する意味、次の活動の因果を定性的に設計、更新、評価する。ゲームプレイ観測の一次証拠がある場合は、観測事実と設計解釈を分け、事前基準により設計仮説を評価する。コンセプト、コアループ、仕様や調整案、選択の意味、資源とリスク、成功と失敗、回復、進行、ランダム性、システム間の誘因を検討するときに使う。",
   "dependencies": [],
-  "contentDigest": "b20d332d6bd609770b093493251156f12297bd4acd141dacb0eef3b1fc3d61df",
-  "manifestDigest": "cdb32eeed950a0106a1fb555780f7ee4f77510f9cb782946eb10e437b655a2b5",
+  "contentDigest": "3cedbbe242ea0b4ed213328b1bfbb899f88996a3befab3d6a621feda6335a51d",
+  "manifestDigest": "8f82121c162ff6ad3f99d65d0da023884d070ded4325d9b865927760f6d96af0",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "92b76f45a96d6274995e550e990a39af4cdb6f528e27f2d39606dabaa16205a8",
-      "materializedFrontmatterDigest": "4e964e759aaad3beada8b1f02f35bf46c105a1757c8ef4793b4631699c7d147a"
+      "digest": "c81a302c7219495783a3e22effac9e252c371fa8721d587e10971e3478146451",
+      "materializedFrontmatterDigest": "0eea68db7fc1810e25982e645ee7f431fff9896f293e7590b662057cf4cd00a6"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "c27574210ccd3640244704825f108540b67eca8fed7201769dd803bef9841111"
+      "materializedFrontmatterDigest": "6e296a1d3fd5b3d4c6e892c17ac3cdb6a06a99120b77b00fb4263e69a247463a"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "446b1a926759c2f1b44b69cc3cc65190c8f3f9b3abbdf5870d78eda306d814ac"
+      "materializedFrontmatterDigest": "bcdf2cb21a7e187fefab10d23397f1efc23c5ebb6d5df8cc11d1e914e4b17ed1"
     }
   ]
 }

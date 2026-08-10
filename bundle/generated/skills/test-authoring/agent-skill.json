@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 7,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "test-authoring",
@@ -12,7 +12,7 @@
     "test-oracle-assessment"
   ],
   "contentDigest": "cead9ab18fbcb8ec81b8a0f063f0dc14172683e41ed8ba31d0eff4792bc6e46f",
-  "manifestDigest": "1cb11b85b3be148f87f2d866c1bf3baf4df7658571ce71e689470abd7a331cdc",
+  "manifestDigest": "fff512155feaa2429b594c50da3b11c67cceeb6c9c927391ef3cae96b24470ed",
   "hostArtifacts": [
     {
       "host": "codex",
