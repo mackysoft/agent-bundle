@@ -1,8 +1,7 @@
 {
-  "schemaVersion": 1,
-  "bundleVersion": 3,
+  "schemaVersion": 2,
+  "bundleVersion": 6,
   "catalogId": "com.mackysoft.agent-bundle",
-  "category": "orchestration",
   "agentName": "verifier",
   "displayName": "Verifier",
   "description": "権限ある所有者が定めた受入条件について、検証面、必要な証拠、判定方法を定め、証拠を照合するときに使う。成果として、受入条件ごとの証拠と判定結果を返す。",
@@ -10,7 +9,7 @@
     "verification-gate"
   ],
   "contentDigest": "fb99dccd5ba633b6b9865c53a80a98b0e55c357aa383b7088383bed5c95397d0",
-  "manifestDigest": "0bfac1fa4a4b14f1bda897b415d3a0aa9d95c9d4654f923ee726acd2dfb582b2",
+  "manifestDigest": "0c0de909482fa8dde444b6d657379aaae40929e69adf4f62047b903e288c003d",
   "hostArtifacts": [
     {
       "host": "claude-code",

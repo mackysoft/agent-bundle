@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 6,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "subagent-execution-analysis",
+  "displayName": "Subagent Execution Analysis",
+  "description": "Codex task/session、親子実行記録、subagent activity、child thread、runtime event、実行時点の custom agent 定義を照合し、spawn 試行と成立した実行について、identity 確度、選択、委譲入力、実効設定と権限、行動境界、成果、follow-up、parent handoff、終了状態を、直接観測・定義・導出・推定・未確認に分けて分析するときに使う。",
+  "dependencies": [
+    "claim-grounding",
+    "referent-modeling",
+    "writing"
+  ],
+  "contentDigest": "509647c6f03feb58d98b976bc95a1b91c58c88e1fcb54114895894af06edb48c",
+  "manifestDigest": "ea7e74b2713a73a91f0db944e4aa3a26508b6122e69cade2e331038efa3b5576",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "829b97cac5b5488d2a0014bd3eb7c11a4fc276dd0c1835b86882073b4bb0f5fd",
+      "materializedFrontmatterDigest": "01d4ecf81c25377d928106118735ba8c61b6de3e4800007bda09567219d89955"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "1a9bb8bcdcdcbef728e5bf960eda4298be5f11b0b606254d879356a514c9c07f"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "da8ce4b37d808b42af48cb357d2282961d58b8db134b1131eb9a8ddba83fa93a"
+    }
+  ]
+}

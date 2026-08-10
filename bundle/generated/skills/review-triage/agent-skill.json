@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 3,
+  "skillBundleVersion": 6,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "review-triage",
@@ -10,7 +10,7 @@
     "claim-grounding"
   ],
   "contentDigest": "2b2b49cc6617f0b33569ea94ab7e0cfe20540994d416c24a623163e5b59bdbea",
-  "manifestDigest": "e4bc0cff2c95515fc24834d183928019fb8d758036c59ad7d78904292d04d28b",
+  "manifestDigest": "dc58cccdfc92769ef571bf5b849698b99b10e5c87595555de5a47a3c7364187e",
   "hostArtifacts": [
     {
       "host": "codex",

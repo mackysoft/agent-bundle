@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 6,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "development",
+  "skillName": "custom-agent-behavior-validation",
+  "displayName": "Custom Agent Behavior Validation",
+  "description": "候補または更新済みのcustom agentについて、選択責務、実行主体、適用定義、host binding、実効設定、許可、行動、成果、follow-up、handoff、終了状態を検証条件へ変換し、隔離したsubagent実行から挙動を観測する。対象agentの同定結果とruntime証拠を照合し、シナリオごとの契約適合、逸脱、未検証範囲、再実行条件を残すときに使う。",
+  "dependencies": [
+    "claim-grounding",
+    "referent-modeling",
+    "subagent-execution-analysis",
+    "writing"
+  ],
+  "contentDigest": "bcb08fc9846116a5f08eb20ad16c706bbec483a9a258b7e0abaa08a67fc96a04",
+  "manifestDigest": "a24c5eabc8c1da1a863eb499c9932201a3d2a073d486da8e9c8bae18829f51d7",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "d6e8af0e03ccca169c601d028742c8fb33bf56503fae1c0c204a2179982b715e",
+      "materializedFrontmatterDigest": "b2f3a2fbd72ce212609e906ae90136793de046bcff905c2cbdcfebaceeefc18b"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "e0596411f29757ab3cff9420ce3a897150b0cf8ee978b0c786e28b331b5731a9"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "d4c8fe9c37ca68fb5942c1213129482c55565cf17b0b38fb5beb29e076fd8538"
+    }
+  ]
+}

@@ -1,8 +1,7 @@
 {
-  "schemaVersion": 1,
-  "bundleVersion": 3,
+  "schemaVersion": 2,
+  "bundleVersion": 6,
   "catalogId": "com.mackysoft.agent-bundle",
-  "category": "orchestration",
   "agentName": "reviewer",
   "displayName": "Reviewer",
   "description": "候補成果を作成した実行主体から独立して欠陥とリスクを評価し、単一または複数のレビュー所見の妥当性、重複、対象との関係を判定するときに使う。成果として、レビュー範囲における判定と根拠付き所見を返す。",
@@ -11,7 +10,7 @@
     "writing"
   ],
   "contentDigest": "c812284d21678d57bd677d11e0ab645405a3d24be1987d795c46550d90c279d9",
-  "manifestDigest": "75c048951c274b6f73a9e44083621139d3b09c60de1f3e7bc0eb6d6c850d0e5e",
+  "manifestDigest": "ff27ca9c291459d7afd924335e554317b5d9f56952697e9aee21690098b02138",
   "hostArtifacts": [
     {
       "host": "claude-code",

@@ -24,7 +24,7 @@ The tool update replaces the CLI and its embedded bundle. It does not change Ski
 
 ```bash
 agent-bundle skills update --host codex --scope user --category basic,development
-agent-bundle agents update --host codex --scope user --category orchestration
+agent-bundle agents update --host codex --scope user --agent architect,implementer,interactive-tester,operator,researcher,reviewer,verifier
 ```
 
 If a release removes or renames a managed Skill or custom agent, clean up each old name explicitly after updating the tool. `update` does not prune removed entries:
@@ -69,7 +69,7 @@ Finally, create installations owned by the new `com.mackysoft.agent-bundle` cata
 
 ```bash
 agent-bundle skills install --host codex --scope user --category basic,development
-agent-bundle agents install --host codex --scope user --category orchestration
+agent-bundle agents install --host codex --scope user --agent architect,implementer,interactive-tester,operator,researcher,reviewer,verifier
 ```
 
 Repeat the new installation for each required host and scope. Project-scope installations must be run for each repository with `--scope project --repository-root /path/to/repository`.
@@ -111,20 +111,21 @@ List the bundled agents and their direct skill dependencies:
 agent-bundle agents list
 ```
 
-Install an orchestration agent and its resolved skill dependencies:
+Install exact custom agents and their resolved skill dependencies:
 
 ```bash
 agent-bundle agents install --host codex --scope project --repository-root . --agent architect
-agent-bundle agents install --host claude-code --scope user --category orchestration
+agent-bundle agents install --host claude-code --scope user --agent architect,reviewer
 agent-bundle agents install --host github-copilot --scope project --repository-root . --agent reviewer --dry-run --print-diff
 ```
 
-The `agents` resource group supports `list`, `export`, `install`, `update`, `doctor`, `uninstall`, and `prune`. Agent selection uses `--category` or `--agent`; installation and update start from the selected Agent → Skill dependencies and resolve their transitive Skill → Skill closure. Agent definitions never depend on other agents.
+The `agents` resource group supports `list`, `export`, `install`, `update`, `doctor`, `uninstall`, and `prune`. Agent selection uses exact names through `--agent`; installation and update start from the selected Agent → Skill dependencies and resolve their transitive Skill → Skill closure. Agent definitions never depend on other agents.
 
 ## Included skills
 
 | Skill | Category | Purpose |
 | --- | --- | --- |
+| `behavior-deviation-analysis` | `development` | Attribute behavior deviations to evidence-backed causes, repair owners, and revalidation scope. |
 | `branch-create` | `development` | Create or reuse task branches while preserving detached or uncommitted work. |
 | `changelog` | `development` | Write reader-facing changelogs, release notes, and pull request change summaries. |
 | `change-framing` | `basic` | Reconstruct change purpose, authority, contract changes, permissions, acceptance conditions, implementation constraints, and unresolved decisions. |
@@ -132,6 +133,8 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `commit` | `development` | Create responsibility-scoped Conventional Commit messages. |
 | `csharp-authoring-rules` | `development` | Apply C#-specific implementation and review judgment rules. |
 | `claim-grounding` | `basic` | Ground claims in sources, evidence composition, adoption status, scope, and relationships. |
+| `custom-agent-authoring` | `development` | Create, update, and validate host-independent custom agent definitions and host bindings. |
+| `custom-agent-behavior-validation` | `development` | Exercise custom agents in isolated subagent runs and assess dispatch, runtime binding, behavior, handoff, and termination. |
 | `game-balance-analysis` | `game-planning` | Quantitatively model game rules to find viable ranges, dominant choices, failure conditions, and recovery paths. |
 | `game-design` | `game-planning` | Connect intended player experiences to player activity, game rules, feedback, and progression. |
 | `game-interface-design` | `game-planning` | Map gameplay information, actions, and outcomes to player-facing displays, controls, and interface states. |
@@ -139,13 +142,17 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `playtest` | `game-planning` | Observe real play across development stages through exploratory or hypothesis-driven playtests. |
 | `issue-planner` | `development` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | `development` | Write, create, update, or review structured GitHub Issue bodies. |
+| `interactive-app-testing` | `development` | Exercise application changes through user paths and produce scoped findings and shareable evidence. |
+| `orchestrator` | `development` | Manage one objective in the current task and bridge context and results among responsible subagents. |
 | `pr-merge` | `development` | Merge pull requests through continuous integration and branch cleanup. |
 | `pr-submit` | `development` | Verify, push, and create or update pull requests. |
 | `push` | `development` | Commit pending work when needed and push the current branch safely. |
 | `referent-modeling` | `basic` | Ground terms and abstractions in concrete referents, roles, and relationships before naming. |
 | `review-triage` | `development` | Triage review comments against code, specifications, and evidence. |
 | `skill-authoring` | `development` | Create, update, and review behaviorally effective agent skills. |
-| `skill-usage-analysis` | `development` | Analyze agent usage and identify evidence-backed skill improvements. |
+| `skill-behavior-validation` | `development` | Exercise agent Skills in isolated scenarios and report contract conformance, gaps, and rerun scope. |
+| `supervisor` | `development` | Route independent objectives to user-operable tasks that apply the orchestrator Skill. |
+| `subagent-execution-analysis` | `development` | Reconstruct and assess subagent spawn attempts and child executions from runtime evidence. |
 | `sync-latest` | `development` | Fetch remotes and safely synchronize a worktree with the right base. |
 | `test-authoring` | `development` | Design, update, and consolidate minimal contract-based test suites. |
 | `test-oracle-assessment` | `development` | Assess whether test judgments are contract-aligned, independently derived, and supported by detection evidence. |
@@ -155,24 +162,25 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `writing` | `basic` | Write, revise, review, summarize, and localize text while preserving meaning and ownership boundaries. |
 | `xml-doc-writer` | `development` | Write contract-focused XML documentation comments. |
 
+Supervisor and Orchestrator are Skills applied in tasks that the user can open and continue. Supervisor only assigns each independent objective to a new or existing task and applies `$orchestrator` in each new task. Orchestrator manages one objective inside that task and bridges the required context and results among leaf custom agents; it does not perform their specialized work. These Skills use the current task's model, reasoning level, and permissions rather than Agent host bindings.
+
 ## Included custom agents
 
-Custom agents are grouped into `orchestration`:
+Custom agents use one flat catalog namespace:
 
 | Agent | Purpose | Direct skill dependencies |
 | --- | --- | --- |
 | `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
 | `implementer` | Implements an agreed design, including natural-language artifacts, and reports implementation verification. | `code-authoring-rules`, `writing` |
+| `interactive-tester` | Exercises application changes through user paths and produces scoped findings and shareable media evidence. | `interactive-app-testing` |
 | `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
 | `verifier` | Determines acceptance evidence and its result. | `verification-gate` |
 | `researcher` | Collects bounded read-only evidence and reports unchecked areas. | `claim-grounding` |
-| `operator` | Performs a fully specified closed action and verifies its result. | None |
-| `orchestrator` | Coordinates one objective across responsible outcomes. | None |
-| `supervisor` | Routes independent objectives and aggregates their state. | None |
+| `operator` | Performs a fully specified closed action, including waiting for a long-running or external execution, and reports its terminal result or configured stop state. | None |
 
 Agent bindings materialize as host-specific files while `AGENT.md` remains host-independent. The package intentionally does not install or maintain host-shared configuration files.
 
-The orchestrator assigns natural-language changes to an implementer and requires a separate read-only reviewer to audit the latest candidate with the `writing` contract. Accepted findings return to implementation, and the revised candidate is audited again before completion.
+When the Orchestrator Skill handles natural-language changes, it assigns the change to an implementer and requires a separate read-only reviewer to audit the latest candidate with the `writing` contract. Accepted findings return to implementation, and the revised candidate is audited again before completion.
 
 ## Supported hosts
 
@@ -182,11 +190,11 @@ The orchestrator assigns natural-language changes to an implementer and requires
 | `claude-code` | Claude Code skill directory | `.claude/agents` |
 | `github-copilot` | GitHub Copilot skill directory | `.github/agents` |
 
-See the [Agent Distribution command reference](https://github.com/mackysoft/agent-distribution/blob/3.0.0/README.md#run-standard-commands) for selector, scope, target-directory, ownership-state, and reload details.
+See the [Agent Distribution command reference](https://github.com/mackysoft/agent-distribution/blob/4.0.0/README.md#run-standard-commands) for selector, scope, target-directory, ownership-state, and reload details.
 
 ## Development
 
-The source of truth is `bundle/bundle.json` and `bundle/definitions`. Schema 2 separates `definitions/skills` from `definitions/agents`; `bundle/generated` is the checked-in canonical output.
+The source of truth is `bundle/bundle.json` and `bundle/definitions`. Schema 3 keeps categorized Skill definitions under `definitions/skills` and flat custom-agent definitions under `definitions/agents`; `bundle/generated` is the checked-in canonical output.
 
 ```bash
 dotnet tool restore

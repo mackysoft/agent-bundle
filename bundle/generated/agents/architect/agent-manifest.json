@@ -1,8 +1,7 @@
 {
-  "schemaVersion": 1,
-  "bundleVersion": 3,
+  "schemaVersion": 2,
+  "bundleVersion": 6,
   "catalogId": "com.mackysoft.agent-bundle",
-  "category": "orchestration",
   "agentName": "architect",
   "displayName": "Architect",
   "description": "権限ある根拠から変更目的、変更対象、契約、範囲を設計入力として整理し、アーキテクチャ、責務境界、不変条件、外部契約、実装契約、検証要件を決めるときに使う。成果として、根拠付き設計判断と実装可能な設計契約を返す。",
@@ -11,7 +10,7 @@
     "referent-modeling"
   ],
   "contentDigest": "b2b80c70a85338e1f2f5bedeffe91feed508adbc45398e3ca8ec09224fa931dd",
-  "manifestDigest": "951dd9f1bb34af1611d2a79acc9252c0a3c20e51a7438613d5a9e0d408a741b6",
+  "manifestDigest": "61401de4a3ecc84c2b6e60c9aad61d64056ab0e11699110c8f403fba7940d0a3",
   "hostArtifacts": [
     {
       "host": "claude-code",

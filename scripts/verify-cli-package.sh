@@ -129,17 +129,67 @@ require_equal("skills list product", "AgentBundle", skills.get("Product"))
 require_equal("skills list command", "skills.list", skills.get("Command"))
 require_equal("skills list status", "ok", skills.get("Status"))
 skills_payload = skills.get("Payload") or {}
-if "writing" not in {item["SkillName"] for item in skills_payload.get("Skills", [])}:
-    print("skills list did not report the writing Skill used by the export smoke test.", file=sys.stderr)
+skill_names = {item["SkillName"] for item in skills_payload.get("Skills", [])}
+if "writing" not in skill_names:
+    print("skills list did not report the writing Skill used by the Agent dependency smoke test.", file=sys.stderr)
     sys.exit(1)
+if "interactive-app-testing" not in skill_names:
+    print("skills list did not report the interactive-app-testing Skill.", file=sys.stderr)
+    sys.exit(1)
+for orchestration_skill in ("orchestrator", "supervisor"):
+    if orchestration_skill not in skill_names:
+        print(
+            f"skills list did not report the orchestration Skill: {orchestration_skill}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+for behavior_skill in (
+    "behavior-deviation-analysis",
+    "custom-agent-authoring",
+    "custom-agent-behavior-validation",
+    "skill-behavior-validation",
+    "subagent-execution-analysis",
+):
+    if behavior_skill not in skill_names:
+        print(
+            f"skills list did not report the behavior contract Skill: {behavior_skill}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+for game_planning_skill in (
+    "game-balance-analysis",
+    "game-design",
+    "game-interface-design",
+    "game-planning",
+    "playtest",
+):
+    if game_planning_skill not in skill_names:
+        print(
+            f"skills list did not report the game-planning Skill: {game_planning_skill}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
 require_equal("agents list product", "AgentBundle", agents.get("Product"))
 require_equal("agents list command", "agents.list", agents.get("Command"))
 require_equal("agents list status", "ok", agents.get("Status"))
 agents_payload = agents.get("Payload") or {}
-if "reviewer" not in {item["AgentName"] for item in agents_payload.get("Agents", [])}:
+agent_names = {item["AgentName"] for item in agents_payload.get("Agents", [])}
+if "reviewer" not in agent_names:
     print("agents list did not report the reviewer used by the export smoke test.", file=sys.stderr)
     sys.exit(1)
+if "interactive-tester" not in agent_names:
+    print("agents list did not report the interactive-tester Agent.", file=sys.stderr)
+    sys.exit(1)
+for orchestration_skill in ("orchestrator", "supervisor"):
+    if orchestration_skill in agent_names:
+        print(
+            f"agents list reported an orchestration entry Skill as a custom agent: {orchestration_skill}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 require_equal(
     "supported custom-agent hosts",
     expected_agent_hosts,
@@ -319,11 +369,94 @@ if missing_files:
 PY
 }
 
+verify_skill_export() {
+  local skill_name="$1"
+  local expected_skills="$2"
+  local required_resource_paths="$3"
+  local export_target="${consumer_root}/${skill_name}-export"
+  local export_report
+
+  export_report="$("${tool_path}/agent-bundle" skills export \
+    --host codex \
+    --skill "${skill_name}" \
+    --output "${export_target}")"
+
+  SKILL_EXPORT_REPORT="${export_report}" \
+    REQUESTED_SKILL="${skill_name}" \
+    EXPECTED_OUTPUT_PATH="${export_target}" \
+    EXPECTED_SKILLS="${expected_skills}" \
+    REQUIRED_RESOURCE_PATHS="${required_resource_paths}" \
+    python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+import sys
+
+report = json.loads(os.environ["SKILL_EXPORT_REPORT"])
+payload = report.get("Payload") or {}
+requested_skill = os.environ["REQUESTED_SKILL"]
+
+
+def require_equal(label, expected, actual):
+    if actual != expected:
+        print(f"Unexpected {label}. Expected: {expected}. Actual: {actual}", file=sys.stderr)
+        sys.exit(1)
+
+
+require_equal("skills export command", "skills.export", report.get("Command"))
+require_equal("skills export status", "ok", report.get("Status"))
+require_equal(
+    "skills export output path",
+    os.environ["EXPECTED_OUTPUT_PATH"],
+    payload.get("OutputPath"),
+)
+if requested_skill not in (payload.get("SkillNames") or []):
+    print(
+        f"skills export did not report the requested Skill: {requested_skill}",
+        file=sys.stderr,
+    )
+    sys.exit(1)
+
+expected_skills = set(json.loads(os.environ["EXPECTED_SKILLS"]))
+reported_skills = set(payload.get("Skills") or [])
+require_equal(
+    f"{requested_skill} export resolved Skill set",
+    sorted(expected_skills),
+    sorted(reported_skills),
+)
+
+output_path = Path(payload["OutputPath"])
+required_files = [
+    path
+    for exported_skill in reported_skills
+    for path in (
+        output_path / exported_skill / "SKILL.md",
+        output_path / exported_skill / "agent-skill.json",
+    )
+]
+required_files.extend(
+    output_path / relative_path
+    for relative_path in json.loads(os.environ["REQUIRED_RESOURCE_PATHS"])
+)
+missing_files = [str(path) for path in required_files if not path.is_file()]
+if missing_files:
+    print(
+        f"skills export did not create required {requested_skill} artifacts: "
+        + ", ".join(missing_files),
+        file=sys.stderr,
+    )
+    sys.exit(1)
+PY
+}
+
 reviewer_skill_closure="$(resolve_skill_closure agent reviewer)"
 architect_skill_closure="$(resolve_skill_closure agent architect)"
-implementer_skill_closure="$(resolve_skill_closure agent implementer)"
-writing_skill_closure="$(resolve_skill_closure skill writing)"
+interactive_tester_skill_closure="$(resolve_skill_closure agent interactive-tester)"
+supervisor_skill_closure="$(resolve_skill_closure skill supervisor)"
 branch_create_skill_closure="$(resolve_skill_closure skill branch-create)"
+skill_authoring_skill_closure="$(resolve_skill_closure skill skill-authoring)"
+custom_agent_authoring_skill_closure="$(resolve_skill_closure skill custom-agent-authoring)"
+game_planning_skill_closure="$(resolve_skill_closure skill game-planning)"
 
 for legacy_host in openai claude copilot; do
   if "${tool_path}/agent-bundle" skills export \
@@ -338,11 +471,11 @@ done
 skill_export_target="${consumer_root}/skill-export"
 skill_export_report="$("${tool_path}/agent-bundle" skills export \
   --host codex \
-  --skill writing \
+  --skill supervisor \
   --output "${skill_export_target}")"
 SKILL_EXPORT_REPORT="${skill_export_report}" \
   EXPECTED_OUTPUT_PATH="${skill_export_target}" \
-  EXPECTED_SKILLS="${writing_skill_closure}" \
+  EXPECTED_SKILLS="${supervisor_skill_closure}" \
   python3 - <<'PY'
 import json
 import os
@@ -366,8 +499,8 @@ require_equal(
     os.environ["EXPECTED_OUTPUT_PATH"],
     payload.get("OutputPath"),
 )
-if "writing" not in (payload.get("SkillNames") or []):
-    print("skills export did not report the requested writing Skill.", file=sys.stderr)
+if "supervisor" not in (payload.get("SkillNames") or []):
+    print("skills export did not report the requested supervisor Skill.", file=sys.stderr)
     sys.exit(1)
 
 expected_skills = set(json.loads(os.environ["EXPECTED_SKILLS"]))
@@ -377,6 +510,12 @@ require_equal(
     sorted(expected_skills),
     sorted(reported_skills),
 )
+if "orchestrator" not in reported_skills:
+    print(
+        "skills export did not resolve the supervisor Skill's orchestrator dependency.",
+        file=sys.stderr,
+    )
+    sys.exit(1)
 
 output_path = Path(payload["OutputPath"])
 required_files = [
@@ -396,6 +535,21 @@ if missing_files:
     )
     sys.exit(1)
 PY
+
+verify_skill_export \
+  skill-authoring \
+  "${skill_authoring_skill_closure}" \
+  '["skill-behavior-validation/references/report-schema.md","subagent-execution-analysis/references/codex-runtime-evidence.md","subagent-execution-analysis/references/report-schema.md"]'
+
+verify_skill_export \
+  custom-agent-authoring \
+  "${custom_agent_authoring_skill_closure}" \
+  '["custom-agent-behavior-validation/references/report-schema.md","subagent-execution-analysis/references/codex-runtime-evidence.md","subagent-execution-analysis/references/report-schema.md"]'
+
+verify_skill_export \
+  game-planning \
+  "${game_planning_skill_closure}" \
+  '[]'
 
 agent_export_target="${consumer_root}/agent-export"
 agent_export_report="$("${tool_path}/agent-bundle" agents export \
@@ -580,29 +734,29 @@ skill_doctor_report="$("${tool_path}/agent-bundle" skills doctor \
   --skill branch-create)"
 verify_doctor_report "${skill_doctor_report}" "skills.doctor"
 
-implementer_agent_target="${consumer_root}/transitive-install/agents"
-implementer_skill_target="${consumer_root}/transitive-install/skills"
-implementer_install_report="$("${tool_path}/agent-bundle" agents install \
+interactive_tester_agent_target="${consumer_root}/transitive-install/agents"
+interactive_tester_skill_target="${consumer_root}/transitive-install/skills"
+interactive_tester_install_report="$("${tool_path}/agent-bundle" agents install \
   --host codex \
   --scope project \
   --repository-root "${consumer_root}" \
-  --agent implementer \
-  --agent-target-dir "${implementer_agent_target}" \
-  --skill-target-dir "${implementer_skill_target}")"
+  --agent interactive-tester \
+  --agent-target-dir "${interactive_tester_agent_target}" \
+  --skill-target-dir "${interactive_tester_skill_target}")"
 verify_agent_install_report \
-  "${implementer_install_report}" \
-  "implementer" \
-  "${implementer_agent_target}" \
+  "${interactive_tester_install_report}" \
+  "interactive-tester" \
+  "${interactive_tester_agent_target}" \
   "${consumer_root}/transitive-install/.agent-distribution/agents" \
-  "${implementer_skill_target}" \
+  "${interactive_tester_skill_target}" \
   ".toml" \
-  "${implementer_skill_closure}"
+  "${interactive_tester_skill_closure}"
 
-implementer_doctor_report="$("${tool_path}/agent-bundle" agents doctor \
+interactive_tester_doctor_report="$("${tool_path}/agent-bundle" agents doctor \
   --host codex \
   --scope project \
   --repository-root "${consumer_root}" \
-  --agent implementer \
-  --agent-target-dir "${implementer_agent_target}" \
-  --skill-target-dir "${implementer_skill_target}")"
-verify_doctor_report "${implementer_doctor_report}" "agents.doctor"
+  --agent interactive-tester \
+  --agent-target-dir "${interactive_tester_agent_target}" \
+  --skill-target-dir "${interactive_tester_skill_target}")"
+verify_doctor_report "${interactive_tester_doctor_report}" "agents.doctor"

@@ -1,0 +1,132 @@
+## 目的
+
+候補または更新済みのcustom agentを実際のsubagentとして起動し、選択からparent handoffと終了までの挙動を、確認済みのagent契約へ照合する。
+
+成果は、対象agentの契約と実行時の挙動をシナリオごとに照合した、読み取り専用の検証結果である。このスキルは対象agentの定義とhost bindingを変更せず、実行記録の復元は `subagent-execution-analysis`、逸脱の原因と対応候補は `behavior-deviation-analysis`、custom agentの作成と修正は `custom-agent-authoring`、変更全体の受入判定は `verification-gate` が所有する。
+
+## 入力
+
+開始前に、次を固定する。
+
+| 項目 | 内容 |
+| --- | --- |
+| 対象agent | agent名、正本への参照、検証対象となるmetadata、host非依存指示、対象host bindingのcomponent名とdigest、またはそれらを一意に固定するbundle digest。 |
+| agent契約 | 権限ある要求または採用済み設計に基づく選択面、成果責務、入力、判断、行動、作用、成果、handoff、完了状態、停止条件、下位委譲方針。 |
+| host条件 | 対象host、surface、host binding、親runtime、利用可能なsubagent操作。 |
+| 検証範囲 | dispatch、明示spawn、主要分岐、責務外入力、follow-up、終了、変更した契約要素、対象外。 |
+| 実行条件 | 初期状態、許可作用、隔離方法、観測方法、cleanup条件。 |
+| 分析範囲 | 親taskまたはsession、時間範囲、端点の包含性、descendant depth、runtime source。 |
+| 停止条件 | 実行回数、時間、費用、外部状態、継続不能とする条件。 |
+| 回帰入力 | 過去に成立していた利用場面、失敗したシナリオ、修正後に再確認する条件。 |
+
+agent契約の根拠、適用範囲、採用状態を入力から直接確定できない場合は `$claim-grounding` を適用する。agent、definition、binding、spawn attempt、execution、turn、scenario の対応が曖昧で判定を変える場合は `$referent-modeling` を適用する。
+
+検証に必要な各componentまたはそれらを一意に固定するbundle digest、対象host、親runtime source、時間範囲を固定できない場合は、実行と対象agentを結び付けられないため、検証を開始せず必要な入力を返す。
+
+## 不変条件
+
+- dispatchによる選択と、agentを指定する明示spawnを別の検証面として扱う。
+- runtime identity、agent origin、definition binding、definition default、runtime effective configuration、actual actionを別々に評価する。
+- spawn attemptと開始済みexecution、same-thread follow-upと新しいspawn、childの終了とparentの完了を区別する。
+- terminal state、成果の存在、parentによる受領、agent契約への適合を一つの成功へ集約しない。
+- 対象agentは検証入力であり、このSkillの配布依存ではない。対象agentまたは別のcustom agentへのSkill依存を作らない。
+- 実行担当には、利用者相当の委譲入力だけを渡し、期待する結論、疑っている欠陥、意図した修正、採点基準を渡さない。
+- 候補definitionまたは生成物を、期待する挙動の唯一の根拠にしない。
+- 一つのvalidation recordでは、対象agentの候補component、host binding、比較基準を固定する。候補または比較基準を変更する場合は、元のrecordを保持して別のrecordを開始する。
+
+## フロー
+
+### Phase 1: 比較基準と実行境界を固定する
+
+権限ある要求または採用済み設計からagent契約を復元し、候補agentの選択用description、host非依存の指示、直接Skill依存、対象hostのbindingへ実装された契約要素を対応付ける。候補definitionの記述だけから期待結果を作らず、独立した比較基準を確定できない契約要素は `unverified` とする。hostの実効設定とsubagent操作は、検証時点で有効なhost契約とruntime記録から確認し、本文へ固定された製品版やmodel一覧を比較基準にしない。
+
+agent定義が期待する値と、親runtimeが上書きまたは継承させる値を区別する。定義と実効値の差がhost契約で成立する場合、その差だけをagent定義の違反にしない。
+
+検証対象のmetadata、host非依存指示、対象host bindingについて、component名、source ref、digestを候補componentとして記録する。bundle digestを使う場合も、runtime分析で照合するcomponentへ展開できる対応を保持する。
+
+複数のhost binding候補を比較する場合は、候補ごとに別のvalidation recordを作り、シナリオ、委譲入力、初期状態、許可作用、観測方法、停止条件を固定する。一度に複数の設定値が異なる比較結果は、その設定の組み合わせにだけ適用し、model、reasoning effort、tool、permissionなど個別の設定へ原因を帰属させない。個別設定の影響を判断する場合は、その設定だけが異なる候補を比較する。
+
+### Phase 2: シナリオを設計する
+
+必要な検証面について、最小のシナリオ集合を作る。
+
+| 種別 | 確認する挙動 |
+| --- | --- |
+| dispatch選択 | agentを明示しない依頼で、選択面に合うagentが選ばれる。 |
+| dispatch非選択 | 隣接する成果責務の依頼で、対象agentが選ばれない。 |
+| 明示spawn | 対象agentを指定した委譲で、成果責務を遂行する。 |
+| 責務外入力 | 対象agentが価値判断を補わず、必要な成果責務と不足内容を返す。 |
+| 設定と作用 | 実効設定と許可作用の範囲で行動する。 |
+| follow-up | 同じ成果責務の追加入力を同じexecutionで継続し、別責務は親へ返す。 |
+| 終了と停止 | terminal、running、blocked、停止条件、再開条件を区別する。 |
+| 回帰 | 更新前に成立していた利用場面と、過去に失敗した利用場面を維持する。 |
+
+各シナリオに一意の `scenario_id`、必須または任意、種別、検証する契約要素、親への依頼、spawn入力、初期状態、許可作用、follow-up、終了状態、停止条件、期待する観測、必要なruntime証拠を与える。同じ契約違反を観測するだけの重複シナリオは作らない。
+
+### Phase 3: 隔離したsubagent実行を開始する
+
+利用環境が提供するsubagent操作を使い、dispatch選択または明示spawnを実行する。親taskまたはsession、spawn attempt、child thread、開始時刻、対象host、指定したagent名と設定を記録する。
+
+共有状態を変更しない対象または隔離した複製を使う。外部状態への作用が必要な場合は、依頼者が許可した対象と作用へ限定し、開始状態、終了状態、cleanup条件をシナリオへ含める。
+
+対象agentを現在のruntimeへ読み込ませる境界をhost契約から特定する。候補definitionを現在の親が利用できない場合は、未確認のagentを別のagentとして推定せず、そのシナリオの `execution_status` を `blocked`、各未実行assessmentを `indeterminate`、全体の `validation_status` を `blocked` とし、対象hostで利用可能な隔離導入または再読み込み条件を残す。
+
+### Phase 4: 継続と終了を観測する
+
+必要なfollow-upを同じchild threadへ届け、確定した終了状態または停止条件まで待つ。停止条件時点でchildが継続中なら、失敗へ補正せず `in_progress` とし、child参照、現在状態、再開条件を保持する。
+
+同じ成果責務の修正または追加証拠取得はsame-thread follow-upとし、新しいthreadへのrespawnを別executionとして記録する。interruptが必要なシナリオでは、許可、実行時刻、終了後の状態を記録する。
+
+### Phase 5: runtime証拠を復元する
+
+各シナリオの親、時間範囲、端点の包含性、descendant depth、runtime sourceへ `$subagent-execution-analysis` を適用する。spawn attempts、executions、identity、agent origin、definition bindings、effective configuration、actual actions、成果、follow-up、parent handoff、terminal stateを取得する。
+
+対象agentの挙動として評価するexecutionは、runtime identityが `confirmed` または `supported` で、対象agentとの対応に競合がないものに限る。identityが `inferred` または `unresolved` の場合は、対象agentの契約適合を `indeterminate` とし、必要なruntime証拠を示す。
+
+各必須契約要素について、その挙動を決める候補componentのdigestを、executionのdefinition bindingへ照合する。`exact` はそのcomponentの結合根拠にできる。`time_correlated` は、対象hostがそのartifactを当該executionへ読み込んだことを示す追加のruntimeまたはhost契約と組み合わせた場合だけ結合根拠にできる。`current_only`、`unresolved`、digestの不一致、または追加根拠のない `time_correlated` は、候補componentが実行された証拠にしない。
+
+必要な候補componentをexecutionへ結合できない契約要素は `indeterminate` とし、対象agentの旧版または別bindingによる結果から候補definitionの適合を導かない。identityの一致をcomponent bindingの代わりにしない。
+
+dispatchで別agentが選ばれたことをruntime証拠から直接確認できる場合は、選択面の契約へ照合できる。実行結果の文体や内容だけから選択agentを推定しない。
+
+### Phase 6: agent契約へ照合する
+
+シナリオごとに次を独立して評価する。
+
+| 観点 | 照合する内容 |
+| --- | --- |
+| dispatch | 選択用description、依頼の成果責務、実際に選択されたagent。 |
+| identityとbinding | runtime identity、agent origin、実行時点のdefinitionとhost binding。 |
+| 委譲入力 | spawn prompt、渡したcontext、対象範囲、制約、許可、必要な成果。 |
+| 設定と権限 | definition default、spawn指定、親設定、runtime effective configuration。 |
+| 行動と作用 | 実際のtool、effects、読み取りまたは変更の境界。 |
+| 成果責務 | agentが所有する判断、成果、責務外入力の返却。 |
+| 継続とhandoff | same-thread follow-up、parentによる受領と利用、別責務の引き渡し。 |
+| 終了 | child terminal state、停止条件、running、再開条件。 |
+
+各assessmentを `conforms`、`violates`、`indeterminate`、`in_progress`、`not_applicable` のいずれかで示し、契約参照、評価に必要な候補component、対応したdefinition binding、runtime evidence refsを対応付ける。identityを対象agentへ結合できない場合、または評価対象の候補componentをexecutionへ結合できない場合は、対象agentの該当契約要素に関する適合を断定しない。
+
+### Phase 7: 検証結果を残す
+
+詳細な成果形式は [references/report-schema.md](references/report-schema.md) に従う。`$writing` を適用し、検証計画、spawn attempts、成立したexecutions、runtime分析、assessment、未検証範囲、再実行条件を区別して返す。
+
+全体の `validation_status` は次の優先順位で決める。
+
+1. 必須シナリオでagent契約への違反を直接確認した場合は `violates`。
+2. 必須executionが停止条件時点で継続中の場合は `in_progress`。
+3. 必須executionを開始、継続、または対象definitionへ結合できる条件を用意できない場合は `blocked`。
+4. 必須の比較基準、identity、binding、runtime証拠が不足する場合は `unverified`。
+5. 必須シナリオの各契約要素について、現在の候補componentとexecutionの結合を確認でき、その候補に適用できる証拠で `conforms` の場合は `conforms`。
+
+`conforms` は対象custom agentの挙動検証結果であり、変更全体の受入判定ではない。`violates`、`unverified`、`blocked` では、原因または変更箇所を推定せず、`behavior-deviation-analysis` が使える証拠と再評価条件を残す。
+
+## 完了条件
+
+- 対象agent、候補definitionの必須component、対象host binding、各digestを検証結果へ結び付けている。
+- dispatch選択と明示spawnを、実行した範囲と証拠に応じて区別している。
+- spawn attempt、execution、follow-up、respawn、childとparentの終了を区別している。
+- identity、binding、definition default、runtime effective configuration、actual actionを別々に評価している。
+- 対象agentのidentityと、評価に必要な候補componentの両方へ結合できるexecutionだけを、その候補の挙動として評価している。
+- 実行状態、成果の存在、parent handoff、agent契約への適合を分けている。
+- 必須シナリオごとにassessment、runtime証拠、未検証範囲、再実行条件を残している。
+- 対象agentへのSkill依存、agent定義の変更、原因候補、変更全体の受入判定を作っていない。

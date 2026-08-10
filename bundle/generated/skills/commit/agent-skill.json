@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 3,
+  "skillBundleVersion": 6,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "commit",
@@ -10,7 +10,7 @@
     "writing"
   ],
   "contentDigest": "7941e81faefcc2b832386886e78f76408e7334c124bf203d172b022b7a0624b5",
-  "manifestDigest": "d6fe28680b764420d4886ce2e048fa790777e04dd872b01371869cb6712df390",
+  "manifestDigest": "e9abd3253e0c63268805028548d091bd30d2099f24e614c50c482df1159e82b0",
   "hostArtifacts": [
     {
       "host": "codex",

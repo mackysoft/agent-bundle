@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 3,
+  "skillBundleVersion": 6,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "game-planning",
   "skillName": "playtest",
@@ -8,7 +8,7 @@
   "description": "確認済みのゲーム設計上の問いを、対象版、対象プレイヤー、プレイ条件、観測、記録、判定、上限、停止条件を持つプレイテスト契約へ変換し、開発段階を問わず実際のプレイからゲーム設計の判断に使う証拠を作る。紙試作、プロトタイプ、開発中ビルド、完成候補ビルド、既存ゲームを対象とし、探索では観測記録、発見した問い、候補仮説を、仮説検証では事前基準に照らした支持、不支持、判定不能、プレイテスト不成立を返す。プレイテストの計画、実行、記録、結果評価を行うときに使う。",
   "dependencies": [],
   "contentDigest": "12914bebf90b365db5d5f6f8f22a78fc7c4cd47d28547563def6b445aa165fd3",
-  "manifestDigest": "ae4357193ef8af369457b65fdab54c944b7d258f1bd44c0b024739f8f2d99fd5",
+  "manifestDigest": "33f25758fba8b6ae1a5496418ae4c8a39da74d40691a9a13a50095dbc0d9b6f2",
   "hostArtifacts": [
     {
       "host": "codex",
