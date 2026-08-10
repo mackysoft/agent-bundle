@@ -11,8 +11,8 @@
     "push",
     "sync-latest"
   ],
-  "contentDigest": "43c162e143bbe2dd941d7ce2715462dca73ce2a08373d2b6e0b0158909f0216d",
-  "manifestDigest": "6db102d62766ff8e2e33b36f0ea315ed727d28d4906e1d029510769bae44149f",
+  "contentDigest": "5b54594d8c57bb65104584520af5e205efb096692bc3fea55b749da33ddadb6b",
+  "manifestDigest": "1b5dea6cc02ebf11179dc812b00bd75e12d7c6c7f7faa4a4aa0b253b26efb444",
   "hostArtifacts": [
     {
       "host": "codex",
