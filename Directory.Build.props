@@ -5,7 +5,7 @@
     <PackageVersion>$(Version)</PackageVersion>
     <Authors>Hiroya Aramaki</Authors>
     <Company>MackySoft</Company>
-    <RepositoryUrl>https://github.com/mackysoft/skills-pack</RepositoryUrl>
+    <RepositoryUrl>https://github.com/mackysoft/agent-bundle</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
