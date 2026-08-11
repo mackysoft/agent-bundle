@@ -7,7 +7,7 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - "**"
   workflow_dispatch:
     inputs:
       expected_sha:
@@ -22,6 +22,7 @@ on:
         options:
           - verify
           - verify-release
+          - verify-default-branch
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -64,15 +65,23 @@ jobs:
         env:
           DISPATCH_OPERATION: ${{ inputs.bundle_operation }}
           EVENT_NAME: ${{ github.event_name }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          REF_NAME: ${{ github.ref_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
 
           operation="verify"
-          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+          if [[ "${EVENT_NAME}" == "push" && "${REF_NAME}" == "${DEFAULT_BRANCH}" ]]; then
+            operation="verify-default-branch"
+          elif [[ "${EVENT_NAME}" == "push" && "${REF_NAME}" == release/* ]]; then
+            if [[ "${REF_NAME}" =~ ^release/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              operation="verify-release"
+            else
+              echo "Release branch must use release/<major>.<minor>.<patch> format: ${REF_NAME}" >&2
+              exit 1
+            fi
+          elif [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
             operation="${DISPATCH_OPERATION:-verify}"
-          elif [[ "${EVENT_NAME}" == "pull_request" && "${HEAD_REF}" =~ ^release/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            operation="verify-release"
           fi
 
           bash scripts/resolve-bundle-operation-version.sh \

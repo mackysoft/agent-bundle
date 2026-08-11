@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  echo "usage: bash scripts/resolve-bundle-operation-version.sh --operation <verify|release|verify-release> --root <bundle-root> --base-ref <published-release-ref>" >&2
+  echo "usage: bash scripts/resolve-bundle-operation-version.sh --operation <verify|release|verify-release|verify-default-branch> --root <bundle-root> --base-ref <published-release-ref>" >&2
 }
 
 operation=""
@@ -37,7 +37,7 @@ while [[ "$#" -gt 0 ]]; do
   esac
 done
 
-if [[ "${operation}" != "verify" && "${operation}" != "release" && "${operation}" != "verify-release" ]]; then
+if [[ "${operation}" != "verify" && "${operation}" != "release" && "${operation}" != "verify-release" && "${operation}" != "verify-default-branch" ]]; then
   usage
   exit 2
 fi
@@ -124,6 +124,27 @@ if [[ "${operation}" == "verify" ]]; then
 
   printf '%s\n' "${base_version}"
   exit 0
+fi
+
+if [[ "${operation}" == "verify-default-branch" ]]; then
+  if [[ "${current_version}" -eq "${base_version}" ]]; then
+    printf '%s\n' "${base_version}"
+    exit 0
+  fi
+
+  if [[ "${base_version}" -eq 2147483647 ]]; then
+    echo "The published bundle version cannot be incremented beyond 2147483647." >&2
+    exit 1
+  fi
+
+  target_version="$((base_version + 1))"
+  if [[ "${current_version}" -eq "${target_version}" ]]; then
+    printf '%s\n' "${target_version}"
+    exit 0
+  fi
+
+  echo "Default branch work must use the published bundle version ${base_version} or the pending release version ${target_version}; current version is ${current_version}." >&2
+  exit 1
 fi
 
 if [[ "${base_version}" -eq 2147483647 ]]; then
