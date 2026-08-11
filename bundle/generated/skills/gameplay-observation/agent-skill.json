@@ -7,8 +7,8 @@
   "displayName": "Gameplay Observation",
   "description": "中立な観測要求をゲームプレイ観測の記録項目契約へ変換するか、汎用証拠パッケージから、対象プレイヤー、情報境界、理解、認識した選択肢、選択、行動、ゲームの応答、本人報告、証拠参照、適用範囲を追える報告用観測レコードへ対応付けるときに使う。",
   "dependencies": [],
-  "contentDigest": "7480e82f6edd5d9e925b5e029ed3a78140d16942cd05e422e2a6ea5d9360798c",
-  "manifestDigest": "5c32cb00de743ddd434028e7e7ec8ca13ae3e8f2c5b664a89881ca2b4f4cee68",
+  "contentDigest": "69ac59a51ebc6fe2bacac7022bca991a91f8ee74b31b621e37fbfdc1cbc9bb79",
+  "manifestDigest": "2b44545c942e6fb17a252827c2f022e5b09452788cb61b7c3d0813a610f74df9",
   "hostArtifacts": [
     {
       "host": "codex",
