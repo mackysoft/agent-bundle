@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "bundleVersion": 9,
+  "bundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "agentName": "evidence-organizer",
   "displayName": "Evidence Organizer",
@@ -9,7 +9,7 @@
     "claim-grounding"
   ],
   "contentDigest": "5f55d9d7b52612d8625dbe05abb75647474c413c805c88c244263364b4f77c33",
-  "manifestDigest": "3c30b7fabf5d5e1a9dc31c8a9adbc1a6fdf0ce2c05be68f9aebba154e3d03b06",
+  "manifestDigest": "09f11f06f91ef4dbe9efbd73351772e61feba251b966e345ee7cf3a528c96147",
   "hostArtifacts": [
     {
       "host": "claude-code",

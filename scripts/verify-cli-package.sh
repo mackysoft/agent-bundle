@@ -40,7 +40,7 @@ if [[ "${actual_version}" != "${expected_version}" ]]; then
 fi
 
 generated_bundle_root="${repo_root}/bundle/generated"
-package_bundle_root="tools/net10.0/any/skills"
+package_bundle_root="tools/net10.0/any/agent-distribution"
 PACKAGE_PATH="${package_path}" REPO_ROOT="${repo_root}" GENERATED_BUNDLE_ROOT="${generated_bundle_root}" PACKAGE_BUNDLE_ROOT="${package_bundle_root}" python3 - <<'PY'
 import os
 from pathlib import Path
