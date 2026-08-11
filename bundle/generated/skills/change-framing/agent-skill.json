@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 8,
+  "skillBundleVersion": 9,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "basic",
   "skillName": "change-framing",
@@ -11,7 +11,7 @@
     "referent-modeling"
   ],
   "contentDigest": "9b050a403f6b7eeb3e20e94d75ca56265537698ed7b51b80527c2609da908f9a",
-  "manifestDigest": "b2688df74489da8a8508572d66961ccacce2211fe1308435191feebd003c4a7d",
+  "manifestDigest": "14fbafc6c1da09844b14e87dc28afae2381c38befc3a779f9bc40dbe3a7f5852",
   "hostArtifacts": [
     {
       "host": "codex",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 8,
+  "skillBundleVersion": 9,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "basic",
   "skillName": "writing",
@@ -11,7 +11,7 @@
     "referent-modeling"
   ],
   "contentDigest": "1b8efae8cd5dfb403c4ccd7175094d9b42ac9f3d8c47109e8d77631bc56cc857",
-  "manifestDigest": "ba1e8951a2adaf91d55756637d27e78322d433f2801f396ec149c08dcfac1c86",
+  "manifestDigest": "b7b5166e7c2e89e802437f64e9618dd47ea8517ccf72057b9d0465054d2af56d",
   "hostArtifacts": [
     {
       "host": "codex",

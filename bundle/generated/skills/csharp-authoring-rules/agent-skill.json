@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 8,
+  "skillBundleVersion": 9,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "csharp-authoring-rules",
@@ -10,7 +10,7 @@
     "code-authoring-rules"
   ],
   "contentDigest": "1d7e3a0d0fc13e44a5e9713409dc3c3cc35dbbd224ca463c3dd30b878940da8b",
-  "manifestDigest": "817d05d8c87e94d8135946a92a432ffe55f7f1617818e324d1462e99327da0b4",
+  "manifestDigest": "36b2d71472195da8ac9327976ea6824cd56f6cbb33b5496b42b7894f8f3acb6f",
   "hostArtifacts": [
     {
       "host": "codex",

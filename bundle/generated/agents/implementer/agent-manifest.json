@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "bundleVersion": 8,
+  "bundleVersion": 9,
   "catalogId": "com.mackysoft.agent-bundle",
   "agentName": "implementer",
   "displayName": "Implementer",
@@ -10,7 +10,7 @@
     "writing"
   ],
   "contentDigest": "82bdcc2da3ac25f7a8472967be19db09f113fa0fb911e933c62e1b42678b1bd4",
-  "manifestDigest": "3488271a214383196215a44d6edb2653f081f93a236227b1380934406520ddbe",
+  "manifestDigest": "80cd9cb42993055a799eee36188cfbcee4f8b9a2b52afc7dca3e62a4d0459e8e",
   "hostArtifacts": [
     {
       "host": "claude-code",

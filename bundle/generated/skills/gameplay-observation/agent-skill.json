@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 8,
+  "skillBundleVersion": 9,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "game-planning",
   "skillName": "gameplay-observation",
@@ -8,7 +8,7 @@
   "description": "中立な観測要求をゲームプレイ観測の記録項目契約へ変換するか、汎用証拠パッケージから、対象プレイヤー、情報境界、理解、認識した選択肢、選択、行動、ゲームの応答、本人報告、証拠参照、適用範囲を追える報告用観測レコードへ対応付けるときに使う。",
   "dependencies": [],
   "contentDigest": "7480e82f6edd5d9e925b5e029ed3a78140d16942cd05e422e2a6ea5d9360798c",
-  "manifestDigest": "6fb7979330f62d3de07720d8179b2795cce38e1f9dce81cab633695cd5596a4e",
+  "manifestDigest": "5c32cb00de743ddd434028e7e7ec8ca13ae3e8f2c5b664a89881ca2b4f4cee68",
   "hostArtifacts": [
     {
       "host": "codex",

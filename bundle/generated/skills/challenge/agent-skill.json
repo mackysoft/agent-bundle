@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 9,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "basic",
+  "skillName": "challenge",
+  "displayName": "Challenge",
+  "description": "現在の問題設定、主要前提、作業分解、責務境界、設計または実装方針が後続作業を拘束する場面で、全体目的、権限ある規範、周辺責務、既存経路、下流影響、作業経過に照らしてその方向を反証し、採否前の異議候補と影響範囲を返す。方向判断を変え得る論点がない場合は確認範囲を、評価材料が不足する場合は不足する文脈と再評価条件を、方向選択がない場合は非適用の理由を返す。",
+  "dependencies": [
+    "change-framing",
+    "claim-grounding"
+  ],
+  "contentDigest": "9484cde2c49b2fb7ed22b899b9672461207c329b8fcc724496deb71515a82355",
+  "manifestDigest": "ec1244b21fe7737f8bac2fc80eadee0fdd09bcb80b46e07a7d5d350b45303236",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "54c16109d7f23a463115cc24ce1d2cbe152f4af4f6f042666c235488adf9eb28",
+      "materializedFrontmatterDigest": "144a011d203497ce4c7a55e7b98423ee7bab298d4102916d44c6f64a3d2210f3"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "eb88e003c66d051b2d09b76c54580892fc9272ef2a6afd45aa7765e645fc5e25"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "d9ac7a191e1417782f14863b52c4aa13d2e041159cbea8bb98fc8fae86aa1f9f"
+    }
+  ]
+}
