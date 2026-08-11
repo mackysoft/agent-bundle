@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 7,
+  "skillBundleVersion": 8,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "changelog",
@@ -10,7 +10,7 @@
     "writing"
   ],
   "contentDigest": "61e73060e7e87c654c63101c88201dc97cc990254e94dba4ef1fd7bf557e39cd",
-  "manifestDigest": "bff669219356554299e307ead5e58d06e863dff4fb85e532d607c262c71235b4",
+  "manifestDigest": "dc119a7c26add51633a9f47d50e7c0055dfd3ba8b328f8c8beb8b30e10d32d2a",
   "hostArtifacts": [
     {
       "host": "codex",

@@ -1,28 +1,28 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 7,
+  "skillBundleVersion": 8,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "game-planning",
   "skillName": "game-balance-analysis",
   "displayName": "Game Balance Analysis",
-  "description": "意味と適用範囲が確定したゲームルール、定量的な問い、結果が影響する設計判断から、変数、単位、時間幅、戦略またはシナリオを持つ再現可能なモデルを作り、計算、表計算、シミュレーション、感度分析によって成立範囲、支配条件、破綻条件、回復可能性、数値候補を分析する。ゲーム内経済、資源収支、確率、需要、成長、戦略利得、失敗後の回復を定量的に調整または評価するときに使う。",
+  "description": "意味、適用範囲、維持する定性的関係が確定したゲームルール、定量的な問い、結果が影響する設計判断から、変数、単位、時間幅、戦略またはシナリオを持つ再現可能なモデルを作る。計算、表計算、シミュレーション、感度分析によって、成立範囲、支配条件、破綻条件、回復可能性、数値候補、または既定の意味を算術表現するルール式候補を分析するときに使う。",
   "dependencies": [],
-  "contentDigest": "783f920544d678d82db062b7a4f6032b69aab7df3a8ebe59863a190b7c1b4e84",
-  "manifestDigest": "c5b636e92caf71c07cf01b31e63d358f3c8f45958ba82e6293df109b145d3dc6",
+  "contentDigest": "0a53c6768eafc65d14db3784694656edd41cd940e71dd648f27074b7dd14ead7",
+  "manifestDigest": "ae90eacbe32fe2d4b1ad61c6c0fca924d0caf5216d20ddf2bd56bc48dffad30e",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "ff4be2e65b2fb84458dc8a280ec1084ed29733a069957f5e79171f9a226592fb",
-      "materializedFrontmatterDigest": "0ad69975097febbb607b9b8ff8e668dc90239cce92e052840403d4955f9e18c5"
+      "digest": "db5771fbe6c4828a9a46d8556ce603e16a78090e5823c09e46ba9b72dd9138dc",
+      "materializedFrontmatterDigest": "fe00b44b29c5b8e6b32b366fbac4ec41630f8f10dd28c370ea96684995255ce4"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "7b5ccb39c9e38a763bd9371c3a6ae8591a93062045e9671420ca8b31b881a566"
+      "materializedFrontmatterDigest": "0122c5b2a83bdea38579848d8da6f78bcab4849fe9e8a6cee3c1144476aafcc0"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "220f7d37b2644ef0199690a892c27a175aa4ae82c50fbc1ee54b20938ad1f399"
+      "materializedFrontmatterDigest": "fd6d709f90e6fe87692ec750185796edc8a3466c00aed7d5fe23511a4fbf1e32"
     }
   ]
 }

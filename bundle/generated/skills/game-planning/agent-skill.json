@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 7,
+  "skillBundleVersion": 8,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "game-planning",
   "skillName": "game-planning",
@@ -16,8 +16,8 @@
     "referent-modeling",
     "writing"
   ],
-  "contentDigest": "35df59e5b3d438894adbfa9ca15a77ceed4f0afdfc36f024122abaa2713f8b47",
-  "manifestDigest": "b590df4858438dea1a2ffd0efd21f4ee3b75eea03a557871903f3a53e9a44380",
+  "contentDigest": "f2fc82364b4e7d9fda56f9d6a46f8c12dfc0c899c84bf18fbe94aafb746232e1",
+  "manifestDigest": "fd90b96ba2da4ae7af92713a5498fbe64fd9032e835b297022b744507d530719",
   "hostArtifacts": [
     {
       "host": "codex",

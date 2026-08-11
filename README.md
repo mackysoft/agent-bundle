@@ -24,7 +24,7 @@ The tool update replaces the CLI and its embedded bundle. It does not change Ski
 
 ```bash
 agent-bundle skills update --host codex --scope user --category basic,development
-agent-bundle agents update --host codex --scope user --agent architect,implementer,interactive-tester,operator,researcher,reviewer,verifier
+agent-bundle agents update --host codex --scope user --agent architect,evidence-organizer,implementer,interactive-tester,operator,researcher,reviewer,verifier
 ```
 
 If a release removes or renames a managed Skill or custom agent, clean up each old name explicitly after updating the tool. `update` does not prune removed entries:
@@ -69,7 +69,7 @@ Finally, create installations owned by the new `com.mackysoft.agent-bundle` cata
 
 ```bash
 agent-bundle skills install --host codex --scope user --category basic,development
-agent-bundle agents install --host codex --scope user --agent architect,implementer,interactive-tester,operator,researcher,reviewer,verifier
+agent-bundle agents install --host codex --scope user --agent architect,evidence-organizer,implementer,interactive-tester,operator,researcher,reviewer,verifier
 ```
 
 Repeat the new installation for each required host and scope. Project-scope installations must be run for each repository with `--scope project --repository-root /path/to/repository`.
@@ -139,10 +139,11 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `game-design` | `game-planning` | Connect intended player experiences to player activity, game rules, feedback, and progression, and evaluate design hypotheses from gameplay observation records. |
 | `game-interface-design` | `game-planning` | Map gameplay information, actions, and outcomes to player-facing displays, controls, and interface states. |
 | `game-planning` | `game-planning` | Define the shared contract and semantic dependencies for mixed game-planning outcomes, then integrate specialist results. |
-| `gameplay-observation` | `game-planning` | Turn neutral observation requests and real-play records with evidence into report-ready gameplay observation records without interpreting them. |
+| `gameplay-observation` | `game-planning` | Turn neutral observation requests and generic evidence packages into report-ready gameplay observation records without interpreting them. |
 | `issue-planner` | `development` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | `development` | Write, create, update, or review structured GitHub Issue bodies. |
-| `interactive-app-testing` | `development` | Exercise application changes through user paths and produce scoped findings and shareable evidence. |
+| `interactive-app-testing` | `development` | Design a frozen interactive execution-and-evidence envelope from user paths and interpret generic evidence packages into scoped comparison results and candidate findings. |
+| `interactive-session-execution` | `development` | Execute the execution portion of one frozen interactive execution-and-evidence envelope and return its raw action, wait, observation, media, and cleanup record. |
 | `orchestrator` | `development` | Manage one objective in the current task and bridge context and results among responsible subagents. |
 | `pr-merge` | `development` | Merge pull requests through continuous integration and branch cleanup. |
 | `pr-submit` | `development` | Verify, push, and create or update pull requests. |
@@ -171,8 +172,9 @@ Custom agents use one flat catalog namespace:
 | Agent | Purpose | Direct skill dependencies |
 | --- | --- | --- |
 | `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
+| `evidence-organizer` | Organizes frozen evidence into a generic, traceable evidence package without interpretation. | `claim-grounding` |
 | `implementer` | Implements an agreed design, including natural-language artifacts, and reports implementation verification. | `code-authoring-rules`, `writing` |
-| `interactive-tester` | Operates an interactive target once under an assigned observation contract, then separately returns application testing results and report-ready gameplay observation records when requested. | `interactive-app-testing`, `gameplay-observation` |
+| `interactive-tester` | Executes the execution portion of one frozen interactive execution-and-evidence envelope and returns its raw session result unchanged. | `interactive-session-execution` |
 | `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
 | `verifier` | Determines acceptance evidence and its result. | `verification-gate` |
 | `researcher` | Collects bounded read-only evidence and reports unchecked areas. | `claim-grounding` |

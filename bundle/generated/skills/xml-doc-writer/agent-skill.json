@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 7,
+  "skillBundleVersion": 8,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "xml-doc-writer",
@@ -10,7 +10,7 @@
     "writing"
   ],
   "contentDigest": "930cae74f5c291f58124e876656f7125de4224e690d4a88613305e53695e710b",
-  "manifestDigest": "0d5234c6db51f7f4adde7f5a40375b3c1c91af1611e3e5cbb97149d048c94b65",
+  "manifestDigest": "2da20ca81f5880ade1e58632c85c9431975bab1be527e2d5129040e507476742",
   "hostArtifacts": [
     {
       "host": "codex",

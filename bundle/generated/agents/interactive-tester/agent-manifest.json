@@ -1,31 +1,30 @@
 {
   "schemaVersion": 2,
-  "bundleVersion": 7,
+  "bundleVersion": 8,
   "catalogId": "com.mackysoft.agent-bundle",
   "agentName": "interactive-tester",
   "displayName": "Interactive Tester",
-  "description": "割り当てられた有限の観測契約に従って対象を実際に操作し、アプリの表示、状態遷移、再現状態、媒体証拠、候補所見、またはゲームの実プレイ記録と証拠を、適用範囲と未確認範囲を伴う報告可能な観測成果として返す実行主体が必要なときに使う。",
+  "description": "凍結済みの対話セッション実行・証拠契約 envelope の execution 部分に従って対象を実際に操作し、操作、待機、観測、媒体、停止、reset、後始末の生記録を変更せずに返す実行主体が必要なときに使う。",
   "skillDependencies": [
-    "gameplay-observation",
-    "interactive-app-testing"
+    "interactive-session-execution"
   ],
-  "contentDigest": "e21637d01fef1067a3903a1f50ace563742a792f96243c15dbe39a39fe8751d6",
-  "manifestDigest": "6f954e260fcbc7cb55fa7574d3c2a5e9b1f49c8021b98cd9807f2d8f2015c975",
+  "contentDigest": "3026f8d249e24a96c08d715baca13a7292deb7c5db9900254b95cc982f14679e",
+  "manifestDigest": "683678dc9d07e6bcd4e6eddc660274e4ca1a5a23b2756ce06f6a6cc3d085d821",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/interactive-tester.md",
-      "digest": "0b500fcf759f2941367afa10b276098fe32b1051c11820f3e3802598341927b0"
+      "digest": "9bc5c8365ad3a17eabd37598655dc03f262fe211358058f359e8ce32c7cbe15a"
     },
     {
       "host": "codex",
       "path": "hosts/codex/interactive-tester.toml",
-      "digest": "c496c6aa0c20eedc152fa627584201027ed08502424f55a3ffdedba23caff03d"
+      "digest": "a62743fad9530cdc9339f1f997fee8eebf62e7a5a9a38c75b41dff829e88ab64"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/interactive-tester.agent.md",
-      "digest": "e607a61aaef0a21a47d330808ad303d0e982272a7aa5867821e49338660bbdf3"
+      "digest": "862325868a8425898a5327385ebf5ab911bb922899f2a62575ae5b5238432680"
     }
   ]
 }

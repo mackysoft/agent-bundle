@@ -1,31 +1,31 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 7,
+  "skillBundleVersion": 8,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "interactive-app-testing",
   "displayName": "Interactive App Testing",
-  "description": "Web、業務アプリ、デスクトップアプリ、モバイルアプリ、ゲームなどの対話型アプリを利用者経路で実際に操作し、表示、状態遷移、既知問題の再現、媒体証拠、後始末を確認するときに使う。固定済みの実行契約、または対象変更、権限ある期待、変更リスク、既知の所見から有限の操作範囲を定め、許可された環境で実行する。確認範囲、比較結果、直接観測した候補所見、再現状態、スクリーンショット、録画、ログ、トレース、未確認範囲、後始末後の状態、共有用の証拠説明を返す。",
+  "description": "Web、業務アプリ、デスクトップアプリ、モバイルアプリ、ゲームなどの対話型アプリについて、変更リスクから有限の利用者経路と凍結済み execution・evidence envelope を設計し、汎用証拠パッケージから比較結果、再現状態、型付き候補所見、範囲付きセッション結果を整理するときに使う。",
   "dependencies": [
     "claim-grounding",
     "writing"
   ],
-  "contentDigest": "b1f1dafb6e94dee971e680e2d3a404b3f522c72f303bc0bae05a41f0e6d525f9",
-  "manifestDigest": "f13a39990aeea9da88ab798bde35ffff7d291b9c64d692fcf4f6196a1d460b4e",
+  "contentDigest": "05a235e01e203446683a6f8dec1d5ce05e05d55284e56dc1fb57b1e1e14daa77",
+  "manifestDigest": "e608571477a0c0c6ac8976b169893a6ec4973b22b5a4611336198e9d3c0803c0",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "c7c25572aa986cb537742d8804fe82e90f2a1fcfef0dc65ed7a8b1ce4254dd49",
-      "materializedFrontmatterDigest": "ac27193dcb811ff5d9b4f2ead376a37187c6c9e9b33b1acee8b9e419ebcfccec"
+      "digest": "559dd9932cd39fc5a8e210508f4abf5c5182b85d076a09e75622316dffc8e216",
+      "materializedFrontmatterDigest": "431247b181f6b9b1324d907ba02e0a865d29b0734f312d7c52ee9f1cad27363b"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "8f106e58f45f65a865f53ee641702135d3daa65027aab9427ca3c23d89a5a85a"
+      "materializedFrontmatterDigest": "37e1c321e544015b530ebed80d4b92a6148fba6e1d9e388e9d09fbbcaaabd6e4"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "df82353540f33212efe9d2fcc304387e8ab79bbb2140b0db84d7055b9a82d236"
+      "materializedFrontmatterDigest": "74b01c15d9bbd5e9d4801bd1a6d8ac51241debdfbc3c1bea3ba0fddaf4171deb"
     }
   ]
 }

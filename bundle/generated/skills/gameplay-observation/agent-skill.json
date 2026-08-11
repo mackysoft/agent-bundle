@@ -1,28 +1,28 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 7,
+  "skillBundleVersion": 8,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "game-planning",
   "skillName": "gameplay-observation",
   "displayName": "Gameplay Observation",
-  "description": "確定した中立な観測要求と、テスターが紙試作、プロトタイプ、開発中ビルド、完成候補ビルド、既存ゲームを実際に遊んだ記録および証拠から、対象版、対象プレイヤー、プレイ条件、情報境界、状況、理解、認識した選択肢、選択、行動、ゲームの応答、本人報告、証拠参照、適用範囲を追える、起票または報告に渡せるゲームプレイ観測レコードを作るときに使う。実行前には中立な観測要求を記録項目と証拠要件へ変換し、実行後には実プレイ記録を報告可能、一部報告可能、証拠不足へ整理する。",
+  "description": "中立な観測要求をゲームプレイ観測の記録項目契約へ変換するか、汎用証拠パッケージから、対象プレイヤー、情報境界、理解、認識した選択肢、選択、行動、ゲームの応答、本人報告、証拠参照、適用範囲を追える報告用観測レコードへ対応付けるときに使う。",
   "dependencies": [],
-  "contentDigest": "c3a71e6a5649da08b97d6498dbc6e15a11ea1f6d3c65e2184906b141ca0fd007",
-  "manifestDigest": "72ebd68d4b6b7462a969da3d8ee76cc562b7ea7d2c908797bacb7fa1719477ca",
+  "contentDigest": "7480e82f6edd5d9e925b5e029ed3a78140d16942cd05e422e2a6ea5d9360798c",
+  "manifestDigest": "6fb7979330f62d3de07720d8179b2795cce38e1f9dce81cab633695cd5596a4e",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "c530515c89e03598485d1ba346c48fa7f61744b0c5a44df71c89fba32235e6f8",
-      "materializedFrontmatterDigest": "8710220d5180c3b27f473c0ca294b4d4ba87ee5d791c0d067ee39aadf5ebf7d8"
+      "digest": "31d886ff8e39d7345ce593c2a07b261bf9a9791595422156b1e564f056e92e70",
+      "materializedFrontmatterDigest": "d846f822a3548da29fb9d5dec4821a5670c650aa4b3cabfda336859ebaed214d"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "b751ad3b06612a5c40a548803e5aba21d9eced1260c87b000124670d5b499e76"
+      "materializedFrontmatterDigest": "0c9d5523294f851d17824ea6917120f7c6d0935b971f8ff4ae8c82f83ceffea7"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "55f8506b00633fe854ac7ad6e21e7391eed421833a223d1df7d31a57f6ee0223"
+      "materializedFrontmatterDigest": "ac0ba3516fe2cab9e605aa99a6a3e596c88631af3f91d369fd220bb38eaedc6e"
     }
   ]
 }

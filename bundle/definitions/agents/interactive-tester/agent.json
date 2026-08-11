@@ -1,9 +1,8 @@
 {
   "schemaVersion": 1,
   "displayName": "Interactive Tester",
-  "description": "割り当てられた有限の観測契約に従って対象を実際に操作し、アプリの表示、状態遷移、再現状態、媒体証拠、候補所見、またはゲームの実プレイ記録と証拠を、適用範囲と未確認範囲を伴う報告可能な観測成果として返す実行主体が必要なときに使う。",
+  "description": "凍結済みの対話セッション実行・証拠契約 envelope の execution 部分に従って対象を実際に操作し、操作、待機、観測、媒体、停止、reset、後始末の生記録を変更せずに返す実行主体が必要なときに使う。",
   "skillDependencies": [
-    "interactive-app-testing",
-    "gameplay-observation"
+    "interactive-session-execution"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 7,
+  "skillBundleVersion": 8,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "branch-create",
@@ -10,7 +10,7 @@
     "sync-latest"
   ],
   "contentDigest": "59c15af196da077cb102e31ce7eb7fa37dffcc89131d349890a234a3fa45860c",
-  "manifestDigest": "05b8a6758d72135447cd42d51ab6ddd80c9f64066488605f2bc0d518b1d31431",
+  "manifestDigest": "d68453e80c3d75c7d4883b79de0cf1cd5d2395877dda155819f3a0e8e172959e",
   "hostArtifacts": [
     {
       "host": "codex",

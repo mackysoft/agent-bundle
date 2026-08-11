@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 7,
+  "skillBundleVersion": 8,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "unity-authoring-rules",
@@ -10,7 +10,7 @@
     "csharp-authoring-rules"
   ],
   "contentDigest": "c35d9b732b6fc0f81973ed59d4cb98097d283720dee60544f274a53d698069d1",
-  "manifestDigest": "f514f8a931f7f4e9a0e5bf5faa30d3f8c28920187aee731e9e9c37e51dae4ae1",
+  "manifestDigest": "9ab3ea2eddf8ec87529f5b721910162cbcfbbff927c07a3ef17b233f2ee5a196",
   "hostArtifacts": [
     {
       "host": "codex",
