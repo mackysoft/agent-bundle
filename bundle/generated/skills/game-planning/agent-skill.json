@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 3,
+  "skillBundleVersion": 4,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "game-planning",
   "skillName": "game-planning",
@@ -17,7 +17,7 @@
     "writing"
   ],
   "contentDigest": "f2fc82364b4e7d9fda56f9d6a46f8c12dfc0c899c84bf18fbe94aafb746232e1",
-  "manifestDigest": "cf8e65ad88c8a1fdf7832630efbc12ec56c1eb05bdc24bce52ed1766e345de63",
+  "manifestDigest": "1d2cd7856a78b1e81de2387d7b4920966ba11a5704c98601795e29b75bad197b",
   "hostArtifacts": [
     {
       "host": "codex",

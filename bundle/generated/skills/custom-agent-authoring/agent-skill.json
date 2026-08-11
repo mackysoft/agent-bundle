@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 3,
+  "skillBundleVersion": 4,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "custom-agent-authoring",
@@ -13,7 +13,7 @@
     "writing"
   ],
   "contentDigest": "75f25adfdcb9cfeb0865cbf67812edf26d7dadfdc54efc5a0a3a7b8af96162f8",
-  "manifestDigest": "519d49d008cb63540c66d4e01bd0e055c3851093a5daace6739c03e0163aaba7",
+  "manifestDigest": "8ed4ed56c36086e78aa36b1180b1ad239bc1a34195fc86a0ec3cef02a8737a8b",
   "hostArtifacts": [
     {
       "host": "codex",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "bundleVersion": 3,
+  "bundleVersion": 4,
   "catalogId": "com.mackysoft.agent-bundle",
   "agentName": "interactive-tester",
   "displayName": "Interactive Tester",
@@ -9,7 +9,7 @@
     "interactive-session-execution"
   ],
   "contentDigest": "3026f8d249e24a96c08d715baca13a7292deb7c5db9900254b95cc982f14679e",
-  "manifestDigest": "7d1e70fdd6b8b5e56dbbdab9de60538293b943f2640bb96bfdf14cf38bf8e8c8",
+  "manifestDigest": "d7558e9f783760dd3ef4cd27a0f588844ca8e20d963a1ac8d36ff65d37898ee2",
   "hostArtifacts": [
     {
       "host": "claude-code",
