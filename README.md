@@ -195,7 +195,7 @@ When the Orchestrator Skill handles natural-language changes, it assigns the cha
 | `claude-code` | Claude Code skill directory | `.claude/agents` |
 | `github-copilot` | GitHub Copilot skill directory | `.github/agents` |
 
-See the [Agent Distribution command reference](https://github.com/mackysoft/agent-distribution/blob/4.0.0/README.md#run-standard-commands) for selector, scope, target-directory, ownership-state, and reload details.
+See the [Agent Distribution command reference](https://github.com/mackysoft/agent-distribution/blob/5.0.0/README.md#run-standard-commands) for selector, scope, target-directory, ownership-state, and reload details.
 
 ## Development
 
