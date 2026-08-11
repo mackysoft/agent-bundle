@@ -1,6 +1,6 @@
 # AgentBundle
 
-[![verify](https://github.com/mackysoft/skills-pack/actions/workflows/verify.yaml/badge.svg)](https://github.com/mackysoft/skills-pack/actions/workflows/verify.yaml) [![NuGet](https://img.shields.io/nuget/v/MackySoft.AgentBundle?label=MackySoft.AgentBundle)](https://www.nuget.org/packages/MackySoft.AgentBundle) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![verify](https://github.com/mackysoft/agent-bundle/actions/workflows/verify.yaml/badge.svg)](https://github.com/mackysoft/agent-bundle/actions/workflows/verify.yaml) [![NuGet](https://img.shields.io/nuget/v/MackySoft.AgentBundle?label=MackySoft.AgentBundle)](https://www.nuget.org/packages/MackySoft.AgentBundle) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 AgentBundle is a .NET global tool that distributes a curated bundle of reusable skills and custom agents through [Agent Distribution](https://github.com/mackysoft/agent-distribution).
 
