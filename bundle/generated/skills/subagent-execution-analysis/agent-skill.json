@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 3,
+  "skillBundleVersion": 4,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "subagent-execution-analysis",
@@ -12,7 +12,7 @@
     "writing"
   ],
   "contentDigest": "509647c6f03feb58d98b976bc95a1b91c58c88e1fcb54114895894af06edb48c",
-  "manifestDigest": "522ed2c171908562f78231312e81abcaaa68c87a176dbd9071860b845a780245",
+  "manifestDigest": "b6fc08a002ec649e5518bdae9d02f389a8b13d4734b1835d2fed56863ce3e77d",
   "hostArtifacts": [
     {
       "host": "codex",

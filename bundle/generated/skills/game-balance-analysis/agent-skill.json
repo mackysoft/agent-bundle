@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 3,
+  "skillBundleVersion": 4,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "game-planning",
   "skillName": "game-balance-analysis",
@@ -8,7 +8,7 @@
   "description": "意味、適用範囲、維持する定性的関係が確定したゲームルール、定量的な問い、結果が影響する設計判断から、変数、単位、時間幅、戦略またはシナリオを持つ再現可能なモデルを作る。計算、表計算、シミュレーション、感度分析によって、成立範囲、支配条件、破綻条件、回復可能性、数値候補、または既定の意味を算術表現するルール式候補を分析するときに使う。",
   "dependencies": [],
   "contentDigest": "0a53c6768eafc65d14db3784694656edd41cd940e71dd648f27074b7dd14ead7",
-  "manifestDigest": "8f3a27988da83668b13896efc89041c957d6df69274ea8f3b00012d75ef66b08",
+  "manifestDigest": "98b237c85b6a570dceb86b8d21bed86308e0666d487271c12bc3991ebe583c87",
   "hostArtifacts": [
     {
       "host": "codex",

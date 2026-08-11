@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 3,
+  "skillBundleVersion": 4,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "interactive-app-testing",
@@ -11,7 +11,7 @@
     "writing"
   ],
   "contentDigest": "03073a1296e870c6a45d37fa358e0edea1cec0932187476e49e66c0e2d386a5a",
-  "manifestDigest": "d5c7711c45c311ae167f075e783d403fc1052756134ab24b6b663b275ca93e98",
+  "manifestDigest": "9feb5f0af3cd921921065b153c32df74030bad7485bbe475349e258473d6a624",
   "hostArtifacts": [
     {
       "host": "codex",
