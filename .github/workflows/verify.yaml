@@ -14,6 +14,14 @@ on:
         description: Commit SHA that a synchronizing workflow expects this run to verify.
         required: false
         type: string
+      bundle_operation:
+        description: Bundle version ownership rule for this exact commit.
+        required: false
+        default: verify
+        type: choice
+        options:
+          - verify
+          - verify-release
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,6 +36,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
       - name: Guard synchronized commit
         env:
           ACTUAL_SHA: ${{ github.sha }}
@@ -37,6 +50,35 @@ jobs:
             echo "Expected synchronized commit ${EXPECTED_SHA}, but workflow_dispatch resolved ${ACTUAL_SHA}." >&2
             exit 1
           fi
+
+      - name: Resolve latest published release
+        id: published_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release_tag="$(bash scripts/resolve-latest-release-tag.sh --repository "${GITHUB_REPOSITORY}")"
+          echo "tag=${release_tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Guard bundle version ownership
+        env:
+          DISPATCH_OPERATION: ${{ inputs.bundle_operation }}
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+
+          operation="verify"
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            operation="${DISPATCH_OPERATION:-verify}"
+          elif [[ "${EVENT_NAME}" == "pull_request" && "${HEAD_REF}" =~ ^release/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            operation="verify-release"
+          fi
+
+          bash scripts/resolve-bundle-operation-version.sh \
+            --operation "${operation}" \
+            --root bundle \
+            --base-ref "refs/tags/${{ steps.published_release.outputs.tag }}"
 
   verify:
     name: verify

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 9,
+  "skillBundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "interactive-session-execution",
@@ -8,7 +8,7 @@
   "description": "凍結済みの対話セッション実行・証拠契約 envelope の execution 部分を、許可された対象に対して一回履行し、action→wait→observe の生記録、媒体、停止、reset、後始末、未実施範囲を持つ生セッション結果を作るときに使う。",
   "dependencies": [],
   "contentDigest": "94d710c7e4cc60c29ad6b98be50621ca57042d45727ed13c3c60df4469d87542",
-  "manifestDigest": "f8ee889c62b82f01531676bac3c1f6146b39d68500359c56b9b28f58bf650904",
+  "manifestDigest": "d9fb3597f6629eda2697bff27ddffa6ad4d32bab4cb35361b1dcad3803180337",
   "hostArtifacts": [
     {
       "host": "codex",

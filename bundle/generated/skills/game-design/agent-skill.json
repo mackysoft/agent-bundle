@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 9,
+  "skillBundleVersion": 3,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "game-planning",
   "skillName": "game-design",
@@ -8,7 +8,7 @@
   "description": "目的、対象範囲、判断を委ねられた範囲、現在有効な前提が確定したゲーム企画について、テーマ、追求する遊びの方向を示すコンセプト、設計仮説、実現手段となるゲームシステムを分け、プレイヤーが利用できる情報と不確実性、活動や選択、ルールによる状態変化、結果として理解する意味、次の活動の因果を定性的に設計、更新、評価する。ゲームプレイ観測の一次証拠がある場合は、観測事実と設計解釈を分け、事前基準により設計仮説を評価する。コンセプト、活動と応答の因果、文脈によって有効性が変わる判断空間、プレイヤーの能力と課題要求の適合、活動の時間構造、状態空間と制作制約、システム間の誘因を検討するときに使う。",
   "dependencies": [],
   "contentDigest": "4793efd58730a9d2375027c0303ba742ef6c63b2dfdcc21ba0ee83791e7e8b0f",
-  "manifestDigest": "e7267ad73713c917437867030e814214a4a38f6b043f32e239ceba8e734e0228",
+  "manifestDigest": "f16513c4ebbf85973b99a8ac82f22e36cdf357b2f6c2f59f863a4bb0e095f192",
   "hostArtifacts": [
     {
       "host": "codex",

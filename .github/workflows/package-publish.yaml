@@ -11,14 +11,21 @@ on:
         required: true
         type: string
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.release_tag || github.ref_name }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
 jobs:
   prepare-release:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
+      actions: write
       contents: write
+      pull-requests: write
     outputs:
       package_version: ${{ steps.version.outputs.package_version }}
       tag_name: ${{ steps.version.outputs.tag_name }}
@@ -26,7 +33,6 @@ jobs:
 
     steps:
       - name: Validate workflow dispatch source
-        if: github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
@@ -50,36 +56,143 @@ jobs:
         shell: bash
         env:
           DISPATCH_TAG: ${{ github.event.inputs.release_tag }}
-        run: ./scripts/resolve-release-version.sh --dispatch-tag "${DISPATCH_TAG}"
+        run: >-
+          ./scripts/resolve-release-version.sh
+          --dispatch-tag "${DISPATCH_TAG}"
+          --event-name workflow_dispatch
 
-      - name: Validate release source
-        id: source
+      - name: Reject an existing release tag
         shell: bash
         env:
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          EVENT_NAME: ${{ github.event_name }}
-          RELEASE_SHA: ${{ github.sha }}
           TAG_NAME: ${{ steps.version.outputs.tag_name }}
         run: |
           set -euo pipefail
 
-          git fetch origin "${DEFAULT_BRANCH}"
-
-          release_sha="${RELEASE_SHA}"
-          if [[ "${EVENT_NAME}" != "workflow_dispatch" ]]; then
-            git fetch --force origin "refs/tags/${TAG_NAME}:refs/tags/${TAG_NAME}"
-            release_sha="$(git rev-list -n 1 "refs/tags/${TAG_NAME}")"
+          if [[ -n "$(git ls-remote --refs --tags origin "refs/tags/${TAG_NAME}")" ]]; then
+            echo "Release tag ${TAG_NAME} already exists. Rerun its existing workflow instead of preparing another bundle release." >&2
+            exit 1
           fi
 
-          if ! git merge-base --is-ancestor "${release_sha}" "origin/${DEFAULT_BRANCH}"; then
-            echo "Release source must be reachable from origin/${DEFAULT_BRANCH}. Actual sha: ${release_sha}" >&2
+      - name: Resolve latest published release
+        id: published_release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release_tag="$(bash scripts/resolve-latest-release-tag.sh --repository "${GITHUB_REPOSITORY}")"
+          echo "tag=${release_tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Resolve release bundle version
+        id: bundle_version
+        shell: bash
+        run: |
+          set -euo pipefail
+          bundle_version="$(bash scripts/resolve-bundle-operation-version.sh \
+            --operation release \
+            --root bundle \
+            --base-ref "refs/tags/${{ steps.published_release.outputs.tag }}")"
+          echo "version=${bundle_version}" >> "${GITHUB_OUTPUT}"
+
+      - name: Inspect release preparation state
+        id: preparation
+        shell: bash
+        env:
+          TARGET_BUNDLE_VERSION: ${{ steps.bundle_version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          current_bundle_version="$(jq -er '.bundleVersion' bundle/bundle.json)"
+          if [[ "${current_bundle_version}" -eq "${TARGET_BUNDLE_VERSION}" ]]; then
+            requires_pull_request="false"
+          elif [[ "${current_bundle_version}" -lt 2147483647 \
+            && $((current_bundle_version + 1)) -eq "${TARGET_BUNDLE_VERSION}" ]]; then
+            requires_pull_request="true"
+          else
+            echo "Current bundle version ${current_bundle_version} cannot prepare release target ${TARGET_BUNDLE_VERSION}." >&2
+            exit 1
+          fi
+
+          echo "requires_pull_request=${requires_pull_request}" >> "${GITHUB_OUTPUT}"
+
+      - name: Checkout release branch
+        id: release_branch
+        if: steps.preparation.outputs.requires_pull_request == 'true'
+        shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          TAG_NAME: ${{ steps.version.outputs.tag_name }}
+        run: |
+          set -euo pipefail
+
+          release_branch="release/${TAG_NAME}"
+          git fetch origin "${DEFAULT_BRANCH}"
+          remote_branch="$(git ls-remote --heads origin "refs/heads/${release_branch}")"
+          if [[ -n "${remote_branch}" ]]; then
+            git fetch origin "${release_branch}:refs/remotes/origin/${release_branch}"
+            if ! git merge-base --is-ancestor "origin/${DEFAULT_BRANCH}" "origin/${release_branch}"; then
+              echo "Existing ${release_branch} is not based on the current origin/${DEFAULT_BRANCH}." >&2
+              exit 1
+            fi
+            git checkout -B "${release_branch}" "origin/${release_branch}"
+          else
+            git checkout -b "${release_branch}" "origin/${DEFAULT_BRANCH}"
+            git push --set-upstream origin "${release_branch}"
+          fi
+
+          echo "name=${release_branch}" >> "${GITHUB_OUTPUT}"
+
+      - name: Prepare release bundle
+        if: steps.preparation.outputs.requires_pull_request == 'true'
+        uses: mackysoft/agent-distribution/actions/release@5.0.0
+        with:
+          root: bundle
+          bundle-version: ${{ steps.bundle_version.outputs.version }}
+
+      - name: Capture prepared release commit
+        id: prepared
+        if: steps.preparation.outputs.requires_pull_request == 'true'
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
+
+      - name: Verify and merge release pull request
+        id: release_pull_request
+        if: steps.preparation.outputs.requires_pull_request == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          ./scripts/merge-release-pull-request.sh
+          --repository "${GITHUB_REPOSITORY}"
+          --default-branch "${{ github.event.repository.default_branch }}"
+          --release-branch "${{ steps.release_branch.outputs.name }}"
+          --expected-sha "${{ steps.prepared.outputs.sha }}"
+
+      - name: Resolve release source
+        id: source
+        shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          MERGE_SHA: ${{ steps.release_pull_request.outputs.merge_sha }}
+          REQUIRES_PULL_REQUEST: ${{ steps.preparation.outputs.requires_pull_request }}
+        run: |
+          set -euo pipefail
+
+          git fetch origin "${DEFAULT_BRANCH}"
+          default_branch_sha="$(git rev-parse "origin/${DEFAULT_BRANCH}")"
+          release_sha="${default_branch_sha}"
+          if [[ "${REQUIRES_PULL_REQUEST}" == "true" ]]; then
+            release_sha="${MERGE_SHA}"
+          fi
+
+          if [[ -z "${release_sha}" || "${release_sha}" != "${default_branch_sha}" ]]; then
+            echo "Release source must be the current origin/${DEFAULT_BRANCH} tip. Release sha: ${release_sha:-<empty>}. Default branch sha: ${default_branch_sha}." >&2
             exit 1
           fi
 
           echo "release_sha=${release_sha}" >> "${GITHUB_OUTPUT}"
 
       - name: Create and push release tag
-        if: github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           TAG_NAME: ${{ steps.version.outputs.tag_name }}
@@ -88,6 +201,7 @@ jobs:
 
   publish:
     needs: prepare-release
+    if: ${{ always() && (github.event_name == 'push' || needs.prepare-release.result == 'success') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -98,21 +212,51 @@ jobs:
         shell: bash
 
     steps:
+      - name: Resolve release source
+        id: source
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PREPARED_RELEASE_SHA: ${{ needs.prepare-release.outputs.release_sha }}
+        run: |
+          set -euo pipefail
+
+          release_sha="${GITHUB_SHA}"
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            release_sha="${PREPARED_RELEASE_SHA}"
+          fi
+
+          if [[ -z "${release_sha}" ]]; then
+            echo "Release commit could not be resolved for ${EVENT_NAME}." >&2
+            exit 1
+          fi
+
+          echo "release_sha=${release_sha}" >> "${GITHUB_OUTPUT}"
+
       - name: Checkout
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          ref: ${{ needs.prepare-release.outputs.release_sha }}
+          ref: ${{ steps.source.outputs.release_sha }}
+
+      - name: Resolve package version
+        id: version
+        env:
+          DISPATCH_TAG: ${{ needs.prepare-release.outputs.tag_name }}
+        run: >-
+          ./scripts/resolve-release-version.sh
+          --dispatch-tag "${DISPATCH_TAG}"
+          --event-name "${GITHUB_EVENT_NAME}"
+          --ref-name "${GITHUB_REF_NAME}"
 
       - name: Guard checked out release source
         uses: mackysoft/actions/release/source-guard@v1
         with:
-          tag-name: ${{ needs.prepare-release.outputs.tag_name }}
+          tag-name: ${{ steps.version.outputs.tag_name }}
           default-branch: ${{ github.event.repository.default_branch }}
-          expected-release-sha: ${{ needs.prepare-release.outputs.release_sha }}
+          expected-release-sha: ${{ steps.source.outputs.release_sha }}
 
       - name: Verify Agent Distribution
-        uses: mackysoft/agent-distribution/actions/verify@4.0.0
+        uses: mackysoft/agent-distribution/actions/verify@5.0.0
         with:
           root: bundle
 
@@ -128,7 +272,7 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('AgentBundle.slnx', '**/*.csproj') }}
 
       - name: Sync release package version
-        run: ./scripts/sync-package-version.sh --version "${{ needs.prepare-release.outputs.package_version }}"
+        run: ./scripts/sync-package-version.sh --version "${{ steps.version.outputs.package_version }}"
 
       - name: Restore
         run: dotnet restore AgentBundle.slnx
@@ -138,19 +282,19 @@ jobs:
           dotnet pack src/AgentBundle/AgentBundle.csproj
           --configuration Release
           --no-restore
-          -p:Version=${{ needs.prepare-release.outputs.package_version }}
-          -p:PackageVersion=${{ needs.prepare-release.outputs.package_version }}
+          -p:Version=${{ steps.version.outputs.package_version }}
+          -p:PackageVersion=${{ steps.version.outputs.package_version }}
           --output artifacts/packages
 
       - name: Smoke test CLI tool package
-        run: ./scripts/verify-cli-package.sh artifacts/packages "${{ needs.prepare-release.outputs.package_version }}"
+        run: ./scripts/verify-cli-package.sh artifacts/packages "${{ steps.version.outputs.package_version }}"
 
       - name: Inspect NuGet publication state
         id: nuget_state
         uses: mackysoft/actions/nuget/package-state@v1
         with:
           mode: inspect
-          package-version: ${{ needs.prepare-release.outputs.package_version }}
+          package-version: ${{ steps.version.outputs.package_version }}
           package-ids: |
             MackySoft.AgentBundle
 
@@ -177,7 +321,7 @@ jobs:
         uses: mackysoft/actions/nuget/package-state@v1
         with:
           mode: wait
-          package-version: ${{ needs.prepare-release.outputs.package_version }}
+          package-version: ${{ steps.version.outputs.package_version }}
           package-ids: |
             MackySoft.AgentBundle
           max-attempts: 90
@@ -186,8 +330,8 @@ jobs:
       - name: Mirror package to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          PACKAGE_VERSION: ${{ needs.prepare-release.outputs.package_version }}
-          RELEASE_TAG: ${{ needs.prepare-release.outputs.tag_name }}
+          PACKAGE_VERSION: ${{ steps.version.outputs.package_version }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag_name }}
           REPOSITORY: ${{ github.repository }}
         run: >-
           ./scripts/mirror-nuget-package-release.sh
