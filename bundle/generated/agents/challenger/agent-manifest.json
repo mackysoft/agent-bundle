@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "bundleVersion": 6,
+  "bundleVersion": 9,
   "catalogId": "com.mackysoft.agent-bundle",
   "agentName": "challenger",
   "displayName": "Challenger",
@@ -9,7 +9,7 @@
     "challenge"
   ],
   "contentDigest": "24be478783b2be410be5507f62390f376128f18160add5db4477146ccee55e2c",
-  "manifestDigest": "491e8da47bccfeb87b6dae1c3ecfd9f15498444a7d1cf52bb35e49fc676c4c1e",
+  "manifestDigest": "9a22d8c52b6bb8939b49bffa29727dbd2ceb33a67b2e260a89b05a3218cd0086",
   "hostArtifacts": [
     {
       "host": "claude-code",

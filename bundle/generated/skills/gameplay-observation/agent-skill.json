@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 9,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "game-planning",
+  "skillName": "gameplay-observation",
+  "displayName": "Gameplay Observation",
+  "description": "中立な観測要求をゲームプレイ観測の記録項目契約へ変換するか、汎用証拠パッケージから、対象プレイヤー、情報境界、理解、認識した選択肢、選択、行動、ゲームの応答、本人報告、証拠参照、適用範囲を追える報告用観測レコードへ対応付けるときに使う。",
+  "dependencies": [],
+  "contentDigest": "69ac59a51ebc6fe2bacac7022bca991a91f8ee74b31b621e37fbfdc1cbc9bb79",
+  "manifestDigest": "2b44545c942e6fb17a252827c2f022e5b09452788cb61b7c3d0813a610f74df9",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "31d886ff8e39d7345ce593c2a07b261bf9a9791595422156b1e564f056e92e70",
+      "materializedFrontmatterDigest": "d846f822a3548da29fb9d5dec4821a5670c650aa4b3cabfda336859ebaed214d"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "0c9d5523294f851d17824ea6917120f7c6d0935b971f8ff4ae8c82f83ceffea7"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "ac0ba3516fe2cab9e605aa99a6a3e596c88631af3f91d369fd220bb38eaedc6e"
+    }
+  ]
+}

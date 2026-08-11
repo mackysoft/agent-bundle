@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 2,
+  "bundleVersion": 9,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "agentName": "evidence-organizer",
+  "displayName": "Evidence Organizer",
+  "description": "凍結済みの対話セッション実行・証拠契約 envelope、生セッション結果、成果物参照を読み取り、完全性、時系列、要求と情報源の対応、不足および競合を追える汎用証拠パッケージへ整理する読み取り専用の実行主体が必要なときに使う。",
+  "skillDependencies": [
+    "claim-grounding"
+  ],
+  "contentDigest": "5f55d9d7b52612d8625dbe05abb75647474c413c805c88c244263364b4f77c33",
+  "manifestDigest": "3c30b7fabf5d5e1a9dc31c8a9adbc1a6fdf0ce2c05be68f9aebba154e3d03b06",
+  "hostArtifacts": [
+    {
+      "host": "claude-code",
+      "path": "hosts/claude-code/evidence-organizer.md",
+      "digest": "b0b5b4240fdca831d540d6fb733205e81da34dc0b0d7f6f88c3d70d262a9d570"
+    },
+    {
+      "host": "codex",
+      "path": "hosts/codex/evidence-organizer.toml",
+      "digest": "5a707982c531afd92be44afd4aa0f5178b432fc58a88cfc0765908acb85a170b"
+    },
+    {
+      "host": "github-copilot",
+      "path": "hosts/github-copilot/evidence-organizer.agent.md",
+      "digest": "0eafe953fcbba6d8ae5967610f32a91cc75e631883c86c53218bad5c22ae56cb"
+    }
+  ]
+}

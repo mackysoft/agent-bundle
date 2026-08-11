@@ -23,9 +23,9 @@ dotnet tool update --global MackySoft.AgentBundle
 The tool update replaces the CLI and its embedded bundle. It does not change Skill or custom agent files that are already installed in a host. Update and prune those files separately for every host and scope where you installed them, using the same selectors and applicable target overrides. Reuse `--target-dir` for Skill update, prune, and doctor; `--agent-target-dir` for custom-agent update, prune, and doctor; and `--skill-target-dir` for custom-agent update and doctor. For example:
 
 ```bash
-agent-bundle skills update --host codex --scope user --category basic,development
-agent-bundle agents update --host codex --scope user --agent architect,challenger,implementer,interactive-tester,operator,researcher,reviewer,verifier
-agent-bundle agents doctor --host codex --scope user --agent architect,challenger,implementer,interactive-tester,operator,researcher,reviewer,verifier
+agent-bundle skills update --host codex --scope user --category basic,development,game-planning
+agent-bundle agents update --host codex --scope user --agent architect,challenger,evidence-organizer,implementer,interactive-tester,operator,researcher,reviewer,verifier
+agent-bundle agents doctor --host codex --scope user --agent architect,challenger,evidence-organizer,implementer,interactive-tester,operator,researcher,reviewer,verifier
 ```
 
 If a release removes or renames a managed Skill or custom agent, clean up each old name explicitly after updating the tool. `update` does not prune removed entries:
@@ -69,8 +69,8 @@ dotnet tool install --global MackySoft.AgentBundle
 Finally, create installations owned by the new `com.mackysoft.agent-bundle` catalog with `agent-bundle`. For example:
 
 ```bash
-agent-bundle skills install --host codex --scope user --category basic,development
-agent-bundle agents install --host codex --scope user --agent architect,challenger,implementer,interactive-tester,operator,researcher,reviewer,verifier
+agent-bundle skills install --host codex --scope user --category basic,development,game-planning
+agent-bundle agents install --host codex --scope user --agent architect,challenger,evidence-organizer,implementer,interactive-tester,operator,researcher,reviewer,verifier
 ```
 
 Repeat the new installation for each required host and scope. Project-scope installations must be run for each repository with `--scope project --repository-root /path/to/repository`.
@@ -87,6 +87,12 @@ Install the development category into the current project for Codex:
 
 ```bash
 agent-bundle skills install --host codex --scope project --repository-root . --category development
+```
+
+Install the game planning category into the current project for Codex:
+
+```bash
+agent-bundle skills install --host codex --scope project --repository-root . --category game-planning
 ```
 
 Select exact skills or multiple categories with comma-separated values:
@@ -131,9 +137,15 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `claim-grounding` | `basic` | Ground claims in sources, evidence composition, adoption status, scope, and relationships. |
 | `custom-agent-authoring` | `development` | Create, update, and validate host-independent custom agent definitions and host bindings. |
 | `custom-agent-behavior-validation` | `development` | Exercise custom agents in isolated subagent runs and assess dispatch, runtime binding, behavior, handoff, and termination. |
+| `game-balance-analysis` | `game-planning` | Quantitatively model game rules to find viable ranges, dominant choices, failure conditions, and recovery paths. |
+| `game-design` | `game-planning` | Connect intended player experiences to player activity, game rules, feedback, and progression, and evaluate design hypotheses from gameplay observation records. |
+| `game-interface-design` | `game-planning` | Map gameplay information, actions, and outcomes to player-facing displays, controls, and interface states. |
+| `game-planning` | `game-planning` | Define the shared contract and semantic dependencies for mixed game-planning outcomes, then integrate specialist results. |
+| `gameplay-observation` | `game-planning` | Turn neutral observation requests and generic evidence packages into report-ready gameplay observation records without interpreting them. |
 | `issue-planner` | `development` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | `development` | Write, create, update, or review structured GitHub Issue bodies. |
-| `interactive-app-testing` | `development` | Exercise application changes through user paths and produce scoped findings and shareable evidence. |
+| `interactive-app-testing` | `development` | Design a frozen interactive execution-and-evidence envelope from user paths and interpret generic evidence packages into scoped comparison results and candidate findings. |
+| `interactive-session-execution` | `development` | Execute the execution portion of one frozen interactive execution-and-evidence envelope and return its raw action, wait, observation, media, and cleanup record. |
 | `orchestrator` | `development` | Manage one objective in the current task and bridge context and results among responsible subagents. |
 | `pr-merge` | `development` | Merge pull requests through continuous integration and branch cleanup. |
 | `pr-submit` | `development` | Verify, push, and create or update pull requests. |
@@ -162,9 +174,10 @@ Custom agents use one flat catalog namespace:
 | Agent | Purpose | Direct skill dependencies |
 | --- | --- | --- |
 | `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
-| `implementer` | Implements an agreed design, including natural-language artifacts, and reports implementation verification. | `code-authoring-rules`, `writing` |
-| `interactive-tester` | Exercises application changes through user paths and produces scoped findings and shareable media evidence. | `interactive-app-testing` |
 | `challenger` | Independently questions a candidate work direction from broad context and returns pre-adoption direction challenges with their impact scope. | `challenge` |
+| `evidence-organizer` | Organizes frozen evidence into a generic, traceable evidence package without interpretation. | `claim-grounding` |
+| `implementer` | Implements an agreed design, including natural-language artifacts, and reports implementation verification. | `code-authoring-rules`, `writing` |
+| `interactive-tester` | Executes the execution portion of one frozen interactive execution-and-evidence envelope and returns its raw session result unchanged. | `interactive-session-execution` |
 | `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
 | `verifier` | Determines acceptance evidence and its result. | `verification-gate` |
 | `researcher` | Collects bounded read-only evidence and reports unchecked areas. | `claim-grounding` |

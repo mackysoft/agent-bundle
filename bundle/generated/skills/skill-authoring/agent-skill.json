@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 9,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "skill-authoring",
@@ -8,12 +8,13 @@
   "description": "エージェントSkillを新規作成、更新、レビューするときに、必要性、単一責務、発火面、判断規則、自由度、フロー、Skill間の構成、本文と補助ファイルの情報配置を評価し、実際の利用文脈で意図した判断と成果へ到達できる作業契約に仕上げる。Skill本文の執筆、責務の分割、descriptionと依存関係の設計、構造検証、隔離した挙動検証と修正の反復で使う。",
   "dependencies": [
     "behavior-deviation-analysis",
+    "claim-grounding",
     "referent-modeling",
     "skill-behavior-validation",
     "writing"
   ],
-  "contentDigest": "259b94b11170069ae0b0ef8b8c528d8489dbf8ee389afdcf2b506ba507b977d2",
-  "manifestDigest": "c1420bea596c5a1b01a8d0ee3d5598f6bb6676cde959edd8ecdffdd5b806a2b3",
+  "contentDigest": "6509841e6b314b451b3557c515608bde24bee7397de65d5caebcafbb102d6b7a",
+  "manifestDigest": "f6b1eab29fef182b6e49dfcf086cfb49f3efaf1bc4ecb0d00f7523cca70ae2f8",
   "hostArtifacts": [
     {
       "host": "codex",

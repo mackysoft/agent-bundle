@@ -23,8 +23,8 @@ AgentBundle は、再利用可能な Skill と custom agent を一つの正規 b
 | `src/AgentBundle/` | .NET CLI 本体とパッケージ設定。 |
 | `src/AgentBundle/Hosting/Cli/Common/` | Agent Distribution の `skills` と `agents` resource group を登録する CLI 境界。 |
 | `src/AgentBundle/Hosting/Composition/` | DI と Agent Distribution runtime を構成する場所。 |
-| `scripts/` | bundle 生成、整形、テスト、パッケージ検証、リリースでローカルと CI が共有する入口。 |
-| `.github/workflows/` | bundle 同期、マルチプラットフォーム検証、パッケージ公開の自動化。 |
+| `scripts/` | bundle 生成、整形、ビルド、パッケージ検証、リリースでローカルと CI が共有する入口。 |
+| `.github/workflows/` | bundle 同期、変更検証、パッケージ公開の自動化。 |
 
 `AgentBundle.slnx` は本体のプロジェクト構成、`src/AgentBundle/AgentBundle.csproj` は global tool と生成済み bundle の同梱、`Directory.Build.props` は共通の NuGet メタデータ、`.config/dotnet-tools.json` は生成ツールの固定バージョンを所有する。
 
@@ -34,7 +34,7 @@ AgentBundle は、再利用可能な Skill と custom agent を一つの正規 b
 - `bundle/generated/**` にある digest、manifest、`agent-skill.json`、`agent-manifest.json`、host artifact は直接編集しない。
 - 正本を変更したら `bash scripts/generate-bundle.sh` を実行し、対応する生成差分を正本と同じ変更へ含める。
 - 公開パッケージの利用方法、カテゴリ、同梱 Skill または custom agent が変わる場合は、正本の内容を利用者向けに `README.md` へ反映する。
-- Skill カテゴリ、Skill または Agent 数、依存閉包、同梱物が変わる場合は、`scripts/verify-cli-package.sh` にあるカタログ、選択、`export`、`install` の期待値も確認する。
+- カタログと依存関係の整合は bundle の正本と `bash scripts/verify-bundle.sh` で確認する。`scripts/verify-cli-package.sh` は、生成済み bundle の同梱と、配布された CLI が Skill と custom agent のカタログを読み込めることを確認する。
 - `.github/workflows/bundle-sync.yaml` による push 後の同期を、ローカルでの生成と確認の代わりにしない。
 
 ## CLI と C# の変更
@@ -60,20 +60,19 @@ bash scripts/generate-bundle.sh
 bash scripts/verify-bundle.sh
 ```
 
-C# の変更中は、必要な範囲で整形とテストを実行する。
+C# の変更中は、必要な範囲で整形する。
 
 ```bash
 bash scripts/code-quality.sh format
-bash scripts/test-dotnet.sh
 ```
 
-完了前の標準検証は次のコマンドとする。これは生成物の整合、C# の書式、Release build、solution に登録されたテストを確認する。
+完了前の標準検証は次のコマンドとする。これは生成物の整合、C# の書式、Release build を確認する。
 
 ```bash
 bash scripts/verify.sh
 ```
 
-NuGet パッケージ、同梱物、カタログ選択、CLI の配布時契約へ影響する場合は、`verify.sh` に加えてパッケージのスモークテストも行う。通常開発時のバージョンは `Directory.Build.props` を確認する。
+NuGet パッケージ、同梱物、CLI の配線へ影響する場合は、`verify.sh` に加えてパッケージのスモークテストも行う。通常開発時のバージョンは `Directory.Build.props` を確認する。
 
 ```bash
 dotnet pack src/AgentBundle/AgentBundle.csproj \

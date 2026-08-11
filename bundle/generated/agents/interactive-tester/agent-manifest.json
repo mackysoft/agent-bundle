@@ -1,30 +1,30 @@
 {
   "schemaVersion": 2,
-  "bundleVersion": 6,
+  "bundleVersion": 9,
   "catalogId": "com.mackysoft.agent-bundle",
   "agentName": "interactive-tester",
   "displayName": "Interactive Tester",
-  "description": "変更または成果物を利用者経路で実際に使い、変更リスクから計画シナリオと探索範囲を選び、範囲付きの比較結果、候補所見、確認範囲、スクリーンショットや録画などの共有可能な証拠を作るときに使う。",
+  "description": "凍結済みの対話セッション実行・証拠契約 envelope の execution 部分に従って対象を実際に操作し、操作、待機、観測、媒体、停止、reset、後始末の生記録を変更せずに返す実行主体が必要なときに使う。",
   "skillDependencies": [
-    "interactive-app-testing"
+    "interactive-session-execution"
   ],
-  "contentDigest": "889be6d78c8a75c733de65a9e39b7edb1354569c5260e708b5f1fe54b0edfba0",
-  "manifestDigest": "e165718abae106b54123f7c14fc95f5349d685b6ce26ef054207a96bbe99a08a",
+  "contentDigest": "3026f8d249e24a96c08d715baca13a7292deb7c5db9900254b95cc982f14679e",
+  "manifestDigest": "e035443a5c12bfd1d7f38fd2d39540ebd8532dd6b3cfd6a48fe1e6aa166448d5",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/interactive-tester.md",
-      "digest": "34b2a7999ddcd0bed5acf6f882f3e1b1ea079bb63d644477e5f7c64dab95a48d"
+      "digest": "9bc5c8365ad3a17eabd37598655dc03f262fe211358058f359e8ce32c7cbe15a"
     },
     {
       "host": "codex",
       "path": "hosts/codex/interactive-tester.toml",
-      "digest": "b16013871156fe482da671a9ced6054cc552f5dc72a0c62428ae9c85bc1dbc58"
+      "digest": "a62743fad9530cdc9339f1f997fee8eebf62e7a5a9a38c75b41dff829e88ab64"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/interactive-tester.agent.md",
-      "digest": "8c742a5c20f8b4e158b114a5a048e05f56338cb7d556f7b6d4493e9d6bd1539f"
+      "digest": "862325868a8425898a5327385ebf5ab911bb922899f2a62575ae5b5238432680"
     }
   ]
 }

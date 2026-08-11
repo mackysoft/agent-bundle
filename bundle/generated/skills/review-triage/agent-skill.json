@@ -1,30 +1,30 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 9,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "review-triage",
   "displayName": "Review Triage",
-  "description": "レビュー所見を対象成果物、要求、契約、関連資料と照合し、妥当性と今回の対象との関係を分けて判断する。重複を統合し、`採用 / 却下 / 保留 / 要確認` に分類して対応方針へまとめる。",
+  "description": "レビュー所見を対象成果物、要求、契約、関連資料と照合し、妥当性と今回の対象との関係を分けて判断する。重複を統合し、`採用 / 却下 / 保留 / 要確認` に分類して対応方針へまとめる。過去に行われた採否の状態を記録から復元するだけの作業には使わない。",
   "dependencies": [
     "claim-grounding"
   ],
-  "contentDigest": "16dd939403c07be6eb90999e804979f95337c885dd9b96fdf00f2b1144424243",
-  "manifestDigest": "1f1b3d82b25b6bd578e7dc1a16c4e2d664fc9570f4d3b99a8da293e1da79565a",
+  "contentDigest": "2b2b49cc6617f0b33569ea94ab7e0cfe20540994d416c24a623163e5b59bdbea",
+  "manifestDigest": "7fe420fac4c3fbbbd434c281ded1185e0f0908637d10e1b7639c9dba262c8e99",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "48868d9b9d030f02fd9c0cfb5498248b0f5a3f541ab40f658a510ab478ce64fd",
-      "materializedFrontmatterDigest": "894dd64dc14a9682ebfe28778dbfe20392043613ee558894aafd1a4fa52c7258"
+      "digest": "f1c739139c2701bdae5a31efb047255f370e4f457e676b73eb49888a2da4b601",
+      "materializedFrontmatterDigest": "2c739b705e1307e80ef8215ef359244f449759f9a655c45e874265f16dd81ba2"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "9379a0e25350cc01d013727699f7867e7cf09572abd6e330be9f174e755eba87"
+      "materializedFrontmatterDigest": "c7abe627bb1fff360907ec0584a5599e19a191ac9c8c8a835694ef6958924862"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "a06bb72ba68338223ad7cf06b5023640d60743793526ab9be4475c851ec780bf"
+      "materializedFrontmatterDigest": "e019551cf604117cae8429a529c554bcb29b1400a3c1fc84630619a70153f530"
     }
   ]
 }

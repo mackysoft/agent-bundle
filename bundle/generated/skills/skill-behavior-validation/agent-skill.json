@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 9,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "skill-behavior-validation",
@@ -12,7 +12,7 @@
     "writing"
   ],
   "contentDigest": "9a6c4d3bf2a16c4ced449c6023b3ea2114f2f9a4057b737a98461a45e356159e",
-  "manifestDigest": "838c1c8f4706b5865ff20684a73fae3a15f8bec6b889a96f96b6404ca34fec9c",
+  "manifestDigest": "17f417f45d609603c90f81c4dc1d5f89ac86a3f630bd0b4017730d99ab3133d7",
   "hostArtifacts": [
     {
       "host": "codex",

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Gameplay Observation"
+  short_description: "中立な観測要求をゲームプレイ観測の記録項目契約へ変換するか、汎用証拠パッケージから、対象プレイヤー、情報境界、理解、認識した選択肢、選択、行動、ゲームの応答、本人報告、証拠参照、適用範囲を追える報告用観測レコードへ対応付けるときに使う。"
+  default_prompt: "Use $gameplay-observation to follow the Gameplay Observation workflow."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 9,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "supervisor",
@@ -10,7 +10,7 @@
     "orchestrator"
   ],
   "contentDigest": "569978782601d2e76dd9bbb494a028b8cc144097cded210bd7b96cb548aa32d5",
-  "manifestDigest": "27641fac229426ab31d842a95954dc1f6ac7528f3d7ffa3677e629f62fd23770",
+  "manifestDigest": "ec76bbc87a5b5776b829fedb927348ecc5068d7340a2b92df82bb0d2defe7144",
   "hostArtifacts": [
     {
       "host": "codex",
