@@ -5,26 +5,27 @@
   "category": "development",
   "skillName": "orchestrator",
   "displayName": "Orchestrator",
-  "description": "利用者が直接操作する現在のタスクを、一つの目的のオーケストレーターとして使うときに適用する。タスク全体の進行と完了責任を持ち、必要な成果へ分解し、判断難度、専門性、作業量、リスクに合うサブエージェントへ実務を割り当て、担当間の成果と文脈の引き渡し、修正、レビュー、検証、完了を管理する。",
+  "description": "利用者が直接操作する現在のタスクを、単一目的のオーケストレーターとして運用するときに適用する。一度適用したタスクでは、タスクの存続中、すべての後続入力へ継続して適用する。タスクでは同時に一つの目的を進行および完了管理し、成果の分解、サブエージェントへの割当、担当間の引き渡し、修正、レビュー、検証、成果報告を管理する。",
   "dependencies": [
+    "change-framing",
     "writing"
   ],
-  "contentDigest": "11f72afdccf11fda94600a5881cf7062fcce36564bc0283250785456d4784ac1",
-  "manifestDigest": "11ed668ab696121c794edc21fa07c5486c5a358fd3e2109c2807f287883f0c34",
+  "contentDigest": "64b2975bd7a6397e5737a4107a92bba126d043012d39d1f4bbec85f9a55b6575",
+  "manifestDigest": "ab514009e589f23aec8f0d9d8d95189efc6b24e7c0b2cc57888b4c980d0b2506",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "c148da2bea92d2d98148e14218ec5ffc73bce48eabcff7f951c7e71c285531de",
-      "materializedFrontmatterDigest": "06558d357d0473498224f26da1a6c4021f057d0385cc2fff2c5c86b4526a9f18"
+      "digest": "28eb80fc0f585d71c986f172bb2c6d42b84134a18d0bec9f6efab3120996ddea",
+      "materializedFrontmatterDigest": "d3bcfda78e77f98bbbf00a486847a6de6e1b10a1f38f91ccd87db81e44d58d8a"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "bb7e3511a5f17314d32d769bdff25469556037d032441d7dfc031489cf60f46e"
+      "materializedFrontmatterDigest": "cd5b1454fc04f7892ff2f9a7a014eaf934cc707a2b1b2d2f20c63ba9176f845c"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "e1ce3e1d32eb6b372a523bd26bc7c12fac4c5f45c5a9b6eb4418d9a1b94b2509"
+      "materializedFrontmatterDigest": "d4052ce32207e933b10304a95330e02f3c3d0a1f452b16364cd6c095fed0d79a"
     }
   ]
 }
