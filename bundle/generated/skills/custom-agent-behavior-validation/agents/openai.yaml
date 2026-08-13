@@ -1,6 +1,6 @@
 interface:
   display_name: "Custom Agent Behavior Validation"
-  short_description: "候補または更新済みのcustom agentについて、選択責務、実行主体、適用定義、host binding、実効設定、許可、行動、成果、follow-up、handoff、終了状態を検証条件へ変換し、隔離したsubagent実行から挙動を観測する。対象agentの同定結果とruntime証拠を照合し、シナリオごとの契約適合、逸脱、未検証範囲、再実行条件を残すときに使う。"
+  short_description: "候補または更新済みのcustom agentについて、選択責務、実行主体、適用定義、host binding、実効設定、許可、行動、成果、follow-up、handoff、終了状態を検証条件へ変換し、隔離したsubagent実行から挙動と資源使用を観測する。対象agentの同定結果、runtime証拠、トークン、所要時間、費用などの計測結果を照合し、シナリオごとの契約適合、資源効率、未検証範囲、再実行条件を残すときに使う。"
   default_prompt: "Use $custom-agent-behavior-validation to follow the Custom Agent Behavior Validation workflow."
 
 policy:
