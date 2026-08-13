@@ -7,8 +7,8 @@
   "displayName": "Orchestrator",
   "description": "利用者が直接操作する現在のタスクで、一つの目的を成果責務へ分解し、必要能力に一致するサブエージェントを割り当て、担当間の成果の引き渡し、依存、実行状態、完了または停止を統括するときに適用する。専門成果と対象状態の調査、作成、変更、監視、レビュー、検証は担当へ委ね、現在のタスクでは責務と担当の対応および割当理由を管理する。",
   "dependencies": [],
-  "contentDigest": "4fd7cce9e2feb16fb96bb176fb8e03020c1c1fa2a8a704c3014fae125ce4c23c",
-  "manifestDigest": "2f2ac108fc6e2b161ee3fef8154cfbd6118f8cb7ecfda1977302e60deaae18ae",
+  "contentDigest": "4ac4f6b567e532ea144e693cc0eb4ea9340b470f4be57a90e7360d321146dab3",
+  "manifestDigest": "3d9c0abedca549429a69caeb7b9e557e259236e39826669ae3049832a22f99b1",
   "hostArtifacts": [
     {
       "host": "codex",
