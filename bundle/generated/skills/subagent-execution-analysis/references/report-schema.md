@@ -27,6 +27,15 @@ executions[]
   behavior_action_coverage { assessment, evidence_refs, missing_reason }
   outcome { value, claim_kind, evidence_refs, missing_reason }
   terminal_state { value, claim_kind, evidence_refs, missing_reason }
+resource_usage[]
+  scope { kind: child | descendants | parent | end_to_end, refs[] }
+  metric, value | null, unit
+  claim_kind { observed | derived | unverified }, evidence_refs, missing_reason
+  calculation { formula, input_measurement_refs[], pricing_ref | null } | null
+pricing_basis[]
+  pricing_ref, provider, model_or_billing_class, currency, rates, effective_at
+  usage_mapping[] { usage_metric, relation: total | subset | independent, billing_class }
+  source_ref, claim_kind, evidence_refs, missing_reason
 effective_configuration[]
   execution_ref, setting
   definition_default { value, binding_refs[]: binding_id, claim_kind, evidence_refs, missing_reason }
@@ -62,6 +71,10 @@ re_evaluation_triggers[]
 不完全な tool または effect trace に基づく assessment は、対応する `behavior_action_observation_ref` を scope にする。execution 全体の action coverage は `behavior_action_coverage` で別に示し、未観測範囲が評価を変え得る場合は execution scope の assessment を `indeterminate` とする。`parent_lifecycle.task_complete` は lifecycle terminal の観測であり、成果契約の成功を単独で示さない。
 
 `executions[].terminal_state` は child の `task_complete` を含む lifecycle terminal observation である。`outcome` と成果への適合は別フィールドおよび別 assessment であり、product contract の追加根拠がない限り `task_complete` 単独から成功を導かない。
+
+`resource_usage` はexecutionの設定、行動、成果から独立したobservationである。runtimeが報告するtoken区分はmetric名と値を保持し、入力、出力、cache、reasoning、totalなど未報告の区分を補わない。経過時間は資源計測範囲が定めた開始と終了または停止のevent refsを入力にした `derived` とし、計測範囲と端点を追跡できるようにする。指定または観測できない端点は補わず、該当する経過時間を `unverified` とする。event数はcoverageが全件性を支える範囲だけを総数とし、それ以外は観測数として記録する。
+
+providerが報告した課金額は対応する課金記録を根拠に `observed` とする。token使用量から計算した費用は `derived` とし、使用したmeasurement、各usage metricの総量・内数・独立量の関係、課金区分へのmapping、計算式、`pricing_ref`を持つ。価格基準はprovider、modelまたは課金区分、通貨、単価、適用時点、source refを保持する。対応するruntime使用量、区分間の関係、課金記録、mapping、または価格基準がない指標は `value=null`、`claim_kind=unverified` とする。
 
 `child_handoffs` は child execution ごとの handoff を記録する。`handoff_coverage.value` は [handoff coverage](codex-runtime-evidence.md#handoff-coverage) の source 完全性評価を表す。`complete` は範囲内の各 started execution へ handoff event または不在を対応付けられる場合だけ、`partial` は既知の record または execution 対応の欠落がある場合、`unverified` は完全または部分を判定する source 保証がない場合に使う。`complete` で空配列なら範囲内に handoff はなく、`partial` または `unverified` で空配列の場合は不存在を断定しない。親の受領または利用は handoff の根拠であり、child 成果の適合を示さない。
 
