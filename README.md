@@ -136,7 +136,7 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `csharp-authoring-rules` | `development` | Apply C#-specific implementation and review judgment rules. |
 | `claim-grounding` | `basic` | Ground claims in sources, evidence composition, adoption status, scope, and relationships. |
 | `custom-agent-authoring` | `development` | Create, update, and validate host-independent custom agent definitions and host bindings. |
-| `custom-agent-behavior-validation` | `development` | Exercise custom agents in isolated subagent runs and assess dispatch, runtime binding, behavior, handoff, and termination. |
+| `custom-agent-behavior-validation` | `development` | Exercise custom agents in isolated subagent runs and assess dispatch, runtime binding, behavior, handoff, termination, and resource efficiency. |
 | `game-balance-analysis` | `game-planning` | Quantitatively model game rules to find viable ranges, dominant choices, failure conditions, and recovery paths. |
 | `game-design` | `game-planning` | Connect intended player experiences to player activity, game rules, feedback, and progression, and evaluate design hypotheses from gameplay observation records. |
 | `game-interface-design` | `game-planning` | Map gameplay information, actions, and outcomes to player-facing displays, controls, and interface states. |
@@ -155,7 +155,7 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `skill-authoring` | `development` | Create, update, and review behaviorally effective agent skills. |
 | `skill-behavior-validation` | `development` | Exercise agent Skills in isolated scenarios and report contract conformance, gaps, and rerun scope. |
 | `supervisor` | `development` | Route independent objectives to user-operable tasks that apply the orchestrator Skill. |
-| `subagent-execution-analysis` | `development` | Reconstruct and assess subagent spawn attempts and child executions from runtime evidence. |
+| `subagent-execution-analysis` | `development` | Reconstruct subagent executions, lifecycle, configuration, actions, and resource usage from runtime evidence. |
 | `sync-latest` | `development` | Fetch remotes and safely synchronize a worktree with the right base. |
 | `test-authoring` | `development` | Design, update, and consolidate minimal contract-based test suites. |
 | `test-oracle-assessment` | `development` | Assess whether test judgments are contract-aligned, independently derived, and supported by detection evidence. |

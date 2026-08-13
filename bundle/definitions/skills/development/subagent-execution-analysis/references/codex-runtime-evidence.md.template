@@ -11,6 +11,7 @@
 | follow-up | 同じ child thread に配送された継続入力。 | 新しい execution の開始。 |
 | runtime configuration | runtime event または child metadata に記録された effective model、effort、sandbox、approval、permission、tool、MCP、skills。 | definition default、actual action。 |
 | actual action | child transcript、tool call、effect、成果物または外部状態の観測。 | 許可された全作用、hidden reasoning、token、cost。 |
+| resource usage | executionへ対応するruntime使用量、開始・終了event、providerの課金記録。 | runtimeが報告しないtoken区分、hidden reasoningの内容、executionへ対応付けられない費用。 |
 | definition | runtime-bound snapshot、digest、bundle version、scope、時点と対応する定義。 | runtime がその定義を実際に適用したこと。 |
 | parent handoff | 親 transcript、受領記録、child 結果への参照、後続入力。 | 暗号化または欠落した child 成果の成果契約への適合。 |
 | parent lifecycle | 親 runtime の terminal event または `task_complete`。 | 成果契約が成功したこと。 |
@@ -50,5 +51,7 @@ definition が read-only を定め、runtime effective configuration が danger-
 prompt が暗号化されていて内容を観測できない場合、prompt 内容は `unverified` とする。title、summary、filename、process UUID、estimated_bytes、現在の TOML 一致は、過去の definition binding を `exact` にする根拠ではない。
 
 tool または effect trace が不完全な場合、確認できた behavior/action observation には限定した assessment を付けられる。execution 全体の action coverage と assessment は別にし、未観測範囲が結果を変え得る場合は全体を `indeterminate` とする。
+
+runtime使用量はexecutionまたは計測範囲へ対応するrecordだけを直接観測として使う。token区分はsourceの名称、値、区分間の関係を保持する。資源計測範囲が定めた開始・終了・停止eventから経過時間を導出し、使用したevent refsと端点を残す。課金額はproviderの課金記録を直接観測とし、token使用量から算出する場合はusage metricと課金区分のmapping、時点付き価格基準を別の根拠として保持する。
 
 child の `task_complete` は `terminal_state` の観測値として execution に記録する。outcome と成果への適合は別の observation と assessment であり、product contract の追加根拠がない限り、`task_complete` 単独から成功を導かない。
