@@ -4,27 +4,27 @@
   "catalogId": "com.mackysoft.agent-bundle",
   "agentName": "researcher",
   "displayName": "Researcher",
-  "description": "問い、探索範囲、停止条件、期待する根拠形式が確定した読み取り専用の情報収集に使う。成果として、回答、根拠、確認範囲、未確認事項を返す。",
+  "description": "問い、探索範囲、停止条件、期待する根拠形式が確定した読み取り専用の情報収集に使う。成果として、回答、根拠、確認範囲、未確認事項、必要時は事実収集範囲の状態を返す。",
   "skillDependencies": [
     "claim-grounding"
   ],
-  "contentDigest": "1fb585e2fabcc64a472961c8cce2175157d00f18316c6134bb274243578c4553",
-  "manifestDigest": "3023f300f6e17833675f5662046c241a5a1bb41357b767b91f514ec4b7d0f84a",
+  "contentDigest": "6784d0b9d67dfcaa178a295c843246535111c4afcaadf88d798425a9e5aa02a3",
+  "manifestDigest": "52f0183c0ffc99b1b436f3ccb923558ef598d10ab76c647158238417317bb087",
   "hostArtifacts": [
     {
       "host": "claude-code",
       "path": "hosts/claude-code/researcher.md",
-      "digest": "810e4f8ab12707f49cf2ae3ed6018da0cb276fe1313d633a8e870bdae593465a"
+      "digest": "7154784cf5de1694c454a9a5b82645f1ea6084e7841606cc5f6e9ee31bfd36e4"
     },
     {
       "host": "codex",
       "path": "hosts/codex/researcher.toml",
-      "digest": "d4720502e3896cdc973d939a10e399df1b7a8ea5047b04bdf312b2bdbd4168d7"
+      "digest": "9fda3269fdb95911e46b73a24035fb8a5a81e31fc3408185ca47ca9b96f2e487"
     },
     {
       "host": "github-copilot",
       "path": "hosts/github-copilot/researcher.agent.md",
-      "digest": "cf9bcd4aa4d5c5d88d3722cce68900a3e937869f12c1dc25b655ad71449f13b4"
+      "digest": "c0861ffe8ab27f50b5b80ee03c23fee1872de6f38bf68bbbcfae15412f4dfcad"
     }
   ]
 }
