@@ -5,27 +5,26 @@
   "category": "basic",
   "skillName": "challenge",
   "displayName": "Challenge",
-  "description": "現在の問題設定、主要前提、作業分解、責務境界、設計または実装方針が後続作業を拘束する場面で、全体目的、権限ある規範、周辺責務、既存経路、下流影響、作業経過に照らしてその方向を反証し、採否前の異議候補と影響範囲を返す。方向判断を変え得る論点がない場合は確認範囲を、評価材料が不足する場合は不足する文脈と再評価条件を、方向選択がない場合は非適用の理由を返す。",
+  "description": "計画、設計、成果物、コード、文章、リポジトリ構造にある具体的な選択を、目的、要求、維持する契約、周辺文脈に照らして批判的に点検する。選択の理由が弱い、不自然な責務または抽象化、重複、不要な間接化、特殊扱い、不整合、脆さ、説明と実体のずれを具体的な観測から示せる場合に、意図、必要性、守る条件、別の形では成立しない理由を問う非ブロッキングなチャレンジを返す。問いがなければ確認範囲を、評価材料が足りなければ不足する判断または根拠と再評価条件を返す。",
   "dependencies": [
-    "change-framing",
     "claim-grounding"
   ],
-  "contentDigest": "9484cde2c49b2fb7ed22b899b9672461207c329b8fcc724496deb71515a82355",
-  "manifestDigest": "9b6897dc054f96c90f27652d852a24e831941c1b17af4eadbf7125a86e83b682",
+  "contentDigest": "d60d34324981a7b83961f8952298b8929e7b16c609f02ef8c6ecbd7613a3ef82",
+  "manifestDigest": "38fc4e73b521e0db7abe68e641081265e46975d96e0921a6ccbccdb0b69ae5a4",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "54c16109d7f23a463115cc24ce1d2cbe152f4af4f6f042666c235488adf9eb28",
-      "materializedFrontmatterDigest": "144a011d203497ce4c7a55e7b98423ee7bab298d4102916d44c6f64a3d2210f3"
+      "digest": "20c1607a5709f84c0c7d8a8477d739cec57df8896525b84b0d4c8ca5971f2dd5",
+      "materializedFrontmatterDigest": "67e8e0087b04f79d139d1d46341a56a6bd757235198acebf52c746af9e01a97f"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "eb88e003c66d051b2d09b76c54580892fc9272ef2a6afd45aa7765e645fc5e25"
+      "materializedFrontmatterDigest": "e480a3e404fdc7d38ea7b7976220cfae6c117dc7f6da78cc6261402129c2d9b8"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "d9ac7a191e1417782f14863b52c4aa13d2e041159cbea8bb98fc8fae86aa1f9f"
+      "materializedFrontmatterDigest": "dbb0d0fc3e23f2e3e5ccd9cde7c8cc896a782d3237f132c00ac09ab3bfe525ee"
     }
   ]
 }

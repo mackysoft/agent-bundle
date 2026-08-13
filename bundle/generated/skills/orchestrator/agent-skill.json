@@ -10,8 +10,8 @@
     "change-framing",
     "writing"
   ],
-  "contentDigest": "22427240e2b9ac234aaae58b085e10db578cfca706f4d0fc407f0d53a6e00b73",
-  "manifestDigest": "f6b0a92f44e7fd44e99d409133638360aa2455eb5f1a428ea02458c5e5791d53",
+  "contentDigest": "3fbc83f92e3ea263c0a24b3fdc5e34161ae61ce92d11b987145312b60f66970f",
+  "manifestDigest": "7d0390167200b36345944a9e303936a6535d6ef3dd06bbda56ff98f2f1bf50ee",
   "hostArtifacts": [
     {
       "host": "codex",
