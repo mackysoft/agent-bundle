@@ -5,26 +5,26 @@
   "category": "development",
   "skillName": "supervisor",
   "displayName": "Supervisor",
-  "description": "利用者が直接操作する現在のタスクを、複数の独立した目的の割当管理を行うスーパーバイザーとして運用するときに適用する。一度適用したタスクでは、タスクの存続中、すべての後続入力へ継続して適用する。目的と既存タスクの対応から新規、継続、重複、要確認を判定し、許可された新規タスクへ $orchestrator と受領内容を引き渡すか、既存タスクへ追加内容を届け、目的と割当先の対応を返す。",
+  "description": "利用者が直接操作する現在のタスクで、受領内容を独立した目的へ分別し、目的境界と既存タスクの統括責務から新規、継続、分割、重複、要確認を判定するときに適用する。目的ごとに $orchestrator を適用する新規タスクを作成するか既存タスクへ追加内容を届け、目的、判定理由、割当先、引き渡し状態を管理する。",
   "dependencies": [
     "orchestrator"
   ],
-  "contentDigest": "f0ccac7caff78fd29dc5244a125674227b3efaaf87e949a904976b62168b0f73",
-  "manifestDigest": "44e5f5bc13d28446ea9a17a343c1287ff279174b247e1ae5b8f07669a0c8e74b",
+  "contentDigest": "3bc4ae98ca83e7aea8db04c667bfb64437c8b87c44ef1a26f83be38675e43c5b",
+  "manifestDigest": "7c8470a7f68781f0f0fbc3005b03488f5c3b18359e3cb715f993d450e81faeb6",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "651f2eca5a903ada3b45e60869d5db42cc04e0e54651389911745cff3fcb6e28",
-      "materializedFrontmatterDigest": "de6ff26273793d27be821c639bd68f91710cc83aec70fcb5eb5f0ec0448115f3"
+      "digest": "ff713d1d981c2621aa46330d67dfeb11a6d9ab0c3a0c9802b7c6c7a3bfd4fcfc",
+      "materializedFrontmatterDigest": "2385307028d7790826f1612e0366bdacc851f88cc3e4999918d352af4231410c"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "c43feb5b615261fb90c82c5b120b6156461f5c43506c37c3ab4b2c6d4fd8d0ff"
+      "materializedFrontmatterDigest": "60aab8c3f60a6ef4bd89e7aae90706b150feb3431ae2258f070440e84b6a187b"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "b207eeacf1ac596942b7afa9679e238d2a81b52790785e8a2f7027a47ebec316"
+      "materializedFrontmatterDigest": "505eb8962779e70210821fbc0d974a5acfb302682e08652f15f3de8133abec92"
     }
   ]
 }

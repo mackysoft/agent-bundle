@@ -146,7 +146,7 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `issue-writer` | `development` | Write, create, update, or review structured GitHub Issue bodies. |
 | `interactive-app-testing` | `development` | Design a frozen interactive execution-and-evidence envelope from user paths and interpret generic evidence packages into scoped comparison results and candidate findings. |
 | `interactive-session-execution` | `development` | Execute the execution portion of one frozen interactive execution-and-evidence envelope and return its raw action, wait, observation, media, and cleanup record. |
-| `orchestrator` | `development` | Manage one objective in the current task and bridge context and results among responsible subagents. |
+| `orchestrator` | `development` | Allocate one objective's outcome responsibilities to capable subagents and manage their handoffs, dependencies, and execution states. |
 | `pr-merge` | `development` | Merge pull requests through continuous integration and branch cleanup. |
 | `pr-submit` | `development` | Verify, push, and create or update pull requests. |
 | `push` | `development` | Commit pending work when needed and push the current branch safely. |
@@ -154,7 +154,7 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `review-triage` | `development` | Triage review comments against code, specifications, and evidence. |
 | `skill-authoring` | `development` | Create, update, and review behaviorally effective agent skills. |
 | `skill-behavior-validation` | `development` | Exercise agent Skills in isolated scenarios and report contract conformance, gaps, and rerun scope. |
-| `supervisor` | `development` | Route independent objectives to user-operable tasks that apply the orchestrator Skill. |
+| `supervisor` | `development` | Classify received work into independent objectives and create, update, or split user-operable tasks that apply the orchestrator Skill. |
 | `subagent-execution-analysis` | `development` | Reconstruct subagent executions, lifecycle, configuration, actions, and resource usage from runtime evidence. |
 | `sync-latest` | `development` | Fetch remotes and safely synchronize a worktree with the right base. |
 | `test-authoring` | `development` | Design, update, and consolidate minimal contract-based test suites. |
@@ -165,7 +165,9 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `writing` | `basic` | Write, revise, review, summarize, and localize text while preserving meaning and ownership boundaries. |
 | `xml-doc-writer` | `development` | Write contract-focused XML documentation comments. |
 
-Supervisor and Orchestrator are Skills applied in tasks that the user can open and continue. Supervisor only assigns each independent objective to a new or existing task and applies `$orchestrator` in each new task. Orchestrator manages one objective inside that task and bridges the required context and results among leaf custom agents; it does not perform their specialized work. These Skills use the current task's model, reasoning level, and permissions rather than Agent host bindings.
+Supervisor and Orchestrator are Skills applied in tasks that the user can open and continue. Supervisor performs task-level orchestration: it separates received work by objective and completion boundary, decides whether to create, update, or split tasks, and applies `$orchestrator` in each new task. Orchestrator performs within-task orchestration: it decomposes one objective into outcome responsibilities, selects capable subagents, and manages their handoffs, dependencies, and execution states. Both roots remain on the coordination plane and assign domain research, artifact changes, target monitoring, review, and verification to responsible subagents. After an allocation cycle completes, they wait for new input instead of monitoring assigned work.
+
+Supervisor and Orchestrator use the current task's model, reasoning level, and permissions as their coordination capacity. Leaf custom agents use the settings defined by their host bindings and defer unspecified settings to the host runtime unless the user explicitly requests an override.
 
 ## Included custom agents
 
@@ -184,8 +186,6 @@ Custom agents use one flat catalog namespace:
 | `operator` | Performs a fully specified closed action, including waiting for a long-running or external execution, and reports its terminal result or configured stop state. | None |
 
 Agent bindings materialize as host-specific files while `AGENT.md` remains host-independent. The package intentionally does not install or maintain host-shared configuration files.
-
-When the Orchestrator Skill handles natural-language changes, it assigns the change to an implementer and requires a separate read-only reviewer to audit the latest candidate with the `writing` contract. Accepted findings return to implementation, and the revised candidate is audited again before completion.
 
 ## Supported hosts
 
