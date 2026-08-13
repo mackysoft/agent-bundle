@@ -128,7 +128,7 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | --- | --- | --- |
 | `behavior-deviation-analysis` | `development` | Attribute behavior deviations to evidence-backed causes, repair owners, and revalidation scope. |
 | `branch-create` | `development` | Create or reuse task branches while preserving detached or uncommitted work. |
-| `challenge` | `basic` | Challenge a candidate work direction against broader goals, responsibilities, existing paths, downstream effects, and work trajectory. |
+| `challenge` | `basic` | Critically question concrete choices in plans and artifacts when evidence shows a weak rationale, mismatch, unnecessary indirection, duplication, or brittleness; return all independent, meaningful questions. |
 | `changelog` | `development` | Write reader-facing changelogs, release notes, and pull request change summaries. |
 | `change-framing` | `basic` | Reconstruct change purpose, authority, contract changes, permissions, acceptance conditions, implementation constraints, and unresolved decisions. |
 | `code-authoring-rules` | `development` | Apply language-independent code design and authoring rules. |
@@ -174,7 +174,7 @@ Custom agents use one flat catalog namespace:
 | Agent | Purpose | Direct skill dependencies |
 | --- | --- | --- |
 | `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
-| `challenger` | Independently questions a candidate work direction from broad context and returns pre-adoption direction challenges with their impact scope. | `challenge` |
+| `challenger` | Returns non-blocking, evidence-backed challenges to questionable concrete choices in plans and artifacts. | `challenge` |
 | `evidence-organizer` | Organizes frozen evidence into a generic, traceable evidence package without interpretation. | `claim-grounding` |
 | `implementer` | Implements an agreed design, including natural-language artifacts, and reports implementation verification. | `code-authoring-rules`, `writing` |
 | `interactive-tester` | Executes the execution portion of one frozen interactive execution-and-evidence envelope and returns its raw session result unchanged. | `interactive-session-execution` |
