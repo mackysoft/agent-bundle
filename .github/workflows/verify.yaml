@@ -7,13 +7,22 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - "**"
   workflow_dispatch:
     inputs:
       expected_sha:
         description: Commit SHA that a synchronizing workflow expects this run to verify.
         required: false
         type: string
+      bundle_operation:
+        description: Bundle version ownership rule for this exact commit.
+        required: false
+        default: verify
+        type: choice
+        options:
+          - verify
+          - verify-release
+          - verify-default-branch
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,6 +37,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
       - name: Guard synchronized commit
         env:
           ACTUAL_SHA: ${{ github.sha }}
@@ -38,32 +52,47 @@ jobs:
             exit 1
           fi
 
-  bundle:
-    name: agent distribution bundle
+      - name: Resolve latest published release
+        id: published_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release_tag="$(bash scripts/resolve-latest-release-tag.sh --repository "${GITHUB_REPOSITORY}")"
+          echo "tag=${release_tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Guard bundle version ownership
+        env:
+          DISPATCH_OPERATION: ${{ inputs.bundle_operation }}
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+
+          operation="verify"
+          if [[ "${EVENT_NAME}" == "push" && "${REF_NAME}" == "${DEFAULT_BRANCH}" ]]; then
+            operation="verify-default-branch"
+          elif [[ "${EVENT_NAME}" == "push" && "${REF_NAME}" == release/* ]]; then
+            if [[ "${REF_NAME}" =~ ^release/[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              operation="verify-release"
+            else
+              echo "Release branch must use release/<major>.<minor>.<patch> format: ${REF_NAME}" >&2
+              exit 1
+            fi
+          elif [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            operation="${DISPATCH_OPERATION:-verify}"
+          fi
+
+          bash scripts/resolve-bundle-operation-version.sh \
+            --operation "${operation}" \
+            --root bundle \
+            --base-ref "refs/tags/${{ steps.published_release.outputs.tag }}"
+
+  verify:
+    name: verify
     needs: source
     runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Verify Agent Distribution
-        uses: mackysoft/agent-distribution/actions/verify@4.0.0
-        with:
-          root: bundle
-
-  dotnet:
-    name: dotnet (${{ matrix.os }})
-    needs: source
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
 
     defaults:
       run:
@@ -89,57 +118,18 @@ jobs:
       - name: Restore
         run: dotnet restore "$DOTNET_SOLUTION"
 
-      - name: Verify code
+      - name: Verify source and generated bundle
         run: >-
           bash scripts/verify.sh
           --no-restore
           --solution "$DOTNET_SOLUTION"
           --configuration Release
-          --
-          --logger "trx;LogFileName=${{ matrix.os }}.trx"
-          --results-directory "artifacts/test-results/${{ matrix.os }}"
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: dotnet-test-results-${{ matrix.os }}
-          path: artifacts/test-results/${{ matrix.os }}
-          if-no-files-found: warn
-
-  package:
-    name: package
-    needs:
-      - bundle
-      - dotnet
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        shell: bash
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 10.0.x
-
-      - name: Cache NuGet packages
-        uses: actions/cache@v5
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('AgentBundle.slnx', '**/*.csproj', '.config/dotnet-tools.json') }}
-
-      - name: Restore
-        run: dotnet restore "$DOTNET_SOLUTION"
 
       - name: Pack CLI tool
         run: >-
           dotnet pack src/AgentBundle/AgentBundle.csproj
           --configuration Release
+          --no-build
           --no-restore
           --output artifacts/packages
 
@@ -151,9 +141,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - source
-      - bundle
-      - dotnet
-      - package
+      - verify
     if: always()
 
     steps:
@@ -161,13 +149,11 @@ jobs:
         shell: bash
         env:
           SOURCE_RESULT: ${{ needs.source.result }}
-          BUNDLE_RESULT: ${{ needs.bundle.result }}
-          DOTNET_RESULT: ${{ needs.dotnet.result }}
-          PACKAGE_RESULT: ${{ needs.package.result }}
+          VERIFY_RESULT: ${{ needs.verify.result }}
         run: |
           set -euo pipefail
 
-          for job in SOURCE BUNDLE DOTNET PACKAGE; do
+          for job in SOURCE VERIFY; do
             result_variable="${job}_RESULT"
             result="${!result_variable}"
             if [[ "${result}" != "success" ]]; then

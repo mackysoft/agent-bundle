@@ -23,8 +23,8 @@ AgentBundle は、再利用可能な Skill と custom agent を一つの正規 b
 | `src/AgentBundle/` | .NET CLI 本体とパッケージ設定。 |
 | `src/AgentBundle/Hosting/Cli/Common/` | Agent Distribution の `skills` と `agents` resource group を登録する CLI 境界。 |
 | `src/AgentBundle/Hosting/Composition/` | DI と Agent Distribution runtime を構成する場所。 |
-| `scripts/` | bundle 生成、整形、テスト、パッケージ検証、リリースでローカルと CI が共有する入口。 |
-| `.github/workflows/` | bundle 同期、マルチプラットフォーム検証、パッケージ公開の自動化。 |
+| `scripts/` | bundle 生成、整形、ビルド、パッケージ検証、リリースでローカルと CI が共有する入口。 |
+| `.github/workflows/` | bundle 同期、変更検証、パッケージ公開の自動化。 |
 
 `AgentBundle.slnx` は本体のプロジェクト構成、`src/AgentBundle/AgentBundle.csproj` は global tool と生成済み bundle の同梱、`Directory.Build.props` は共通の NuGet メタデータ、`.config/dotnet-tools.json` は生成ツールの固定バージョンを所有する。
 
@@ -33,8 +33,9 @@ AgentBundle は、再利用可能な Skill と custom agent を一つの正規 b
 - Skill と custom agent の追加、本文、description、依存関係、参照資料、host binding は `bundle/definitions/**` で変更する。
 - `bundle/generated/**` にある digest、manifest、`agent-skill.json`、`agent-manifest.json`、host artifact は直接編集しない。
 - 正本を変更したら `bash scripts/generate-bundle.sh` を実行し、対応する生成差分を正本と同じ変更へ含める。
+- 通常のローカル生成、bundle 同期、機能変更では `bundle/bundle.json` の `bundleVersion` を変更しない。通常のブランチおよび pull request の検証は、最新の公開 GitHub Release と同じ値だけを受け入れる。検証済みリリース候補を既定ブランチへ昇格した後の既定ブランチ push 検証だけは、公開前の次の値も受け入れる。
 - 公開パッケージの利用方法、カテゴリ、同梱 Skill または custom agent が変わる場合は、正本の内容を利用者向けに `README.md` へ反映する。
-- Skill カテゴリ、Skill または Agent 数、依存閉包、同梱物が変わる場合は、`scripts/verify-cli-package.sh` にあるカタログ、選択、`export`、`install` の期待値も確認する。
+- カタログと依存関係の整合は bundle の正本と `bash scripts/verify-bundle.sh` で確認する。`scripts/verify-cli-package.sh` は、生成済み bundle の同梱と、配布された CLI が Skill と custom agent のカタログを読み込めることを確認する。
 - `.github/workflows/bundle-sync.yaml` による push 後の同期を、ローカルでの生成と確認の代わりにしない。
 
 ## CLI と C# の変更
@@ -60,20 +61,19 @@ bash scripts/generate-bundle.sh
 bash scripts/verify-bundle.sh
 ```
 
-C# の変更中は、必要な範囲で整形とテストを実行する。
+C# の変更中は、必要な範囲で整形する。
 
 ```bash
 bash scripts/code-quality.sh format
-bash scripts/test-dotnet.sh
 ```
 
-完了前の標準検証は次のコマンドとする。これは生成物の整合、C# の書式、Release build、solution に登録されたテストを確認する。
+完了前の標準検証は次のコマンドとする。これは生成物の整合、C# の書式、Release build を確認する。
 
 ```bash
 bash scripts/verify.sh
 ```
 
-NuGet パッケージ、同梱物、カタログ選択、CLI の配布時契約へ影響する場合は、`verify.sh` に加えてパッケージのスモークテストも行う。通常開発時のバージョンは `Directory.Build.props` を確認する。
+NuGet パッケージ、同梱物、CLI の配線へ影響する場合は、`verify.sh` に加えてパッケージのスモークテストも行う。通常開発時のバージョンは `Directory.Build.props` を確認する。
 
 ```bash
 dotnet pack src/AgentBundle/AgentBundle.csproj \
@@ -87,7 +87,7 @@ bash scripts/verify-cli-package.sh artifacts/packages <package-version>
 
 ## リリース
 
-リリース処理の正本は `.github/workflows/package-publish.yaml` と、そこから呼び出す `scripts/` のリリース用スクリプトである。タグは接頭辞なしの `<major>.<minor>.<patch>` 形式を使用する。ワークフローは、リリース元の検証、バージョン反映、`pack`、スモークテスト、NuGet.org への公開、公開確認、GitHub Release への反映を所有する。明示的なリリース依頼がない通常作業では、タグ作成、パッケージ公開、グローバル環境の更新を行わない。
+リリース処理の正本は `.github/workflows/package-publish.yaml` と、そこから呼び出す `scripts/` のリリース用スクリプトである。タグは接頭辞なしの `<major>.<minor>.<patch>` 形式を使用する。リリースは既定ブランチから `workflow_dispatch` で明示的に実行し、最新の公開 GitHub Release の bundle version から次の値を一度だけ解決する。Agent Distribution の release action は `release/<version>` の一時 ref に候補コミットを一つだけ作る。候補は開始時点の既定ブランチ先頭の直子であり、`bundle/bundle.json` と `bundle/generated/**` 以外を変更してはならない。候補の昇格証拠は、その ref と候補 commit の `push` で起動した `verify.yaml` の required check だけであり、`workflow_dispatch` の成功は使わない。`MackySoft Release` GitHub App token は、リリース処理用の既定ブランチ checkout、候補 commit の最初の push、既定ブランチの非強制早送り、および必要な bot identity 照会に使う。タグ作成前に checkout credential を `GITHUB_TOKEN` へ戻す。早送り後も既定ブランチの同じ commit に対する `push` 検証を確認してから、タグ、パッケージ化、NuGet.org への公開、GitHub Release を行う。公開成功後だけ、同じ候補 commit を指す一時 ref を削除する。既定ブランチが既に次のリリース bundle version を持つ再実行では新たな増分を作らず、その状態へ収束させる。明示的なリリース依頼がない通常作業では、bundle version の更新、タグ作成、パッケージ公開、グローバル環境の更新を行わない。
 
 ## リリース後のグローバル反映
 

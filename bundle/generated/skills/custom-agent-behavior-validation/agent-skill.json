@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 4,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "custom-agent-behavior-validation",
@@ -13,7 +13,7 @@
     "writing"
   ],
   "contentDigest": "5189cd08402a1c2b774a3892b98c2069aaf14658cac966486f611dd927cf391f",
-  "manifestDigest": "72f96929671adb9889e9946b884e8f7c990abe8bf396b6d65ef58bfb31935b51",
+  "manifestDigest": "624b0dc9dba5ff89f6400cc1c0673367dd53c513b7b8dd701d1b2836e22784df",
   "hostArtifacts": [
     {
       "host": "codex",

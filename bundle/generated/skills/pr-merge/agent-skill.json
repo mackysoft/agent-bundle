@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 4,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "pr-merge",
@@ -12,7 +12,7 @@
     "sync-latest"
   ],
   "contentDigest": "5b54594d8c57bb65104584520af5e205efb096692bc3fea55b749da33ddadb6b",
-  "manifestDigest": "1b5dea6cc02ebf11179dc812b00bd75e12d7c6c7f7faa4a4aa0b253b26efb444",
+  "manifestDigest": "d8903bba847f2a0967fc71e7181824721bcc65d3e552b66eedec20d67ddfecc0",
   "hostArtifacts": [
     {
       "host": "codex",

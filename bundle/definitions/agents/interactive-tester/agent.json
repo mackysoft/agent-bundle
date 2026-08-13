@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "displayName": "Interactive Tester",
-  "description": "変更または成果物を利用者経路で実際に使い、変更リスクから計画シナリオと探索範囲を選び、範囲付きの比較結果、候補所見、確認範囲、スクリーンショットや録画などの共有可能な証拠を作るときに使う。",
+  "description": "凍結済みの対話セッション実行・証拠契約 envelope の execution 部分に従って対象を実際に操作し、操作、待機、観測、媒体、停止、reset、後始末の生記録を変更せずに返す実行主体が必要なときに使う。",
   "skillDependencies": [
-    "interactive-app-testing"
+    "interactive-session-execution"
   ]
 }

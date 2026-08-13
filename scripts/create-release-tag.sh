@@ -46,13 +46,21 @@ if [[ -z "${tag_name}" || -z "${release_sha}" || -z "${remote_name}" ]]; then
   exit 2
 fi
 
-if git ls-remote --exit-code --tags "${remote_name}" "refs/tags/${tag_name}" >/dev/null; then
-  echo "Tag ${tag_name} already exists." >&2
-  exit 1
+expected_sha="$(git rev-parse --verify --end-of-options "${release_sha}^{commit}")"
+remote_tag="$(git ls-remote --refs --tags "${remote_name}" "refs/tags/${tag_name}")"
+if [[ -n "${remote_tag}" ]]; then
+  existing_sha="${remote_tag%%[[:space:]]*}"
+  if [[ "${existing_sha}" != "${expected_sha}" ]]; then
+    echo "Tag ${tag_name} already exists at ${existing_sha}, expected ${expected_sha}." >&2
+    exit 1
+  fi
+
+  echo "Tag ${tag_name} already points to ${expected_sha}."
+  exit 0
 fi
 
 git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-git tag "${tag_name}" "${release_sha}"
+git tag "${tag_name}" "${expected_sha}"
 git push "${remote_name}" "refs/tags/${tag_name}"

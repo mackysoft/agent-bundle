@@ -1,30 +1,30 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 4,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "supervisor",
   "displayName": "Supervisor",
-  "description": "利用者が直接操作する現在のタスクで、複数の独立した目的をそれぞれの実行タスクへ割り当てるときに適用する。目的と既存タスクの対応から新規、継続、重複、要確認を判定し、許可された新規タスクへ $orchestrator と受領内容を引き渡すか、既存タスクへ追加内容を届け、目的と割当先の対応を返す。",
+  "description": "利用者が直接操作する現在のタスクを、複数の独立した目的の割当管理を行うスーパーバイザーとして運用するときに適用する。一度適用したタスクでは、タスクの存続中、すべての後続入力へ継続して適用する。目的と既存タスクの対応から新規、継続、重複、要確認を判定し、許可された新規タスクへ $orchestrator と受領内容を引き渡すか、既存タスクへ追加内容を届け、目的と割当先の対応を返す。",
   "dependencies": [
     "orchestrator"
   ],
-  "contentDigest": "569978782601d2e76dd9bbb494a028b8cc144097cded210bd7b96cb548aa32d5",
-  "manifestDigest": "27641fac229426ab31d842a95954dc1f6ac7528f3d7ffa3677e629f62fd23770",
+  "contentDigest": "f0ccac7caff78fd29dc5244a125674227b3efaaf87e949a904976b62168b0f73",
+  "manifestDigest": "44e5f5bc13d28446ea9a17a343c1287ff279174b247e1ae5b8f07669a0c8e74b",
   "hostArtifacts": [
     {
       "host": "codex",
       "path": "agents/openai.yaml",
-      "digest": "06a4f8850c2f59cc8be1b0c0c9325292d292ee522cc25e0cdff4393cb3c1d3d4",
-      "materializedFrontmatterDigest": "5a5ec9f892e3fd640b45e315aff21a9e55c458ad5627f5cddc2e69ecde6ec063"
+      "digest": "651f2eca5a903ada3b45e60869d5db42cc04e0e54651389911745cff3fcb6e28",
+      "materializedFrontmatterDigest": "de6ff26273793d27be821c639bd68f91710cc83aec70fcb5eb5f0ec0448115f3"
     },
     {
       "host": "claude-code",
-      "materializedFrontmatterDigest": "ab9f4bdea6b01734846070f664f86fe2859c827fa40a90652f951f9da90ca28f"
+      "materializedFrontmatterDigest": "c43feb5b615261fb90c82c5b120b6156461f5c43506c37c3ab4b2c6d4fd8d0ff"
     },
     {
       "host": "github-copilot",
-      "materializedFrontmatterDigest": "cabf0823eb36ac4d057e8cf2f0ad6324d8ca407a16a67ae8c9451f998da748b4"
+      "materializedFrontmatterDigest": "b207eeacf1ac596942b7afa9679e238d2a81b52790785e8a2f7027a47ebec316"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 4,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "basic",
   "skillName": "challenge",
@@ -11,7 +11,7 @@
     "claim-grounding"
   ],
   "contentDigest": "9484cde2c49b2fb7ed22b899b9672461207c329b8fcc724496deb71515a82355",
-  "manifestDigest": "3739fb1c266f2720b4039b0214852c72086cec4f1ba2dea92810e7ee9eb86e7f",
+  "manifestDigest": "9b6897dc054f96c90f27652d852a24e831941c1b17af4eadbf7125a86e83b682",
   "hostArtifacts": [
     {
       "host": "codex",

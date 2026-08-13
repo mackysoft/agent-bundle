@@ -11,22 +11,28 @@ on:
         required: true
         type: string
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
 jobs:
   prepare-release:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: write
     outputs:
       package_version: ${{ steps.version.outputs.package_version }}
       tag_name: ${{ steps.version.outputs.tag_name }}
       release_sha: ${{ steps.source.outputs.release_sha }}
+      release_branch: ${{ steps.release_branch.outputs.name }}
 
     steps:
       - name: Validate workflow dispatch source
-        if: github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
@@ -39,47 +45,287 @@ jobs:
             exit 1
           fi
 
+      - name: Create release app token
+        id: release_app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+          permission-contents: write
+
       - name: Checkout release tooling
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: ${{ github.event.repository.default_branch }}
+          token: ${{ steps.release_app.outputs.token }}
+          persist-credentials: true
+
+      - name: Resolve release app identity
+        id: release_app_identity
+        shell: bash
+        env:
+          APP_SLUG: ${{ steps.release_app.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.release_app.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          bot_login="${APP_SLUG}[bot]"
+          bot_id="$(gh api "/users/${APP_SLUG}%5Bbot%5D" --jq '.id')"
+          echo "name=${bot_login}" >> "${GITHUB_OUTPUT}"
+          echo "email=${bot_id}+${bot_login}@users.noreply.github.com" >> "${GITHUB_OUTPUT}"
 
       - name: Resolve package version
         id: version
         shell: bash
         env:
           DISPATCH_TAG: ${{ github.event.inputs.release_tag }}
-        run: ./scripts/resolve-release-version.sh --dispatch-tag "${DISPATCH_TAG}"
+        run: >-
+          ./scripts/resolve-release-version.sh
+          --dispatch-tag "${DISPATCH_TAG}"
+          --event-name workflow_dispatch
 
-      - name: Validate release source
-        id: source
+      - name: Reject an existing release tag
         shell: bash
         env:
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          EVENT_NAME: ${{ github.event_name }}
-          RELEASE_SHA: ${{ github.sha }}
           TAG_NAME: ${{ steps.version.outputs.tag_name }}
         run: |
           set -euo pipefail
 
-          git fetch origin "${DEFAULT_BRANCH}"
-
-          release_sha="${RELEASE_SHA}"
-          if [[ "${EVENT_NAME}" != "workflow_dispatch" ]]; then
-            git fetch --force origin "refs/tags/${TAG_NAME}:refs/tags/${TAG_NAME}"
-            release_sha="$(git rev-list -n 1 "refs/tags/${TAG_NAME}")"
+          if [[ -n "$(git ls-remote --refs --tags origin "refs/tags/${TAG_NAME}")" ]]; then
+            echo "Release tag ${TAG_NAME} already exists. Rerun its existing workflow instead of preparing another bundle release." >&2
+            exit 1
           fi
 
-          if ! git merge-base --is-ancestor "${release_sha}" "origin/${DEFAULT_BRANCH}"; then
-            echo "Release source must be reachable from origin/${DEFAULT_BRANCH}. Actual sha: ${release_sha}" >&2
+      - name: Resolve latest published release
+        id: published_release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release_tag="$(bash scripts/resolve-latest-release-tag.sh --repository "${GITHUB_REPOSITORY}")"
+          echo "tag=${release_tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Resolve release bundle version
+        id: bundle_version
+        shell: bash
+        run: |
+          set -euo pipefail
+          bundle_version="$(bash scripts/resolve-bundle-operation-version.sh \
+            --operation release \
+            --root bundle \
+            --base-ref "refs/tags/${{ steps.published_release.outputs.tag }}")"
+          echo "version=${bundle_version}" >> "${GITHUB_OUTPUT}"
+
+      - name: Inspect release preparation state
+        id: preparation
+        shell: bash
+        env:
+          TARGET_BUNDLE_VERSION: ${{ steps.bundle_version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          current_bundle_version="$(jq -er '.bundleVersion' bundle/bundle.json)"
+          if [[ "${current_bundle_version}" -eq "${TARGET_BUNDLE_VERSION}" ]]; then
+            requires_candidate="false"
+          elif [[ "${current_bundle_version}" -lt 2147483647 \
+            && $((current_bundle_version + 1)) -eq "${TARGET_BUNDLE_VERSION}" ]]; then
+            requires_candidate="true"
+          else
+            echo "Current bundle version ${current_bundle_version} cannot prepare release target ${TARGET_BUNDLE_VERSION}." >&2
+            exit 1
+          fi
+
+          echo "requires_candidate=${requires_candidate}" >> "${GITHUB_OUTPUT}"
+
+      - name: Define release branch
+        id: release_branch
+        shell: bash
+        env:
+          TAG_NAME: ${{ steps.version.outputs.tag_name }}
+        run: |
+          set -euo pipefail
+
+          release_branch="release/${TAG_NAME}"
+          echo "name=${release_branch}" >> "${GITHUB_OUTPUT}"
+
+      - name: Resolve release candidate state
+        id: candidate_state
+        if: steps.preparation.outputs.requires_candidate == 'true'
+        shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          RELEASE_BRANCH: ${{ steps.release_branch.outputs.name }}
+          TARGET_BUNDLE_VERSION: ${{ steps.bundle_version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          base_sha="$(git rev-parse HEAD)"
+          remote_base="$(git ls-remote --heads origin "refs/heads/${DEFAULT_BRANCH}")"
+          remote_base_sha="${remote_base%%[[:space:]]*}"
+          if [[ -z "${remote_base_sha}" || "${remote_base_sha}" != "${base_sha}" ]]; then
+            echo "Default branch ${DEFAULT_BRANCH} changed after release preparation started. Expected ${base_sha}; actual: ${remote_base_sha:-<missing>}." >&2
+            exit 1
+          fi
+
+          remote_branch="$(git ls-remote --heads origin "refs/heads/${RELEASE_BRANCH}")"
+          remote_branch_sha="${remote_branch%%[[:space:]]*}"
+          if [[ -z "${remote_branch_sha}" ]]; then
+            state="new"
+            candidate_sha=""
+            git checkout -b "${RELEASE_BRANCH}" "${base_sha}"
+          else
+            git fetch origin "${RELEASE_BRANCH}:refs/remotes/origin/${RELEASE_BRANCH}"
+            git checkout -B "${RELEASE_BRANCH}" "origin/${RELEASE_BRANCH}"
+            git branch --set-upstream-to="origin/${RELEASE_BRANCH}" "${RELEASE_BRANCH}"
+
+            if [[ "${remote_branch_sha}" == "${base_sha}" ]]; then
+              state="base"
+              candidate_sha=""
+            else
+              candidate_parents=( $(git rev-list --parents -n 1 "${remote_branch_sha}") )
+              if [[ "${#candidate_parents[@]}" -ne 2 \
+                || "${candidate_parents[0]}" != "${remote_branch_sha}" \
+                || "${candidate_parents[1]}" != "${base_sha}" ]]; then
+                echo "Existing ${RELEASE_BRANCH} must point to ${base_sha} or to its direct candidate child." >&2
+                exit 1
+              fi
+
+              while IFS= read -r changed_path; do
+                if [[ "${changed_path}" == "bundle/bundle.json" || "${changed_path}" == bundle/generated/* ]]; then
+                  continue
+                fi
+
+                echo "Existing release candidate changes an unsupported path: ${changed_path}" >&2
+                exit 1
+              done < <(git diff --name-only "${base_sha}" "${remote_branch_sha}")
+
+              candidate_bundle_version="$(git show "${remote_branch_sha}:bundle/bundle.json" | jq -er '.bundleVersion')"
+              if [[ "${candidate_bundle_version}" != "${TARGET_BUNDLE_VERSION}" ]]; then
+                echo "Existing release candidate bundle version ${candidate_bundle_version} does not match target ${TARGET_BUNDLE_VERSION}." >&2
+                exit 1
+              fi
+
+              state="candidate"
+              candidate_sha="${remote_branch_sha}"
+            fi
+          fi
+
+          echo "state=${state}" >> "${GITHUB_OUTPUT}"
+          echo "sha=${candidate_sha}" >> "${GITHUB_OUTPUT}"
+
+      - name: Prepare release bundle
+        if: steps.preparation.outputs.requires_candidate == 'true' && (steps.candidate_state.outputs.state == 'new' || steps.candidate_state.outputs.state == 'base')
+        uses: mackysoft/agent-distribution/actions/release@5.0.0
+        env:
+          GIT_AUTHOR_EMAIL: ${{ steps.release_app_identity.outputs.email }}
+          GIT_AUTHOR_NAME: ${{ steps.release_app_identity.outputs.name }}
+          GIT_COMMITTER_EMAIL: ${{ steps.release_app_identity.outputs.email }}
+          GIT_COMMITTER_NAME: ${{ steps.release_app_identity.outputs.name }}
+          GIT_CONFIG_COUNT: "2"
+          GIT_CONFIG_KEY_0: user.name
+          GIT_CONFIG_VALUE_0: ${{ steps.release_app_identity.outputs.name }}
+          GIT_CONFIG_KEY_1: user.email
+          GIT_CONFIG_VALUE_1: ${{ steps.release_app_identity.outputs.email }}
+        with:
+          root: bundle
+          bundle-version: ${{ steps.bundle_version.outputs.version }}
+
+      - name: Capture prepared release commit
+        id: prepared
+        if: steps.preparation.outputs.requires_candidate == 'true'
+        shell: bash
+        env:
+          CANDIDATE_STATE: ${{ steps.candidate_state.outputs.state }}
+          CANDIDATE_SHA: ${{ steps.candidate_state.outputs.sha }}
+        run: |
+          set -euo pipefail
+
+          prepared_sha="${CANDIDATE_SHA}"
+          if [[ "${CANDIDATE_STATE}" != "candidate" ]]; then
+            prepared_sha="$(git rev-parse HEAD)"
+          fi
+
+          if [[ "$(git rev-parse HEAD)" != "${prepared_sha}" ]]; then
+            echo "Checked out release candidate does not match ${prepared_sha}." >&2
+            exit 1
+          fi
+
+          echo "sha=${prepared_sha}" >> "${GITHUB_OUTPUT}"
+
+      - name: Verify and promote release candidate
+        id: release_promotion
+        if: steps.preparation.outputs.requires_candidate == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_BOT_TOKEN: ${{ steps.release_app.outputs.token }}
+        run: >-
+          ./scripts/promote-verified-release.sh
+          --mode promote
+          --repository "${GITHUB_REPOSITORY}"
+          --default-branch "${{ github.event.repository.default_branch }}"
+          --release-branch "${{ steps.release_branch.outputs.name }}"
+          --expected-sha "${{ steps.prepared.outputs.sha }}"
+          --target-bundle-version "${{ steps.bundle_version.outputs.version }}"
+          --expected-author-name "${{ steps.release_app_identity.outputs.name }}"
+          --expected-author-email "${{ steps.release_app_identity.outputs.email }}"
+
+      - name: Verify already promoted release candidate
+        id: promoted_verification
+        if: steps.preparation.outputs.requires_candidate == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_BUNDLE_VERSION: ${{ steps.bundle_version.outputs.version }}
+        run: >-
+          ./scripts/promote-verified-release.sh
+          --mode verify-promoted
+          --repository "${GITHUB_REPOSITORY}"
+          --default-branch "${{ github.event.repository.default_branch }}"
+          --release-branch "${{ steps.release_branch.outputs.name }}"
+          --expected-sha "$(git rev-parse HEAD)"
+          --target-bundle-version "${TARGET_BUNDLE_VERSION}"
+          --expected-author-name "${{ steps.release_app_identity.outputs.name }}"
+          --expected-author-email "${{ steps.release_app_identity.outputs.email }}"
+
+      - name: Resolve release source
+        id: source
+        shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          PROMOTED_SHA: ${{ steps.release_promotion.outputs.release_sha }}
+          VERIFIED_PROMOTED_SHA: ${{ steps.promoted_verification.outputs.release_sha }}
+          REQUIRES_CANDIDATE: ${{ steps.preparation.outputs.requires_candidate }}
+        run: |
+          set -euo pipefail
+
+          git fetch origin "${DEFAULT_BRANCH}"
+          default_branch_sha="$(git rev-parse "origin/${DEFAULT_BRANCH}")"
+          release_sha="${default_branch_sha}"
+          if [[ "${REQUIRES_CANDIDATE}" == "true" ]]; then
+            release_sha="${PROMOTED_SHA}"
+          else
+            release_sha="${VERIFIED_PROMOTED_SHA}"
+          fi
+
+          if [[ -z "${release_sha}" || "${release_sha}" != "${default_branch_sha}" ]]; then
+            echo "Release source must be the current origin/${DEFAULT_BRANCH} tip. Release sha: ${release_sha:-<empty>}. Default branch sha: ${default_branch_sha}." >&2
             exit 1
           fi
 
           echo "release_sha=${release_sha}" >> "${GITHUB_OUTPUT}"
 
+      - name: Restore GitHub Actions checkout credential
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.source.outputs.release_sha }}
+          token: ${{ github.token }}
+          persist-credentials: true
+
       - name: Create and push release tag
-        if: github.event_name == 'workflow_dispatch'
         shell: bash
         env:
           TAG_NAME: ${{ steps.version.outputs.tag_name }}
@@ -88,6 +334,7 @@ jobs:
 
   publish:
     needs: prepare-release
+    if: ${{ always() && (github.event_name == 'push' || needs.prepare-release.result == 'success') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -98,21 +345,51 @@ jobs:
         shell: bash
 
     steps:
+      - name: Resolve release source
+        id: source
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PREPARED_RELEASE_SHA: ${{ needs.prepare-release.outputs.release_sha }}
+        run: |
+          set -euo pipefail
+
+          release_sha="${GITHUB_SHA}"
+          if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            release_sha="${PREPARED_RELEASE_SHA}"
+          fi
+
+          if [[ -z "${release_sha}" ]]; then
+            echo "Release commit could not be resolved for ${EVENT_NAME}." >&2
+            exit 1
+          fi
+
+          echo "release_sha=${release_sha}" >> "${GITHUB_OUTPUT}"
+
       - name: Checkout
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          ref: ${{ needs.prepare-release.outputs.release_sha }}
+          ref: ${{ steps.source.outputs.release_sha }}
+
+      - name: Resolve package version
+        id: version
+        env:
+          DISPATCH_TAG: ${{ needs.prepare-release.outputs.tag_name }}
+        run: >-
+          ./scripts/resolve-release-version.sh
+          --dispatch-tag "${DISPATCH_TAG}"
+          --event-name "${GITHUB_EVENT_NAME}"
+          --ref-name "${GITHUB_REF_NAME}"
 
       - name: Guard checked out release source
         uses: mackysoft/actions/release/source-guard@v1
         with:
-          tag-name: ${{ needs.prepare-release.outputs.tag_name }}
+          tag-name: ${{ steps.version.outputs.tag_name }}
           default-branch: ${{ github.event.repository.default_branch }}
-          expected-release-sha: ${{ needs.prepare-release.outputs.release_sha }}
+          expected-release-sha: ${{ steps.source.outputs.release_sha }}
 
       - name: Verify Agent Distribution
-        uses: mackysoft/agent-distribution/actions/verify@4.0.0
+        uses: mackysoft/agent-distribution/actions/verify@5.0.0
         with:
           root: bundle
 
@@ -128,7 +405,7 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('AgentBundle.slnx', '**/*.csproj') }}
 
       - name: Sync release package version
-        run: ./scripts/sync-package-version.sh --version "${{ needs.prepare-release.outputs.package_version }}"
+        run: ./scripts/sync-package-version.sh --version "${{ steps.version.outputs.package_version }}"
 
       - name: Restore
         run: dotnet restore AgentBundle.slnx
@@ -138,19 +415,19 @@ jobs:
           dotnet pack src/AgentBundle/AgentBundle.csproj
           --configuration Release
           --no-restore
-          -p:Version=${{ needs.prepare-release.outputs.package_version }}
-          -p:PackageVersion=${{ needs.prepare-release.outputs.package_version }}
+          -p:Version=${{ steps.version.outputs.package_version }}
+          -p:PackageVersion=${{ steps.version.outputs.package_version }}
           --output artifacts/packages
 
       - name: Smoke test CLI tool package
-        run: ./scripts/verify-cli-package.sh artifacts/packages "${{ needs.prepare-release.outputs.package_version }}"
+        run: ./scripts/verify-cli-package.sh artifacts/packages "${{ steps.version.outputs.package_version }}"
 
       - name: Inspect NuGet publication state
         id: nuget_state
         uses: mackysoft/actions/nuget/package-state@v1
         with:
           mode: inspect
-          package-version: ${{ needs.prepare-release.outputs.package_version }}
+          package-version: ${{ steps.version.outputs.package_version }}
           package-ids: |
             MackySoft.AgentBundle
 
@@ -177,7 +454,7 @@ jobs:
         uses: mackysoft/actions/nuget/package-state@v1
         with:
           mode: wait
-          package-version: ${{ needs.prepare-release.outputs.package_version }}
+          package-version: ${{ steps.version.outputs.package_version }}
           package-ids: |
             MackySoft.AgentBundle
           max-attempts: 90
@@ -186,8 +463,8 @@ jobs:
       - name: Mirror package to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          PACKAGE_VERSION: ${{ needs.prepare-release.outputs.package_version }}
-          RELEASE_TAG: ${{ needs.prepare-release.outputs.tag_name }}
+          PACKAGE_VERSION: ${{ steps.version.outputs.package_version }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag_name }}
           REPOSITORY: ${{ github.repository }}
         run: >-
           ./scripts/mirror-nuget-package-release.sh
@@ -196,3 +473,27 @@ jobs:
           --package-glob "artifacts/packages/*.nupkg"
           --title "${PACKAGE_VERSION}"
           --generate-notes
+
+      - name: Delete temporary release branch
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          RELEASE_BRANCH: ${{ needs.prepare-release.outputs.release_branch }}
+          RELEASE_SHA: ${{ steps.source.outputs.release_sha }}
+        run: |
+          set -euo pipefail
+
+          remote_release_branch="$(git ls-remote --heads origin "refs/heads/${RELEASE_BRANCH}")"
+          if [[ -z "${remote_release_branch}" ]]; then
+            exit 0
+          fi
+
+          remote_release_sha="${remote_release_branch%%[[:space:]]*}"
+          if [[ "${remote_release_sha}" != "${RELEASE_SHA}" ]]; then
+            echo "Temporary release branch ${RELEASE_BRANCH} must point to published release commit ${RELEASE_SHA}; actual: ${remote_release_sha}." >&2
+            exit 1
+          fi
+
+          git push \
+            --force-with-lease="refs/heads/${RELEASE_BRANCH}:${RELEASE_SHA}" \
+            origin \
+            ":refs/heads/${RELEASE_BRANCH}"

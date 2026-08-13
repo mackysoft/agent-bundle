@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "skillBundleVersion": 6,
+  "skillBundleVersion": 4,
   "catalogId": "com.mackysoft.agent-bundle",
   "category": "development",
   "skillName": "behavior-deviation-analysis",
@@ -13,7 +13,7 @@
     "writing"
   ],
   "contentDigest": "16a75a4064a138e7de3cf75730071b8eab91bcd37bc8cd09c0d7d22231f30540",
-  "manifestDigest": "ee2d071eb0b9f68db52e1a9a45af4e355636cebe35bd57a539d269c3d1e8099d",
+  "manifestDigest": "0e4e20eabbd845873b4b16cf694f2e32c2c5caefe2c0a2dcfbd293a7aa1a7ee8",
   "hostArtifacts": [
     {
       "host": "codex",

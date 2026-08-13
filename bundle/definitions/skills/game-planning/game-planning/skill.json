@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Game Planning",
+  "description": "ゲーム企画の目的、対象範囲、制約、決定状態、未解決の問い、完了条件が混在または未確定で、専門作業へ渡す入力契約を作る必要があるとき、またはゲーム設計、定量分析、インターフェース設計、報告可能なゲームプレイ観測レコードの複数領域を一つの企画成果へ統合する必要があるときに使う。企画全体の入力契約、必要な専門成果と意味上の成立依存、成果の統合、企画成果の成立状態を持つ。",
+  "dependencies": [
+    "change-framing",
+    "claim-grounding",
+    "game-balance-analysis",
+    "game-design",
+    "game-interface-design",
+    "gameplay-observation",
+    "referent-modeling",
+    "writing"
+  ]
+}
