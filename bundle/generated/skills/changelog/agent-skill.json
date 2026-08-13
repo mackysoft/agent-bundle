@@ -9,8 +9,8 @@
   "dependencies": [
     "writing"
   ],
-  "contentDigest": "61e73060e7e87c654c63101c88201dc97cc990254e94dba4ef1fd7bf557e39cd",
-  "manifestDigest": "e5f6cbacca8f622f38e183371072e13a8c46b91d9992c5b405e9ec7bdea78294",
+  "contentDigest": "70ad5c3123a10d15e2d685615353c423215b39fc8f1270928eed60f0eb6388e0",
+  "manifestDigest": "37d9e0031e91d6c7f3bb0f433e737300db4f122333dc891825613898695bf22d",
   "hostArtifacts": [
     {
       "host": "codex",

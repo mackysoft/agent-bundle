@@ -1,6 +1,6 @@
 interface:
   display_name: "Subagent Execution Analysis"
-  short_description: "Codex task/session、親子実行記録、subagent activity、child thread、runtime event、実行時点の custom agent 定義を照合し、spawn 試行と成立した実行について、identity 確度、選択、委譲入力、実効設定と権限、行動境界、成果、follow-up、parent handoff、終了状態を、直接観測・定義・導出・推定・未確認に分けて分析するときに使う。"
+  short_description: "Codex task/session、親子実行記録、subagent activity、child thread、runtime event、実行時点の custom agent 定義を照合し、spawn 試行と成立した実行について、identity 確度、選択、委譲入力、実効設定と権限、行動境界、成果、follow-up、parent handoff、終了状態、トークン、所要時間、費用などの資源使用を、直接観測・定義・導出・推定・未確認に分けて分析するときに使う。"
   default_prompt: "Use $subagent-execution-analysis to follow the Subagent Execution Analysis workflow."
 
 policy:

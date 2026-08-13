@@ -4,7 +4,7 @@
 
 指定時点と範囲の親 task または session から、すべての subagent 起動試行と child execution を復元する。実行主体と適用定義の同定確度を示し、委譲から終了までを契約へ照合した分析結果を作る。
 
-成果は、対象範囲のspawn attemptと開始済みexecutionを復元し、実行主体、適用定義、設定、行動、成果、handoff、終了を根拠に対応付けた、読み取り専用の分析結果である。このスキルは runtime 記録、定義、成果物を変更せず、期待との差、原因、対応候補、再検証範囲は `behavior-deviation-analysis`、受入条件への最終判定は `verification-gate` が所有する。
+成果は、対象範囲のspawn attemptと開始済みexecutionを復元し、実行主体、適用定義、設定、行動、成果、handoff、終了、資源使用を根拠に対応付けた、読み取り専用の分析結果である。このスキルは runtime 記録、定義、成果物を変更せず、期待との差、原因、対応候補、再検証範囲は `behavior-deviation-analysis`、受入条件への最終判定は `verification-gate` が所有する。
 
 ## 入力
 
@@ -17,6 +17,7 @@
 | 子孫範囲 | 追跡する descendant depth。 |
 | 分析水準 | 起動と実行の列挙だけか、委譲から終了までの契約照合を含むか。 |
 | 親 runtime source | 親の runtime 記録を取得する情報源。 |
+| 資源計測範囲 | child、descendant、parent、end-to-endの対象、必要な指標、範囲ごとの経過時間の端点、runtime使用量または課金source、token区分の意味と課金区分への対応、価格基準。 |
 
 時間範囲または端点の包含性を固定できない場合は、起動試行と実行の範囲を確定できないため、分析を開始せず、必要な時刻、順序、または記録の取得条件を確認する。
 
@@ -36,7 +37,7 @@
 
 実行主体の identity は `confirmed`、`supported`、`inferred`、`unresolved` のいずれかで示す。runtime identity、agent origin、definition binding の確度は別々に評価する。definition binding は component または artifact ごとに `exact`、`time_correlated`、`current_only`、`unresolved` のいずれかで示す。
 
-title、summary、filename、process UUID、estimated_bytes は、identity、model、permission、token、cost、prompt intent、actual action の根拠にしない。hidden reasoning、token、cost は推測しない。現在の definition は過去の実行時点の definition と断定せず、時点に結び付く根拠がない場合は `current_only` とする。
+title、summary、filename、process UUID、estimated_bytes は、identity、model、permission、token、cost、prompt intent、actual action の根拠にしない。executionへ結び付くruntime使用量、課金記録、時刻eventを資源使用の直接根拠として使い、観測できないhidden reasoning、token、costは `unverified` とする。現在の definition は過去の実行時点の definition と断定せず、時点に結び付く根拠がない場合は `current_only` とする。
 
 ## 不変条件
 
@@ -45,12 +46,14 @@ title、summary、filename、process UUID、estimated_bytes は、identity、mod
 - definition default、runtime effective configuration、actual action を別に評価する。definition の読み取り専用指定、runtime の danger-full-access、実際の読み取り専用 action は、同じ事実を表さない。
 - running は失敗ではない。child execution の終了と parent の完了も別に示す。
 - 観測できない prompt の内容、暗号化された prompt、実行時の hidden reasoning、token、cost は `unverified` とし、内容を補わない。
+- token使用量はruntimeが報告する区分を保持し、provider報告費用と、観測した使用量および時点付き価格基準からの導出費用を別のobservationとして扱う。
+- child、descendant、parent、end-to-endの資源使用を計測範囲ごとに保持する。
 
 ## フロー
 
 ### Phase 1: 分析範囲を固定する
 
-親、時間範囲、子孫範囲、分析水準、親 runtime source を記録する。開始時刻と終了時刻、各端点の包含性、inclusive cutoff からの写像、同時刻 event の順序規則、取得できない runtime 記録、対象外の child を明示する。
+親、時間範囲、子孫範囲、分析水準、親 runtime source、資源計測範囲を記録する。開始時刻と終了時刻、各端点の包含性、inclusive cutoff からの写像、同時刻 event の順序規則、取得できない runtime 記録、対象外の child を明示する。
 
 入力に含まれる契約、要求、権限、指示を、当時の runtime 入力または定義を示す証拠と、現在の分析を決める指示系統に分ける。契約命題の根拠、適用範囲、採用状態を入力から直接確定できない場合は `$claim-grounding` を適用する。task、session、attempt、execution、turn、definition、parent handoff の対応が曖昧で評価を変える場合は `$referent-modeling` を適用する。
 
@@ -74,7 +77,15 @@ model、effort、sandbox、approval、permission、tool、MCP、skills につい
 
 definition にない runtime effective configuration、runtime から確認できない definition default、設定と action の不一致は、それぞれ根拠と未確認事項を残す。設定値または action を identity の補助根拠へ転用しない。
 
-### Phase 5: 委譲から終了までを独立に照合する
+### Phase 5: 資源使用を復元する
+
+資源計測範囲ごとに、runtime使用量、課金記録、開始・終了・停止event、spawn、tool、follow-upの記録をexecutionとparent lifecycleへ対応付ける。runtimeが報告するtoken区分は名称、値、単位を保持し、報告されない区分は `unverified` とする。
+
+経過時間の開始と終了または停止eventは資源計測範囲が定める。両端が指定され、runtime記録へ対応する範囲について経過時間を導出し、event refと端点の扱いを残す。端点を指定または観測できない範囲は `unverified` とする。spawn attempt数、開始済みexecution数、respawn数、tool call数は、coverageが成立するruntime sourceと時間範囲のeventを数える。coverageが全件性を支えない場合は、観測数と全件性を区別する。
+
+課金記録がexecutionまたは計測範囲へ直接対応する場合はprovider報告費用として記録する。費用をtoken使用量から導出する場合は、各usage metricの値が課金区分の総量、内数、または独立量のどれに対応するかをruntime契約または課金sourceから確認し、価格基準へのmapping、provider、modelまたは課金区分、通貨、単価、適用時点、source ref、計算式を記録する。使用量、区分間の関係、mapping、価格基準のいずれかを対応付けられない費用は `unverified` とする。
+
+### Phase 6: 委譲から終了までを独立に照合する
 
 execution ごとに、次の観点を独立に契約と照合する。
 
@@ -91,7 +102,7 @@ execution ごとに、次の観点を独立に契約と照合する。
 
 各照合結果は `conforms`、`violates`、`mismatch`、`indeterminate`、`in_progress`、`not_applicable` のいずれかで示す。設定と権限は dimension と setting ごとに評価し、execution 全体の単一評価へ集約しない。確認できない証拠を推定で補わず、`indeterminate` または `unverified` とする。
 
-### Phase 6: 分析結果を報告する
+### Phase 7: 分析結果を報告する
 
 `$writing` を適用し、時系列の転記ではなく、復元した単位、照合結果、根拠、未確認事項、再評価条件を読者が追える構造で返す。詳細な report schema は [references/report-schema.md](references/report-schema.md)、Codex runtime evidence の収集と限界は [references/codex-runtime-evidence.md](references/codex-runtime-evidence.md) に従う。
 
@@ -105,6 +116,7 @@ subagentの実行分析結果は次の項目を持つ。
 | `spawn_attempts` | attempt の開始、結果、対応する execution、根拠。 |
 | `executions` | child thread、turn、identity、agent origin、component ごとの definition bindings、behavior/action observation、成果、継続、終了。 |
 | `effective_configuration` | definition default、spawn 指定値、parent 指定値、runtime effective configuration を個別 observation とした構成と権限。 |
+| `resource_usage` | child、descendant、parent、end-to-endの各範囲に結び付くtoken使用量、経過時間、event数、provider報告費用、導出費用と未確認事項。 |
 | `assessments` | 観点ごとの契約照合、assessment、根拠、未確認事項。 |
 | `parent_lifecycle` | parent の状態、child 成果の handoff と利用、parent 完了との関係。 |
 | `summary` | 確認できた execution、mismatch または violation の列挙、分析時点の状態。 |
@@ -119,5 +131,6 @@ subagentの実行分析結果は次の項目を持つ。
 - coverage が成立する深さと runtime source の範囲で、全 spawn attempt と開始済み execution を別々に列挙し、same-thread follow-up と新しい spawn を区別している。
 - identity と definition binding を別に示し、現在の definition を過去の実行時点へ断定していない。
 - definition default、spawn 指定値、parent 指定値、runtime effective configuration、execution の behavior/action observation を別に評価している。
+- 計測範囲ごとの資源使用を値または `unverified` として示し、runtime報告値、provider報告費用、価格基準からの導出値を区別している。
 - 各照合結果、child の終了、parent lifecycle、未確認事項を混同していない。
 - 各結論を evidence_refs から追跡でき、推定と未確認を観測事実として扱っていない。
