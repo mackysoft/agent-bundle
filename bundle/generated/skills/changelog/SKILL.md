@@ -260,7 +260,7 @@ Security impact がある場合は、ユーザーまたは既存リリース方�
 6. 既存の changelog 規約を黙って変更しない。
 7. 完了前に実差分を確認し、変更が許可されたバージョンまたは節だけに収まっていることを確認する。
 
-## Definition of Done
+## 完了条件
 - Phase 1 で確定した比較基準から最終状態までの更新対象範囲について、対象読者にとって記録する価値がある変更結果を表している。
 - 比較範囲全体を対象にした更新では、同じ `comparison_scope_id` の網羅性台帳が `complete` であり、現在の `ledger_revision` と `output_candidate_revision` を含めて、各走査単位と変更候補の扱いを根拠へ追跡できる。
 - 比較範囲全体を対象にした更新では、最新の網羅性レビューが、同じ `comparison_scope_id`、現在の `ledger_revision`、現在の `output_candidate_revision` の台帳と出力候補について `complete` を確認している。
