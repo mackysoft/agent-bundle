@@ -182,7 +182,7 @@ Custom agents use one flat catalog namespace:
 | `interactive-tester` | Executes the execution portion of one frozen interactive execution-and-evidence envelope and returns its raw session result unchanged. | `interactive-session-execution` |
 | `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
 | `verifier` | Determines acceptance evidence and its result. | `verification-gate` |
-| `researcher` | Collects bounded read-only evidence and reports unchecked areas. | `claim-grounding` |
+| `researcher` | Finds and grounds the facts needed for a downstream decision, reports checked scope, and keeps missing evidence unconfirmed. | `claim-grounding` |
 | `operator` | Performs a fully specified closed action, including waiting for a long-running or external execution, and reports its terminal result or configured stop state. | None |
 
 Agent bindings materialize as host-specific files while `AGENT.md` remains host-independent. The package intentionally does not install or maintain host-shared configuration files.
