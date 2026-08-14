@@ -86,7 +86,7 @@ jobs:
 
           bash scripts/resolve-bundle-operation-version.sh \
             --operation "${operation}" \
-            --root bundle \
+            --source bundle \
             --base-ref "refs/tags/${{ steps.published_release.outputs.tag }}"
 
   verify:
@@ -118,7 +118,7 @@ jobs:
       - name: Restore
         run: dotnet restore "$DOTNET_SOLUTION"
 
-      - name: Verify source and generated bundle
+      - name: Verify source and build distribution bundle
         run: >-
           bash scripts/verify.sh
           --no-restore

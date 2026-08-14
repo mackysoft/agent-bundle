@@ -1,7 +1,0 @@
-interface:
-  display_name: "Skill Authoring"
-  short_description: "エージェントSkillを新規作成、更新、レビューするときに、必要性、単一責務、発火面、判断規則、自由度、フロー、Skill間の構成、本文と補助ファイルの情報配置を評価し、実際の利用文脈で意図した判断と成果へ到達できる作業契約に仕上げる。Skill本文の執筆、責務の分割、descriptionと依存関係の設計、構造検証、隔離した挙動検証と修正の反復で使う。"
-  default_prompt: "Use $skill-authoring to follow the Skill Authoring workflow."
-
-policy:
-  allow_implicit_invocation: true
