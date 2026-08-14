@@ -2,11 +2,11 @@
 set -euo pipefail
 
 usage() {
-  echo "usage: bash scripts/resolve-bundle-operation-version.sh --operation <verify|release|verify-release|verify-default-branch> --root <bundle-root> --base-ref <published-release-ref>" >&2
+  echo "usage: bash scripts/resolve-bundle-operation-version.sh --operation <verify|release|verify-release|verify-default-branch> --source <source-root> --base-ref <published-release-ref>" >&2
 }
 
 operation=""
-bundle_root=""
+source_root=""
 base_ref=""
 
 while [[ "$#" -gt 0 ]]; do
@@ -16,9 +16,9 @@ while [[ "$#" -gt 0 ]]; do
       operation="$2"
       shift 2
       ;;
-    --root)
+    --source)
       [[ "$#" -ge 2 ]] || { usage; exit 2; }
-      bundle_root="$2"
+      source_root="$2"
       shift 2
       ;;
     --base-ref)
@@ -42,7 +42,7 @@ if [[ "${operation}" != "verify" && "${operation}" != "release" && "${operation}
   exit 2
 fi
 
-if [[ -z "${bundle_root}" || -z "${base_ref}" ]]; then
+if [[ -z "${source_root}" || -z "${base_ref}" ]]; then
   usage
   exit 2
 fi
@@ -54,20 +54,20 @@ fi
 
 repository_root="$(git rev-parse --show-toplevel)"
 repository_root="$(cd -- "${repository_root}" && pwd -P)"
-if ! resolved_bundle_root="$(cd -- "${bundle_root}" && pwd -P)"; then
-  echo "The bundle root does not exist: ${bundle_root}" >&2
+if ! resolved_source_root="$(cd -- "${source_root}" && pwd -P)"; then
+  echo "The source root does not exist: ${source_root}" >&2
   exit 1
 fi
 
-case "${resolved_bundle_root}" in
+case "${resolved_source_root}" in
   "${repository_root}")
     bundle_path="bundle.json"
     ;;
   "${repository_root}"/*)
-    bundle_path="${resolved_bundle_root#"${repository_root}"/}/bundle.json"
+    bundle_path="${resolved_source_root#"${repository_root}"/}/bundle.json"
     ;;
   *)
-    echo "The bundle root must remain inside the Git worktree: ${bundle_root}" >&2
+    echo "The source root must remain inside the Git worktree: ${source_root}" >&2
     exit 1
     ;;
 esac
@@ -107,14 +107,14 @@ read_bundle_version() {
 }
 
 base_catalog_id="$(read_catalog_id "Published bundle" <<< "${base_bundle}")"
-current_catalog_id="$(read_catalog_id "Current bundle" < "${resolved_bundle_root}/bundle.json")"
+current_catalog_id="$(read_catalog_id "Current bundle" < "${resolved_source_root}/bundle.json")"
 if [[ "${current_catalog_id}" != "${base_catalog_id}" ]]; then
   echo "Current catalogId ${current_catalog_id} does not match published catalogId ${base_catalog_id}." >&2
   exit 1
 fi
 
 base_version="$(read_bundle_version "Published bundle" <<< "${base_bundle}")"
-current_version="$(read_bundle_version "Current bundle" < "${resolved_bundle_root}/bundle.json")"
+current_version="$(read_bundle_version "Current bundle" < "${resolved_source_root}/bundle.json")"
 
 if [[ "${operation}" == "verify" ]]; then
   if [[ "${current_version}" -ne "${base_version}" ]]; then

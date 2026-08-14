@@ -1,7 +1,0 @@
-interface:
-  display_name: "Interactive App Testing"
-  short_description: "Web、業務アプリ、デスクトップアプリ、モバイルアプリ、ゲームなどの対話型アプリについて、変更リスクから有限の利用者経路と凍結済み execution・evidence envelope を設計し、汎用証拠パッケージから比較結果、再現状態、型付き候補所見、範囲付きセッション結果を整理するときに使う。"
-  default_prompt: "Use $interactive-app-testing to follow the Interactive App Testing workflow."
-
-policy:
-  allow_implicit_invocation: true

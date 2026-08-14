@@ -12,4 +12,6 @@ fi
 
 cd "$DOTNET_REPO_ROOT"
 dotnet tool restore >/dev/null
-dotnet tool run agent-distribution -- build --root bundle
+dotnet tool run agent-distribution -- build \
+  --source bundle \
+  --output artifacts/agent-distribution

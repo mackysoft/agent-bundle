@@ -1,7 +1,0 @@
-interface:
-  display_name: "Referent Modeling"
-  short_description: "要求、観測、調査結果から置く名称、分類、責務名、抽象化が複数の具体対象、役割、状態、条件を覆い、その曖昧さが下流成果物の意味、責務、条件、構造を変える場面で、具体対象、役割、責任主体、成立条件、失敗条件、関係、未確定事項、完了を示す観測を分け、指示対象の対応を確定する。対象となる名称には、用語、型、メソッド、boolean、手順や因果の要約、文書や実装の責務境界を含み、新規設計と既存名称の意味上の点検の双方を扱う。"
-  default_prompt: "Use $referent-modeling to follow the Referent Modeling workflow."
-
-policy:
-  allow_implicit_invocation: true

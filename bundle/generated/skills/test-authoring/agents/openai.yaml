@@ -1,7 +1,0 @@
-interface:
-  display_name: "Test Authoring"
-  short_description: "自動テスト成果物の作成、更新、整理を成果とする依頼で使う。権限ある契約根拠を実装やテスト設計より先に読み、具体的なケース、期待値、アサート、補助構造を作る前に、確定済み契約に対するテストの必要性を判定する。採用した対象だけについて、独自の検出価値、所有境界、代表ケース、観測範囲、実行境界、オラクルを確認し、契約外の現状、外部依存、実装詳細を固定するテストと重複を残さず、最小のテスト集合にする。"
-  default_prompt: "Use $test-authoring to follow the Test Authoring workflow."
-
-policy:
-  allow_implicit_invocation: true
