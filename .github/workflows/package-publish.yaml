@@ -114,7 +114,7 @@ jobs:
           set -euo pipefail
           bundle_version="$(bash scripts/resolve-bundle-operation-version.sh \
             --operation release \
-            --root bundle \
+            --source bundle \
             --base-ref "refs/tags/${{ steps.published_release.outputs.tag }}")"
           echo "version=${bundle_version}" >> "${GITHUB_OUTPUT}"
 
@@ -193,7 +193,7 @@ jobs:
               fi
 
               while IFS= read -r changed_path; do
-                if [[ "${changed_path}" == "bundle/bundle.json" || "${changed_path}" == bundle/generated/* ]]; then
+                if [[ "${changed_path}" == "bundle/bundle.json" ]]; then
                   continue
                 fi
 
@@ -217,7 +217,7 @@ jobs:
 
       - name: Prepare release bundle
         if: steps.preparation.outputs.requires_candidate == 'true' && (steps.candidate_state.outputs.state == 'new' || steps.candidate_state.outputs.state == 'base')
-        uses: mackysoft/agent-distribution/actions/release@5.0.0
+        shell: bash
         env:
           GIT_AUTHOR_EMAIL: ${{ steps.release_app_identity.outputs.email }}
           GIT_AUTHOR_NAME: ${{ steps.release_app_identity.outputs.name }}
@@ -228,9 +228,40 @@ jobs:
           GIT_CONFIG_VALUE_0: ${{ steps.release_app_identity.outputs.name }}
           GIT_CONFIG_KEY_1: user.email
           GIT_CONFIG_VALUE_1: ${{ steps.release_app_identity.outputs.email }}
-        with:
-          root: bundle
-          bundle-version: ${{ steps.bundle_version.outputs.version }}
+          RELEASE_BRANCH: ${{ steps.release_branch.outputs.name }}
+          TARGET_BUNDLE_VERSION: ${{ steps.bundle_version.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          if ! git diff --quiet -- bundle/bundle.json \
+            || ! git diff --cached --quiet -- bundle/bundle.json; then
+            echo "Release preparation requires an unmodified source bundle descriptor." >&2
+            exit 1
+          fi
+
+          current_bundle_version="$(jq -er '.bundleVersion' bundle/bundle.json)"
+          if [[ "${current_bundle_version}" -ge 2147483647 \
+            || $((current_bundle_version + 1)) -ne "${TARGET_BUNDLE_VERSION}" ]]; then
+            echo "Release bundle version ${TARGET_BUNDLE_VERSION} must follow authored version ${current_bundle_version}." >&2
+            exit 1
+          fi
+
+          temporary_bundle="$(mktemp bundle/.bundle.json.release.XXXXXX)"
+          trap 'rm -f -- "${temporary_bundle}"' EXIT
+          jq --argjson version "${TARGET_BUNDLE_VERSION}" \
+            '.bundleVersion = $version' \
+            bundle/bundle.json > "${temporary_bundle}"
+          mv -- "${temporary_bundle}" bundle/bundle.json
+          trap - EXIT
+
+          git add -- bundle/bundle.json
+          if git diff --cached --quiet; then
+            echo "Release preparation did not update bundle/bundle.json." >&2
+            exit 1
+          fi
+
+          git commit -m "chore(release): prepare bundle version ${TARGET_BUNDLE_VERSION}"
+          git push origin "HEAD:${RELEASE_BRANCH}"
 
       - name: Capture prepared release commit
         id: prepared
@@ -389,9 +420,9 @@ jobs:
           expected-release-sha: ${{ steps.source.outputs.release_sha }}
 
       - name: Verify Agent Distribution
-        uses: mackysoft/agent-distribution/actions/verify@5.0.0
+        uses: mackysoft/agent-distribution/actions/verify@6.0.0
         with:
-          root: bundle
+          source: bundle
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -409,6 +440,9 @@ jobs:
 
       - name: Restore
         run: dotnet restore AgentBundle.slnx
+
+      - name: Build distribution bundle
+        run: bash scripts/generate-bundle.sh
 
       - name: Pack CLI tool
         run: >-

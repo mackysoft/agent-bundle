@@ -7,4 +7,10 @@ source "$script_dir/dotnet-common.sh"
 
 cd "$DOTNET_REPO_ROOT"
 dotnet tool restore >/dev/null
-dotnet tool run agent-distribution -- build --root bundle --check
+dotnet tool run agent-distribution -- build \
+  --source bundle \
+  --output artifacts/agent-distribution
+dotnet tool run agent-distribution -- build \
+  --source bundle \
+  --output artifacts/agent-distribution \
+  --check

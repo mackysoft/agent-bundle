@@ -1,7 +1,0 @@
-interface:
-  display_name: "Branch Create"
-  short_description: "detached HEAD や未コミット差分を含む現在作業を保護しながら、規約準拠名の作業ブランチを対象 worktree に作成または再利用する。Issue がある場合は `<type>/issue-<N>-<branch_name>`、Issue がない場合は `<type>/<branch_name>` 形式を使う。"
-  default_prompt: "Use $branch-create to follow the Branch Create workflow."
-
-policy:
-  allow_implicit_invocation: true

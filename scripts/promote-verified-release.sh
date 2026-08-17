@@ -185,10 +185,6 @@ validate_candidate() {
       continue
     fi
 
-    if [[ "${changed_path}" == bundle/generated/* ]]; then
-      continue
-    fi
-
     echo "Release candidate ${candidate_sha} changes an unsupported path: ${changed_path}" >&2
     exit 1
   done < <(git diff --name-only "${candidate_base_sha}" "${candidate_sha}")
@@ -199,7 +195,7 @@ validate_candidate() {
   fi
 }
 
-verify_generated_bundle() {
+verify_bundle_source() {
   bash scripts/verify-bundle.sh
 }
 
@@ -325,7 +321,7 @@ if [[ "${current_sha}" != "${resolved_expected_sha}" ]]; then
 fi
 
 validate_candidate "${resolved_expected_sha}"
-verify_generated_bundle
+verify_bundle_source
 
 master_before="$(ref_sha "${default_branch}")"
 release_before="$(ref_sha "${release_branch}")"
