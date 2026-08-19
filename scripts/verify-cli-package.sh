@@ -39,7 +39,11 @@ if [[ "${actual_version}" != "${expected_version}" ]]; then
   exit 1
 fi
 
-generated_bundle_root="${repo_root}/bundle/generated"
+generated_bundle_root="${repo_root}/artifacts/agent-distribution"
+if [[ ! -d "${generated_bundle_root}" ]]; then
+  echo "Generated Agent Distribution bundle does not exist: ${generated_bundle_root}" >&2
+  exit 1
+fi
 package_bundle_root="tools/net10.0/any/agent-distribution"
 PACKAGE_PATH="${package_path}" REPO_ROOT="${repo_root}" GENERATED_BUNDLE_ROOT="${generated_bundle_root}" PACKAGE_BUNDLE_ROOT="${package_bundle_root}" python3 - <<'PY'
 import os

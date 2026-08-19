@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "target": "github-copilot",
+  "tools": [
+    "read",
+    "search",
+    "web",
+    "edit"
+  ],
+  "userInvocable": true
+}
