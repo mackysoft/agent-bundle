@@ -1,0 +1,40 @@
+## 目的
+
+後続担当が一時的に利用する成果を、通常の保存先を持つ成果と分けて引き渡す。
+
+## 対象の扱い
+
+| 対象 | 扱い |
+| --- | --- |
+| 作業契約が通常の保存先を定める成果 | その保存先に作成する。 |
+| 後続担当がファイルとして利用する一時的な成果 | 成果物ディレクトリに作成または更新する。 |
+| 依頼、状態、判断、成果物への参照 | 通常メッセージで扱う。 |
+
+## 割当
+
+委任側は、専門担当を開始する前に、成果物ディレクトリを次の形で割り当てる。
+
+```text
+<worktree>/tmp/agent-handoff/<task-instance>/<execution-instance>/
+```
+
+`<task-instance>` と `<execution-instance>` は、委任側が発行する一意で不透明な識別子とする。同じ実行への追加入力には同じディレクトリを、独立した再委任には新しい `<execution-instance>` のディレクトリを渡す。
+
+## 引き渡しのシーケンス
+
+```mermaid
+sequenceDiagram
+    participant Delegator as 委任側
+    participant Specialist as 専門担当
+    participant ArtifactDir as 成果物ディレクトリ
+    participant Successor as 後続担当
+
+    Delegator->>Specialist: 成果物ディレクトリ、後続担当での利用目的
+    Specialist->>ArtifactDir: 初回に作成し、一時的な成果を作成または更新
+    Specialist-->>Delegator: 成果物ディレクトリへの参照
+    Delegator->>Successor: 参照、利用目的
+```
+
+## 完了状態
+
+成果物ディレクトリに必要な一時的成果があり、それを利用する後続担当がその参照を受け取っている。

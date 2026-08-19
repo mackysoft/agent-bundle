@@ -4,7 +4,8 @@
   "tools": [
     "read",
     "search",
-    "web"
+    "web",
+    "edit"
   ],
   "userInvocable": true
 }
