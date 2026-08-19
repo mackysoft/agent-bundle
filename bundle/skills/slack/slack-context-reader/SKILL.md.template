@@ -14,11 +14,11 @@
 | `direct_reference` | Slack URL、conversation ID、message ID、thread参照 | 正規化した対象と取得した現在状態 |
 | `discovery` | conversation、actor、検索語、期間 | 条件に合う候補と探索済み範囲 |
 
-Slack URLだけの場合は、URLからworkspaceと対象を正規化し、actorを解決する。ローカルCLIの認証選択が一つでworkspaceに一致するときはその選択を使い、それ以外は `input_incomplete` とする。
+Slack URLだけの場合は、URLからworkspaceと対象を正規化する。
 
 ## 取得と観測
 
-ローカルSlack CLIの `slack api` で取得する。methodと引数は、インストール済みCLIのhelpと現在のSlack公式資料から選ぶ。`direct_reference` ではworkspace、conversation、親message、thread、対象messageを正規化し、`discovery` では探索条件と候補条件を固定する。
+取得前にworkspace、Slack app、actorに一致するCLI認証選択を一つへ固定し、全取得で維持する。読み取りはローカルSlack CLIの `slack api` だけで行い、methodとargumentsはインストール済みCLIのhelpと現在のSlack公式資料から選ぶ。agentが `slack api` を実行し、CLI内部でWeb API通信する経路を使い、agentのdirect HTTP、SDK、手書きのC#またはPowerShellを代替またはfallbackにしない。credentialまたはtokenの値はCLIまたは実行環境で解決し、入力として要求・転記せず、CLI arguments、log、result、handoffへ含めない。成果にはworkspace、Slack app、actorの識別子までを含める。認証選択が不明なら `input_incomplete`、主体を固定した後に認証を確立できなければ `access_unconfirmed`、CLI、helpまたはSlack公式資料を利用できず取得契約を確定できなければ `partial` とし、既存の結果契約に従いreason、unretrieved scope、resume conditionを返す。`direct_reference` ではworkspace、conversation、親message、thread、対象messageを正規化し、`discovery` では探索条件と候補条件を固定する。
 
 要求範囲に応じて、workspace、conversation、message、parent、threadを取得する。normal message、subtypeまたはsystem event、`thread_broadcast` を区別し、actor、app、認証主体、timestamp、編集、text、blocks、thread relation、reactionsとそのactor、mentions、broadcast、conversation type、public・private・external-shared境界、file、attachment、unfurl、linkを観測する。paginationは要求範囲を満たすか継続条件が失われるまで進める。
 
