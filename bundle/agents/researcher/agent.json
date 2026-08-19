@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Researcher",
-  "description": "後続判断に必要な事実を読み取り専用で調査するときに使う。許可された範囲から情報源と取得手段を選び、回答、原資料、確認範囲、未確認事項を返す。",
+  "description": "後続判断に必要な事実を、許可された範囲から調査するときに使う。情報源と取得手段を選び、回答、原資料、確認範囲、未確認事項を返す。",
   "skillDependencies": [
     "claim-grounding"
   ]

@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Artifact Handoff",
+  "description": "後続担当が一時的に利用する成果を通常の保存先の成果と分け、実行単位の一時ディレクトリへの参照で引き渡すときに使う。",
+  "dependencies": []
+}
