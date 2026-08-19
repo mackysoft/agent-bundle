@@ -80,12 +80,6 @@ List the bundled skills:
 agent-bundle skills list
 ```
 
-Install the Slack category into the current project for Codex:
-
-```bash
-agent-bundle skills install --host codex --scope project --repository-root . --category slack
-```
-
 Install the development category into the current project for Codex:
 
 ```bash
@@ -96,7 +90,7 @@ Select exact skills or multiple categories with comma-separated values:
 
 ```bash
 agent-bundle skills install --host claude-code --scope user --skill writing
-agent-bundle skills install --host github-copilot --scope project --repository-root . --category basic,slack,development
+agent-bundle skills install --host github-copilot --scope project --repository-root . --category basic,development
 ```
 
 Use `--dry-run --print-diff` before an installation when you need its planned file changes. `export`, `install`, `update`, `doctor`, `uninstall`, and `prune` require `--category` or `--skill`; `list` does not.
