@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Subagent Execution Analysis",
-  "description": "Codex task/session、親子実行記録、subagent activity、child thread、runtime event、実行時点の custom agent 定義を照合し、spawn 試行と成立した実行について、identity 確度、選択、委譲入力、実効設定と権限、行動境界、成果、follow-up、parent handoff、終了状態、トークン、所要時間、費用などの資源使用を、直接観測・定義・導出・推定・未確認に分けて分析するときに使う。",
+  "description": "正規化済みの親子実行記録と実行時点のagent定義から、subagentの起動試行と開始済みexecutionを復元し、実行主体、適用定義、委譲から終了までの挙動、資源使用を証拠の確度とともに分析するときに使う。",
   "dependencies": [
     "claim-grounding",
     "referent-modeling",

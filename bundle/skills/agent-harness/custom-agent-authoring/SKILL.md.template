@@ -18,7 +18,7 @@ custom agentを作成、更新、レビューし、呼び出し元が適切な�
 
 依頼、既存agent、呼び出し元が行う選択、実際の実行記録、成果物、対象hostの契約を確認する。作成候補について、既存agentまたはSkillでは所有できない独立した成果責務と、呼び出し元がその責務を選ぶ利用場面があることを確認する。
 
-利用記録または挙動検証の失敗を変更根拠にする場合は、期待との差、最初の逸脱、原因帰属、修正責任、影響する契約要素、再検証範囲を確認できる分析結果を使う。生のsession、runtime記録、検証結果だけで原因を確定できない場合は、変更前に `$behavior-deviation-analysis` を適用する。
+利用記録または挙動検証の失敗を変更根拠にする場合は、期待との差、最初の逸脱、原因帰属、修正責任、影響する契約要素、再検証範囲を確認できる分析結果を使う。分析されていない利用記録または検証結果だけで原因を確定できない場合は、変更前に `$behavior-deviation-analysis` を適用する。
 
 既存agentの更新では、選択面、入力、判断、行動、作用、成果、handoff、完了状態、停止条件、実行担当の割当方針、Skill依存、host bindingについて、保持、更新、別の正本への移管、削除のいずれかを根拠とともに決める。
 
@@ -58,17 +58,17 @@ host非依存指示では、成果の受領と追加割当を行う相手を抽�
 | --- | --- |
 | agent identity、表示名、選択用description、直接Skill依存 | 配布基盤のagent定義メタデータ。 |
 | 成果責務、入力、判断、行動、作用、成果、handoff、完了と停止、実行担当の割当 | host非依存のagent指示。 |
-| model、reasoning effort、tool、permission、sandbox、host固有の出力設定 | host binding。 |
+| host schemaが定める実効設定、能力、許可、host固有の出力設定 | host binding。 |
 | 生成形式、host artifact、install先 | 配布基盤と対象hostの公開契約。 |
-| 実行時の実効設定 | runtime記録を正本とする。 |
+| 実行時の実効設定の観測 | 記録提供責務から受け取る正規化済み実行記録。 |
 
 Agent Distribution sourceを扱う場合は、`agent.json`を定義メタデータ、`AGENT.md.template`をhost非依存指示、`hosts/<host>.json`をhost bindingの正本とする。生成済みartifactは、これらの正本から正規の生成手段で更新する。
 
-host非依存指示は成果責務と判断規則、host bindingはhost名、model、tool、設定値、hostごとの表現差を所有する。配布基盤のadapterはhost artifactへの変換を所有する。
+host非依存指示は成果責務と判断規則、host bindingはhost schemaが定める実効設定とhostごとの表現差を所有する。配布基盤はhost artifactへの変換を所有する。
 
-直接Skill依存は、agentが実行時に適用する下位能力で構成する。authoring、挙動検証、原因分析は作成作業の依存として保持する。agent間の関係は実行時の選択とhandoff、Skill間の関係はSkill依存として表す。
+作成対象agentの直接Skill依存は、そのagentが実行時に適用する下位能力で構成する。作成時に適用するauthoring補助、挙動検証、原因分析は、このSkillの依存として保持し、作成対象agentの依存へ含めない。agent間の関係は実行時の選択とhandoff、作成対象agentとSkillの関係は直接Skill依存として表す。
 
-host bindingのmodel、reasoning effort、tool、permissionは、成果責務の判断難度、作業量、作用、安全条件と、対象hostの現在有効な契約から選ぶ。host非依存の作業契約には、設定値を選ぶ基準を保持する。
+host bindingの設定は、成果責務の判断難度、作業量、作用、安全条件と、対象hostの現在有効な契約から選ぶ。host非依存の作業契約には、設定値を選ぶ基準を保持する。
 
 定義メタデータ、host非依存指示、bindingの文章には `$writing` を適用する。成果物の内容は現在有効なagent契約で構成する。
 
@@ -82,11 +82,11 @@ identity、description、指示、Skill依存、host bindingが対象schemaで�
 
 ### Phase 6: 挙動を検証して修正する
 
-現在の候補、definition digestまたはbundle version、agent契約、対象host、許可作用、変更した契約要素、回帰入力を `$custom-agent-behavior-validation` へ渡す。
+現在の候補、definition digestまたはbundle version、agent契約、対象host、検証範囲、変更した契約要素、回帰入力と、`$custom-agent-behavior-validation` の入力契約を満たす実行計画・観測・記録契約を渡す。実行参照と正規化済み実行記録は開始前の必須入力にせず、実行後に取得する。
 
-検証結果が `violates`、`unverified`、`blocked` の場合は、その検証結果とruntime証拠へ `$behavior-deviation-analysis` を適用し、原因、修正を判断する責務、影響する契約要素、再検証範囲を確認する。
+検証結果が `violates`、`unverified`、`blocked` の場合は、その検証結果と実行証拠へ `$behavior-deviation-analysis` を適用し、原因、修正を判断する責務、影響する契約要素、再検証範囲を確認する。
 
-原因がcustom agent定義へ帰属し、対応候補を採用する場合は、Phase 2からPhase 4の該当判断へ戻って候補を修正する。binding、runtime、配布基盤、検証手段、作業条件へ帰属する問題は、それぞれを所有する責務へ渡す。
+原因がcustom agent定義へ帰属し、対応候補を採用する場合は、Phase 2からPhase 4の該当判断へ戻って候補を修正する。binding、実効設定、実行提供責務、記録提供責務、配布基盤、検証手段、作業条件へ帰属する問題は、それぞれを所有する責務へ渡す。
 
 修正後は構造検証を更新し、失敗したシナリオと変更の影響が届く回帰シナリオを、同じ比較基準で再実行する。最新候補の証拠には、その版またはdigestに対応する検証結果を使う。
 
@@ -102,7 +102,7 @@ identity、description、指示、Skill依存、host bindingが対象schemaで�
 
 - agent identity、選択面、成果責務、入力、判断、行動、作用、成果、handoff、完了と停止、実行担当の割当方針が一つの作業契約として整合している。
 - descriptionが呼び出し元による選択、host非依存指示が実行時の成果責務、host bindingがhost固有設定を所有している。
-- host非依存指示、host binding、runtime記録が、それぞれの情報を一つの正本として所有している。
+- host非依存指示、host binding、正規化済み実行記録が、それぞれの情報を一つの正本として所有している。
 - 直接Skill依存が実行時に必要な下位能力へ向き、agent間の関係が実行時の選択とhandoffで表されている。
 - 更新前の各契約が保持、根拠のある更新、別の正本への移管、削除のいずれかに対応している。
 - 正規の生成物と構造検証が現在の正本に一致している。
