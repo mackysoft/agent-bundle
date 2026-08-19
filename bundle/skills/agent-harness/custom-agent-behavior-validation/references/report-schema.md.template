@@ -46,7 +46,7 @@ custom agentの挙動検証について、対象definition、host条件、シナ
 - `expected_observations`
 - `required_execution_evidence`
 - `observation_record_contract_refs`
-- `resource_measurement_plan`: 計測範囲、記録契約が定義する必要な指標と単位、計測端点となるrecord refs、指標間の関係、課金区分への対応、価格基準、反復条件、集約方法、比較対象となる実行の成立条件
+- `resource_measurement_plan`: 計測範囲、使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用、記録契約が定義する名称と単位、計測端点となるrecord refs、指標間の関係、課金区分への対応、価格基準、反復条件、集約方法、比較対象となる実行の成立条件
 
 期待する具体的な回答ではなく、契約から観測すべき選択、identity、設定、判断、行動、成果、handoff、状態を書く。
 
@@ -56,6 +56,7 @@ custom agentの挙動検証について、対象definition、host条件、シナ
 
 - 親execution
 - 分析範囲と端点の包含性
+- cutoffがある場合のcutoff mapping
 - 起動試行ID
 - 子実行ID
 - identity status
@@ -97,7 +98,7 @@ lifecycle state、成果の存在、親実行による受領、契約適合を�
 - `execution_ref`、または親実行とend-to-endを表すscope ref
 - `scope`: `child`、`descendants`、`parent`、`end_to_end`
 - `record_contract_ref`
-- `metric`: 記録契約が定義する指標名
+- `metric`: 使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用のいずれかに対応する、記録契約が定義する指標名
 - `value`、取得できない場合は `null`
 - `unit`
 - `claim_kind`: `observed`、`derived`、`unverified`
@@ -105,7 +106,7 @@ lifecycle state、成果の存在、親実行による受領、契約適合を�
 - `calculation`: 導出値の場合の式、入力measurement、価格基準への参照
 - `missing_reason`
 
-各指標は、記録契約が定義する名称、値、単位、指標間の関係を保持する。記録契約が区別しない指標を推定で作らない。課金記録が報告する費用と、観測した使用量および時点付き価格基準から計算した費用は別measurementにする。価格基準は課金区分、通貨、単価、適用時点、source refを持つ。導出費用の計算には、各使用量指標が課金区分の総量、内数、または独立量のどれに対応するかを示すmappingを使う。mappingを確認できない指標を含む導出費用は `unverified` とする。
+各指標は、使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用の意味単位と、記録契約が定義する名称、値、単位、指標間の関係を保持する。記録契約が区別しない指標を推定で作らない。課金記録が報告する費用と、観測した使用量および時点付き価格基準から計算した費用は別measurementにする。価格基準は課金区分、通貨、単価、適用時点、source refを持つ。導出費用の計算には、各使用量指標が課金区分の総量、内数、または独立量のどれに対応するかを示すmappingを使う。mappingを確認できない指標を含む導出費用は `unverified` とする。
 
 経過時間を計測する場合は、資源計測条件が範囲ごとに定めた開始と終了または停止のrecord refs、端点の包含性、計測範囲を保持する。両端を指定または観測できない範囲の経過時間は `unverified` とする。親実行、子実行、子孫、end-to-endを一つの時間または費用へ暗黙に集約しない。
 

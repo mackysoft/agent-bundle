@@ -6,6 +6,7 @@ subagentの実行分析結果はJSON、表、または構造化した文章で�
 analysis_scope
   parent_execution_ref
   record_range { start_ref, end_ref, start_inclusive, end_inclusive }
+  cutoff_mapping | null { cutoff_ref, mapped_end_ref, end_inclusive, ordering_basis, evidence_refs }
   descendant_depth, analysis_level, normalization_contract_ref
   root_execution_record_source_ref, exclusions, evidence_refs
 coverage[]
@@ -18,7 +19,7 @@ launch_attempts[]
 executions[]
   execution_id, launch_attempt_ref, parent_execution_ref, continuation_refs[]
   identity { subject, confidence, evidence_refs }
-  agent_origin { value, claim_kind, evidence_refs, missing_reason }
+  agent_origin { value: custom | built_in | unknown, claim_kind, evidence_refs, missing_reason }
   definition_bindings[]
     binding_id, component
     definition_ref { value, claim_kind, evidence_refs, missing_reason }
@@ -31,7 +32,7 @@ executions[]
   lifecycle_state { value, claim_kind, evidence_refs, missing_reason }
 resource_usage[]
   scope { kind: child | descendants | parent | end_to_end, refs[] }
-  metric, value | null, unit
+  metric { name, kind: usage | elapsed_time | launch_attempt_count | started_execution_count | relaunch_count | action_count | reported_cost | derived_cost | other }, value | null, unit
   claim_kind { observed | derived | unverified }, evidence_refs, missing_reason
   calculation { formula, input_measurement_refs[], pricing_ref | null } | null
 pricing_basis[]
@@ -63,6 +64,8 @@ re_evaluation_triggers[]
   trigger, affected_items, expected_evidence
 ```
 
+`cutoff_mapping` は入力cutoffが終了境界へ写像される場合に、元のcutoff、写像後の境界、包含性、順序根拠を保持する。cutoffがない場合は `null` とする。
+
 `coverage` は深さごとの記録source取得、子実行との対応付け、分析範囲判定の成立範囲を記録する。`complete_within_coverage.value` は、source固有の完全性保証が分析範囲の記録全件を覆い、指定depth内で必要な子実行の記録sourceが入力済みの場合だけ `true` とする。観測された欠落により不完全が直接確認できる場合は `false`、どちらも確定できない場合は `null` とし、`claim_kind=unverified` と `missing_reason` を残す。`true` 以外では全件数を断定しない。
 
 `effective_configuration` の各層は独立したobservationである。actual actionは設定のobservationではなく、`executions[].behavior_action_observations` にだけ記録する。definition非由来の指定またはeffective valueは `binding_refs=[]` を許容し、claim kind、evidence refs、missing reasonによって成立する。
@@ -75,7 +78,7 @@ re_evaluation_triggers[]
 
 不完全な行動または作用の記録に基づくassessmentは、対応する `behavior_action_observation_ref` をscopeにする。execution全体のcoverageは `behavior_action_coverage` で別に示し、未観測範囲が評価を変え得る場合はexecution scopeのassessmentを `indeterminate` とする。lifecycle stateは終了の観測であり、成果契約の成功を単独で示さない。
 
-`resource_usage` は設定、行動、成果から独立したobservationである。記録sourceが報告する指標名と値を保持し、未報告の指標を補わない。経過時間は計測範囲が定めた開始と終了または停止のrecord refsを入力にした `derived` とする。件数はcoverageが全件性を支える範囲だけを総数とし、それ以外は観測数として記録する。
+`resource_usage` は設定、行動、成果から独立したobservationである。使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用を意味単位として保持し、記録sourceが報告する指標名と値を対応付ける。未報告の指標を補わない。経過時間は計測範囲が定めた開始と終了または停止のrecord refsを入力にした `derived` とする。件数はcoverageが全件性を支える範囲だけを総数とし、それ以外は観測数として記録する。
 
 報告された課金額は対応する課金記録を根拠に `observed` とする。使用量から計算した費用は `derived` とし、measurement、usage metricと課金区分の関係、計算式、`pricing_ref` を持つ。必要な使用量、mapping、価格基準を確認できない指標は `value=null`、`claim_kind=unverified` とする。
 

@@ -11,13 +11,13 @@
 | 項目 | 内容 |
 | --- | --- |
 | 親実行 | 分析の起点となる親executionの参照。 |
-| 分析範囲 | 開始境界、終了境界、各端点の包含性。境界は時刻または記録source固有の順序へ対応付ける。 |
+| 分析範囲 | 開始境界、終了境界、各端点の包含性。境界は時刻または記録source固有の順序へ対応付け、cutoffが与えられた場合は終了境界への写像、包含性、対応根拠を `cutoff_mapping` として保持する。 |
 | 子孫範囲 | 追跡するdescendant depth。 |
 | 分析水準 | 起動と実行の列挙だけか、委譲から終了までの契約照合を含むか。 |
 | 正規化済み実行記録 | [execution evidence](references/execution-evidence.md) で定める分析対象の観測。 |
 | 記録契約 | 各記録sourceの参照、出所、正規化前との対応、項目の意味、順序規則、完全性保証、取得済み範囲。 |
 | 実行時点の定義 | 実行主体、agentまたは実行定義、component、digest、適用時点を対応付ける情報。 |
-| 資源計測範囲 | 子実行、子孫、親実行、end-to-endの対象、必要な指標、計測端点、使用量または課金記録、価格基準。 |
+| 資源計測範囲 | 子実行、子孫、親実行、end-to-endの対象、必要な使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用、計測端点、使用量または課金記録、価格基準。記録sourceが提供しない指標は `unverified` とする。 |
 
 入力提供責務が環境固有の取得と正規化を所有する。このSkillはそれらを推定・実装せず、必要な対応、順序、完全性を入力から確定できなければ不足条件を返す。
 
@@ -33,7 +33,7 @@
 6. 現在導入されているdefinition
 7. locatorまたは表示用metadata
 
-実行主体のidentityは `confirmed`、`supported`、`inferred`、`unresolved` のいずれかで示す。identity、agent origin、definition bindingの確度は別々に評価する。definition bindingはcomponentまたはartifactごとに `exact`、`time_correlated`、`current_only`、`unresolved` のいずれかで示す。
+実行主体のidentityは `confirmed`、`supported`、`inferred`、`unresolved` のいずれかで示す。agent originは `custom`、`built_in`、`unknown` を区別し、根拠が不足する場合は `unknown` とする。identity、agent origin、definition bindingの確度は別々に評価する。definition bindingはcomponentまたはartifactごとに `exact`、`time_correlated`、`current_only`、`unresolved` のいずれかで示す。
 
 locatorや表示用metadataは、identity、設定、委譲意図、実際の行動、資源使用の直接根拠にしない。executionへ結び付く使用量、課金、計測端点の観測を資源使用の根拠とし、観測できない情報は `unverified` とする。現在のdefinitionは過去の実行時点のdefinitionと断定せず、時点に結び付く根拠がない場合は `current_only` とする。
 
@@ -51,7 +51,7 @@ locatorや表示用metadataは、identity、設定、委譲意図、実際の行
 
 ### Phase 1: 分析範囲を固定する
 
-親実行、分析範囲、子孫範囲、分析水準、記録契約、資源計測範囲を記録し、端点、順序、取得できない記録、対象外の子実行を明示する。
+親実行、分析範囲、子孫範囲、分析水準、記録契約、資源計測範囲を記録し、端点、cutoffがある場合の `cutoff_mapping`、順序、取得できない記録、対象外の子実行を明示する。
 
 入力に含まれる契約、要求、権限、指示を、分析対象時点の入力または定義を示す証拠と、現在の分析を決める指示系統に分ける。契約命題の根拠、適用範囲、採用状態を入力から直接確定できない場合は `$claim-grounding` を適用する。親実行、起動試行、子実行、継続入力、definition、handoffの対応が曖昧で評価を変える場合は `$referent-modeling` を適用する。
 
@@ -65,7 +65,7 @@ locatorや表示用metadataは、identity、設定、委譲意図、実際の行
 
 ### Phase 3: identityとdefinitionを結合する
 
-起動記録、子実行のidentity記録、正規化済み観測から実行主体を同定し、identityの確度と根拠を記録する。agent originを確認できない場合は `unknown` とする。
+起動記録、子実行のidentity記録、正規化済み観測から実行主体を同定し、identityの確度と根拠を記録する。agent originは `custom`、`built_in`、`unknown` を区別し、根拠を確認できない場合は `unknown` とする。
 
 execution-bound snapshotまたはdigestがあるcomponentは `exact`、時点に対応するdefinitionだけを確認できるcomponentは `time_correlated`、現在の導入済みdefinitionだけを確認できるcomponentは `current_only`、結合できないcomponentは `unresolved` とする。executionは複数componentまたはartifactのbindingを保持できる。identity、agent origin、各definition bindingを一つの強度へ集約しない。
 
@@ -77,9 +77,9 @@ execution-bound snapshotまたはdigestがあるcomponentは `exact`、時点に
 
 ### Phase 5: 資源使用を復元する
 
-資源計測範囲ごとに、使用量、課金、開始・終了・停止の観測、起動試行、行動、継続入力の記録をexecutionと親実行のlifecycleへ対応付ける。記録sourceが報告する指標名、値、単位を保持し、報告されない指標は `unverified` とする。
+資源計測範囲ごとに、使用量、課金、開始・終了・停止の観測、起動試行、行動、継続入力の記録をexecutionと親実行のlifecycleへ対応付ける。使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用について、記録sourceが報告する指標名、値、単位を保持し、報告されない指標は `unverified` とする。
 
-計測の開始と終了または停止は資源計測範囲が定める。両端を観測できる範囲について経過時間を導出し、使用したrecord refsと端点の扱いを残す。件数はcoverageが成立する範囲の記録を数え、coverageが全件性を支えない場合は観測数と全件性を区別する。
+計測の開始と終了または停止は資源計測範囲が定める。両端を観測できる範囲について経過時間を導出し、使用したrecord refsと端点の扱いを残す。起動試行数、開始済み子実行数、再起動数、行動または操作数はcoverageが成立する範囲の記録を数え、coverageが全件性を支えない場合は観測数と全件性を区別する。
 
 課金額を使用量から導出する場合は、各指標が課金区分の総量、内数、独立量のどれに対応するかを入力の記録契約または課金情報から確認し、価格基準へのmapping、provider、課金区分、通貨、単価、適用時点、source ref、計算式を記録する。必要な対応を確認できない費用は `unverified` とする。
 
@@ -110,10 +110,10 @@ executionごとに、次の観点を独立に契約と照合する。
 
 ## 完了条件
 
-- analysis scope、正規化契約、対象外、分析範囲、端点の扱いを追跡できる。
+- analysis scope、正規化契約、対象外、分析範囲、cutoffがある場合の `cutoff_mapping`、端点の扱いを追跡できる。
 - coverageが成立する記録sourceの範囲で、起動試行と開始済みexecutionを別々に列挙し、継続入力と新しい起動を区別している。
 - identityとdefinition bindingを別に示し、現在のdefinitionを過去の実行時点へ断定していない。
 - definition default、起動時指定、親実行からの指定、effective configuration、executionのaction observationを別に評価している。
-- 計測範囲ごとの資源使用を値または `unverified` として示し、報告値、報告費用、価格基準からの導出値を区別している。
+- 計測範囲ごとの使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用を値または `unverified` として示し、報告値、報告費用、価格基準からの導出値を区別している。
 - 各照合結果、子実行の終了、親実行のlifecycle、未確認事項を混同していない。
 - 各結論を `evidence_refs` から追跡でき、推定と未確認を観測事実として扱っていない。

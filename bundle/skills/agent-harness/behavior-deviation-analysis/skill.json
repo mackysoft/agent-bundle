@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Behavior Deviation Analysis",
-  "description": "エージェントの利用記録、Skillまたはcustom agentの挙動検証結果、成果物から、期待との最初の逸脱と原因の帰属先を特定し、修正を判断する責務と再検証範囲を示すときに使う。",
+  "description": "エージェントの利用記録、Skillまたはcustom agentの挙動検証結果、成果物、差分、レビュー、修正指示を調べ、期待した挙動から最初に逸脱した地点、主原因、従原因、再発性、影響を特定する。原因をSkill、custom agent定義、選択とオーケストレーション、host bindingと実効設定、配布基盤、製品またはツール、作業条件、検証手段、実行上の逸脱へ帰属させ、修正責任と再検証範囲を示すときに使う。",
   "dependencies": [
     "claim-grounding",
     "referent-modeling",
