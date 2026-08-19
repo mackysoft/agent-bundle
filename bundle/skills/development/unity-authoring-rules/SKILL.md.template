@@ -2,14 +2,8 @@
 Unity プロジェクトの実装、修正、レビューで適用する Unity 固有のルールを定める。
 Unity の実行モデル、シリアライズ、UnityEngine.Object の寿命、生成物、Asset、Scene、Prefab、ScriptableObject、asmdef の制約を確認する。
 
-## 優先順位
-1. プロジェクト固有の明示規約を優先する。
-2. Unity 固有の制約と C# 一般の設計判断が衝突する場合は、Unity 固有の制約を満たす。
-3. 既存コードが責務境界や依存境界を崩している場合は、現状を正当化せず、変更範囲で改善できる境界を選ぶ。
-
 ## C# 一般ルールとの関係
-Unity 固有の制約がない通常の C# クラス、ドメインロジック、変換、判定、テスト対象コードには、$csharp-authoring-rules も適用する。
-Unity の実行モデル、シリアライズ、Inspector、Scene、Prefab、Asset、Editor API、Unity のライフサイクルに関わる判断では、Unity 固有の制約を満たしたうえで C# としての責務境界を保つ。
+Unity 固有の制約を満たした上で、$csharp-authoring-rules を適用する。
 
 ## ルール
 
@@ -18,7 +12,6 @@ Runtime コードから Editor 専用 API へ依存させない。
 Editor 拡張は Editor 側に閉じる。
 Runtime と Editor の両方で使う契約は、どちらにも依存しない場所へ分ける。
 Editor 用の処理を条件分岐だけで Runtime 側へ混在させない。
-Test の都合を Runtime の依存方向へ逆流させない。
 
 ### MonoBehaviour の責務
 `MonoBehaviour` には Unity のライフサイクル、Scene との接続、Inspector から設定される状態を置く。
@@ -66,7 +59,6 @@ Inspector 表示のための構造と、実行時の契約を同じ型へ無理�
 ### Asset、Scene、Prefab への副作用
 Asset、Scene、Prefab を変更する処理は、いつ、何を、どの単位で変更するかを明確にする。
 Editor 処理で永続化される変更と、Play Mode 中だけの変更を混同しない。
-自動生成やインポート処理は、手書きコードと責務を分ける。
 永続化を伴う Editor 操作では、Undo、dirty 状態、保存範囲を確認する。
 Prefab や Scene に保存される参照を変える場合は、コード変更ではなく永続化された状態の変更として扱う。
 Unity にコードファイルや Asset を追加、削除、移動した場合は、Unity 正規の `meta` 生成と更新を前提にする。
@@ -114,9 +106,7 @@ Play Mode 終了で停止する処理は、`Application.exitCancellationToken` �
 コンポーネント、Scene、サービスの寿命で止める処理は、その寿命に対応するキャンセル契約を用意する。
 
 ### 割り当て
-毎フレーム呼ばれる処理で不要な割り当てを増やさない。
-頻繁に実行される処理では、コレクション生成、LINQ、文字列生成、クロージャ生成を必要性で判断する。
-最適化のために責務境界や可読性を壊さない。
+毎フレームまたは高頻度で実行する処理には、$csharp-authoring-rules の割り当て規則を適用する。
 
 ### asmdef と依存方向
 asmdef がある場合は、Runtime、Editor、Test、パッケージ境界の依存方向を確認する。
