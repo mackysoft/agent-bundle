@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Slack Interaction",
+  "description": "Slack URL、参照、または対応依頼で、確認済みの業務入力と必要な場合に取得した現在のSlack状態から、読み取り、目的確認、下書き、外部作用不要、許可確認、または一作用の結果という完了状態を選ぶときに使う。",
+  "dependencies": [
+    "slack-action-executor",
+    "slack-context-reader",
+    "writing"
+  ]
+}

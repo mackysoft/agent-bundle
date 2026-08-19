@@ -1,0 +1,51 @@
+## 目的
+
+確定済みの一つのSlack作用を、preflight、attempt、有限の機械的回復、postfetch、分類によって履行する。作用、target、payload、reaction、notification、actor、permissionは入力どおりに保持する。
+
+## 入力
+
+一作用の入力は、作用別の確定項目と共通項目で構成する。
+
+| 作用 | 確定項目 |
+| --- | --- |
+| `parent_message` | conversation、confirmed payload、mentions、観測可能なnotification settings |
+| `thread_reply` | parent、payload、mentions、broadcast |
+| `message_update` | target、expected before state、replacement payload |
+| `message_delete` | target、取得済みのbefore state |
+| `reaction_add` / `reaction_remove` | target、exact reaction、actor |
+| `no_op` | 受入可能なexisting state、verification scope、その状態を受け入れるpermission |
+
+共通項目は、workspace、conversation、app、actor、期待するpublic・private・external-shared boundaryと検証条件、固定snapshot invariants、一作用のpermission、expected observable projection、作用別のattribution evidence、allowed no-op conditionである。stable identityは一意性が必要な場合にだけ含める。
+
+表現は、confirmed payload、submitted representation、expected observable projection、observed projectionを分けて保持する。submitted representationにはmethod、arguments、JSON、escaping、encodingなどの非secret表現を記録する。observed projectionはdispatch前のmethod contractで定めた正規化規則を使う。観測可能なnotificationはmention token、thread、broadcast、thread_broadcast、API attributeであり、人による配達、閲覧、理解はprojectionに含めない。
+
+## 履行
+
+preflight前に、common workspace、app、actorに一致するCLI認証選択を一つへ固定する。preflight、全attempt、repreflight、postfetchでは同じ主体を使い、読み取りには同じ識別子を `$slack-context-reader` へ渡してその契約に従う。mutation dispatchはローカルSlack CLIの `slack api` だけで行い、methodとargumentsはインストール済みCLIのhelpと現在のSlack公式資料から選ぶ。agentが `slack api` を実行し、CLI内部でWeb API通信する経路を使い、agentのdirect HTTP、SDK、手書きのコードをrecovery candidateを含む代替またはfallbackにしない。credentialまたはtokenの値はCLIまたは実行環境で解決し、CLI arguments、submitted representation、log、result、handoffにはnon-secret情報とidentifierだけを残す。許可経路、契約の情報源、認証選択、安全なcredential解決を最初のaction attempt前に確定できなければ、0 attemptで `preflight_blocked` を返す。
+
+1. `$slack-context-reader` を適用して、target、current state、boundary、snapshot invariants、no-op条件、projection、attribution scopeをpreflightする。必要な観測、比較規則、boundary確認が不足または不一致なら `preflight_blocked` を返し、dispatchしない。readerのpaginationまたは読み取り継続はattemptに数えない。
+2. preflight後のno-op分岐を一度だけ判定する。input actionが `no_op` なら、authorized existing conditionを観測できたときは0 attemptで `no_op`、条件が不成立または観測不能なら `preflight_blocked` を返す。他のactionでは、allowed no-op conditionを観測したときは0 attemptで `no_op` を返す。expected resultが既に存在し、その状態をno-opとして受け入れるpermissionがないときは `preflight_blocked` を返す。それ以外はattempt 1へ進む。
+3. action attemptは最大2回とし、`not_dispatched` とmutation rate limitも1回のattemptとして数える。各attemptを `not_dispatched`、`rejected_not_applied`、`possibly_applied`、`accepted_unverified` の一つに分類し、submitted representationと観測根拠を残す。
+4. `possibly_applied` または `accepted_unverified` の後は `$slack-context-reader` を適用してpostfetchする。non-applicationを回復根拠にする場合も、action-specific required scopeを完全に取得して確認する。取得済みstateは取得範囲だけで記録する。
+5. attempt結果とpostfetch結果は、次の排他的な順序で分類する。第一に、action-specific required scopeを完全に取得し、今回attemptによるstate transitionがないことを証明できれば `confirmed non-applied` とする。この場合はattributionを評価しない。attempt 1が `possibly_applied` 後のpostfetchで `confirmed non-applied` となった場合を含め、全relevant attemptの非適用、新たに確認した具体的原因、semantic-preservingな別の修正、原因と修正の不反復、作用・target・payload・notification・actor・boundary・permissionの不変、repreflight通過を満たすときだけ、repreflightを経てattempt 2を行う。attempt 1でこの回復条件を満たさない場合は `recovery_blocked`、attempt 2が `confirmed non-applied` の場合は追加回復を行わず `recovery_blocked` を返し、attempt 3へ進まない。第二に、non-applicationが証明されず、required scopeがcompleteで、API response ID、actor、message IDまたはreaction IDなどで今回効果へ帰属できる場合は、normalized projectionが一致するとき `applied_verified`、異なるとき `applied_mismatch` を返す。第三に、required scopeがincompleteまたはunretrieved、application possibilityが残る、またはeffectを今回attemptへ帰属できない場合は `outcome_unknown` を返し、再送しない。attempt後のrepreflightで、同じ実行前提であるCLI route、CLI help、Slack公式資料、認証選択、安全なcredential解決を再確定できない場合は、all relevant attemptsが `confirmed non-applied` なら `recovery_blocked`、application possibilityが残るなら `outcome_unknown` とする。取得済みstate、unretrieved scope、理由、resume conditionを返し、access、rate limit、paginationも該当するときに記録する。
+
+`applied_mismatch` または `outcome_unknown` の訂正は、現在の状態を入力にした新しい作用と新しいpermissionで行う。
+
+## 結果
+
+| 状態 | 成立条件 |
+| --- | --- |
+| `preflight_blocked` | dispatch前に必要な観測、比較規則またはboundary確認を満たさない。 |
+| `no_op` | 許可されたexisting stateをdispatchなしで検証した。 |
+| `applied_verified` | attemptへのattributionが成立し、observed projectionが期待と一致した。 |
+| `recovery_blocked` | attempt 1の回復条件を満たさない、またはattempt 2で非適用を確認した。 |
+| `applied_mismatch` | attemptへのattributionが成立し、observed projectionが期待と異なった。 |
+| `outcome_unknown` | 適用可能性、必要なfinal state、または今回attemptへのattributionを確定できない。 |
+
+成果には、各attemptとdispatch classification、recovery、attribution、取得できたobserved final state、preflightとpostfetchのmethod・time・scope・unretrievedを含める。
+
+## 完了条件
+
+- 一作用の確定入力を保持し、preflightから終端状態までを追跡できる。
+- action attemptは最大2回であり、retryは非適用の証明、異なるsemantic-preservingな修正、repreflightを伴う。
+- final stateとattemptへのattributionを分け、終端状態を根拠とともに返している。

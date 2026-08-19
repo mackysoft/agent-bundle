@@ -1,0 +1,56 @@
+## 目的
+
+指定されたSlackの範囲を読み取り、正規化した対象、観測した事実、取得範囲、未取得範囲、再開条件を返す。成果は観測記録として、取得時点と方法に対応付ける。
+
+## 入力
+
+- workspaceと、今回使うSlack appまたは認証主体
+- `direct_reference` または `discovery` の読み取り方式
+- Slack URL、conversation、message、thread、actor、検索語、期間などの対象または探索条件
+- 要求する観測項目と、message、thread、期間、件数、添付、paginationの範囲
+
+| 読み取り方式 | 入力 | 成果 |
+| --- | --- | --- |
+| `direct_reference` | Slack URL、conversation ID、message ID、thread参照 | 正規化した対象と取得した現在状態 |
+| `discovery` | conversation、actor、検索語、期間 | 条件に合う候補と探索済み範囲 |
+
+Slack URLだけの場合は、URLからworkspaceと対象を正規化する。
+
+## 取得と観測
+
+取得前にworkspace、Slack app、actorに一致するCLI認証選択を一つへ固定し、全取得で維持する。読み取りはローカルSlack CLIの `slack api` だけで行い、methodとargumentsはインストール済みCLIのhelpと現在のSlack公式資料から選ぶ。agentが `slack api` を実行し、CLI内部でWeb API通信する経路を使い、agentのdirect HTTP、SDK、手書きのC#またはPowerShellを代替またはfallbackにしない。credentialまたはtokenの値はCLIまたは実行環境で解決し、入力として要求・転記せず、CLI arguments、log、result、handoffへ含めない。成果にはworkspace、Slack app、actorの識別子までを含める。認証選択が不明なら `input_incomplete`、主体を固定した後に認証を確立できなければ `access_unconfirmed`、CLI、helpまたはSlack公式資料を利用できず取得契約を確定できなければ `partial` とし、既存の結果契約に従いreason、unretrieved scope、resume conditionを返す。`direct_reference` ではworkspace、conversation、親message、thread、対象messageを正規化し、`discovery` では探索条件と候補条件を固定する。
+
+要求範囲に応じて、workspace、conversation、message、parent、threadを取得する。normal message、subtypeまたはsystem event、`thread_broadcast` を区別し、actor、app、認証主体、timestamp、編集、text、blocks、thread relation、reactionsとそのactor、mentions、broadcast、conversation type、public・private・external-shared境界、file、attachment、unfurl、linkを観測する。paginationは要求範囲を満たすか継続条件が失われるまで進める。
+
+各要求項目を次のいずれかへ分類し、method、時刻、target、access、paginationへ対応付ける。
+
+| 分類 | 記録 |
+| --- | --- |
+| 観測済み | 値、または根拠を伴う明示的な不在 |
+| 未要求 | 今回の要求範囲に含まれないこと |
+| 未取得 | 理由と再開条件 |
+
+API fieldの欠落は未取得として記録する。明示empty、method contract、または完全取得した範囲だけを、値の不在を観測した根拠に使う。
+
+## 結果
+
+結果には、元参照または探索条件、正規化した対象、取得時刻とmethod、観測済み・未要求・未取得の項目、取得済み範囲、未取得範囲、pagination、認証・アクセス・rate limit・対象不在の付帯条件と再開条件を含める。
+
+主状態は取得終了時の状態から一つ選び、併存する事実は付帯条件に保持する。
+
+| 状態 | 成立条件 |
+| --- | --- |
+| `not_found_confirmed` | `direct_reference` の対象が存在し得る範囲を完全取得し、対象がなかった。 |
+| `complete` | 要求範囲と必要なpaginationを取得し、対象または探索結果を返した。 |
+| `input_incomplete` | 対象、範囲または認証主体が未確定で、Slackへの取得要求を開始していない。 |
+| `rate_limited` | 有効なrate limitの再開条件が要求範囲の取得を止めている。 |
+| `access_unconfirmed` | 認証、workspace、scopeまたは対象へのアクセス確認が要求範囲の取得を止めている。 |
+| `partial` | その他の取得失敗またはpagination中断により未取得範囲が残る。 |
+
+`discovery` が `complete` で候補が空の場合は、指定した探索範囲で一致がなかった観測として返す。response selection、payloadの意味同一性、permission、currentness、作用の帰属は、この成果の判断に含めない。
+
+## 完了条件
+
+- 観測した事実をmethod、対象、取得時刻、範囲へ追跡できる。
+- 値の不在とAPI fieldの未取得を区別している。
+- 主状態、取得範囲、未取得範囲、付帯条件、再開条件が対応している。

@@ -182,6 +182,16 @@ Game design, balance analysis, interface design, and gameplay observation.
 | `game-planning` | Define the shared contract and semantic dependencies for mixed game-planning outcomes, then integrate specialist results. |
 | `gameplay-observation` | Turn neutral observation requests and generic evidence packages into report-ready gameplay observation records without interpreting them. |
 
+### slack
+
+Context acquisition, request completion, and authorized external effects.
+
+| Skill | Purpose |
+| --- | --- |
+| `slack-action-executor` | Establish one fully specified effect, safely recover from confirmed non-application, and classify its observed result. |
+| `slack-context-reader` | Read a bounded conversation or discovery scope with traceable coverage, omissions, and access state. |
+| `slack-interaction` | Read references first, then resolve whether the request ends in context, intent confirmation, a draft, or one authorized effect. |
+
 ## Custom agents
 
 List the bundled agents and their direct skill dependencies:
