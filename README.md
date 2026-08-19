@@ -23,7 +23,7 @@ dotnet tool update --global MackySoft.AgentBundle
 The tool update replaces the CLI and its embedded bundle. It does not change Skill or custom agent files that are already installed in a host. Update and prune those files separately for every host and scope where you installed them, using the same selectors and applicable target overrides. Reuse `--target-dir` for Skill update, prune, and doctor; `--agent-target-dir` for custom-agent update, prune, and doctor; and `--skill-target-dir` for custom-agent update and doctor. For example:
 
 ```bash
-agent-bundle skills update --host codex --scope user --category basic,development,game-planning
+agent-bundle skills update --host codex --scope user --category basic,communication,development,game-planning
 agent-bundle agents update --host codex --scope user --agent architect,challenger,evidence-organizer,implementer,interactive-tester,operator,researcher,reviewer,verifier
 agent-bundle agents doctor --host codex --scope user --agent architect,challenger,evidence-organizer,implementer,interactive-tester,operator,researcher,reviewer,verifier
 ```
@@ -69,7 +69,7 @@ dotnet tool install --global MackySoft.AgentBundle
 Finally, create installations owned by the new `com.mackysoft.agent-bundle` catalog with `agent-bundle`. For example:
 
 ```bash
-agent-bundle skills install --host codex --scope user --category basic,development,game-planning
+agent-bundle skills install --host codex --scope user --category basic,communication,development,game-planning
 agent-bundle agents install --host codex --scope user --agent architect,challenger,evidence-organizer,implementer,interactive-tester,operator,researcher,reviewer,verifier
 ```
 
@@ -81,6 +81,12 @@ List the bundled skills:
 
 ```bash
 agent-bundle skills list
+```
+
+Install the communication category into the current project for Codex:
+
+```bash
+agent-bundle skills install --host codex --scope project --repository-root . --category communication
 ```
 
 Install the development category into the current project for Codex:
@@ -99,7 +105,7 @@ Select exact skills or multiple categories with comma-separated values:
 
 ```bash
 agent-bundle skills install --host claude-code --scope user --skill writing
-agent-bundle skills install --host github-copilot --scope project --repository-root . --category basic,development
+agent-bundle skills install --host github-copilot --scope project --repository-root . --category basic,communication,development
 ```
 
 Use `--dry-run --print-diff` before an installation when you need its planned file changes. `export`, `install`, `update`, `doctor`, `uninstall`, and `prune` require `--category` or `--skill`; `list` does not.
@@ -154,6 +160,9 @@ The `agents` resource group supports `list`, `export`, `install`, `update`, `doc
 | `review-triage` | `development` | Triage review comments against code, specifications, and evidence. |
 | `skill-authoring` | `development` | Create, update, and review behaviorally effective agent skills. |
 | `skill-behavior-validation` | `development` | Exercise agent Skills in isolated scenarios and report contract conformance, gaps, and rerun scope. |
+| `slack-action-executor` | `communication` | Establish one fully specified Slack effect, safely recover from confirmed non-application, and classify its observed result. |
+| `slack-context-reader` | `communication` | Read a bounded Slack conversation or discovery scope with traceable coverage, omissions, and access state. |
+| `slack-interaction` | `communication` | Read Slack references first, then resolve whether the request ends in context, intent confirmation, a draft, or one authorized Slack effect. |
 | `supervisor` | `development` | Route independent objectives to user-operable tasks that apply the orchestrator Skill. |
 | `subagent-execution-analysis` | `development` | Reconstruct subagent executions, lifecycle, configuration, actions, and resource usage from runtime evidence. |
 | `sync-latest` | `development` | Fetch remotes and safely synchronize a worktree with the right base. |

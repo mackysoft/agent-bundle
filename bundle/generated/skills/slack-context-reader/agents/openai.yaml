@@ -1,0 +1,7 @@
+interface:
+  display_name: "Slack Context Reader"
+  short_description: "指定されたSlackのconversation、thread、message、reply、actor、file、attachment、unfurlをSlack CLI経由で取得し、確認した事実、取得済み・未取得範囲、pagination、アクセス状態、再開条件を返す。Slackの事実と取得範囲が必要な依頼、または上位のSlack依頼から読み取り範囲を渡された場合に使う。"
+  default_prompt: "Use $slack-context-reader to follow the Slack Context Reader workflow."
+
+policy:
+  allow_implicit_invocation: true

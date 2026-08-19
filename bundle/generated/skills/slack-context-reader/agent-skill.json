@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 4,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "communication",
+  "skillName": "slack-context-reader",
+  "displayName": "Slack Context Reader",
+  "description": "指定されたSlackのconversation、thread、message、reply、actor、file、attachment、unfurlをSlack CLI経由で取得し、確認した事実、取得済み・未取得範囲、pagination、アクセス状態、再開条件を返す。Slackの事実と取得範囲が必要な依頼、または上位のSlack依頼から読み取り範囲を渡された場合に使う。",
+  "dependencies": [],
+  "contentDigest": "0bba46f3209bb1c5cdbe6b9b5fa42967c429cbc84dbdfdd470c88217d48035c3",
+  "manifestDigest": "6a013524f5381dc1561e5012fdc42691991df77a4cd7385b3b065555ec81e5b6",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "155835ce11352a045674f2f4e3228f3067caaa04b982c18601bb158e6d5977e6",
+      "materializedFrontmatterDigest": "be12dddb1acf60f880377bfd6292deb3894a0535e075561766def87b0bc81c31"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "9a471af14792c0df84ca4688cadaa935d46fd80a9a5ce56050be331c80628e2d"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "77603912d022dfb3bf8d1e0d5092c257580e3c700b040f7324e54a68554b6185"
+    }
+  ]
+}

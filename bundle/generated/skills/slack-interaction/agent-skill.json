@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "skillBundleVersion": 4,
+  "catalogId": "com.mackysoft.agent-bundle",
+  "category": "communication",
+  "skillName": "slack-interaction",
+  "displayName": "Slack Interaction",
+  "description": "Slack URL、識別子、探索条件、またはSlack上の対応依頼について現在状態を読み、読み取り完了、目的確認、下書き、明示許可された一つのSlack効果から完了状態を選ぶ。Slack向け本文と作用条件を確定し、実行条件が成立した場合はexecutorの結果まで返す。",
+  "dependencies": [
+    "slack-action-executor",
+    "slack-context-reader",
+    "writing"
+  ],
+  "contentDigest": "fb944646e929f3c5bb1e67631662ceca7944453c1d24cc661bd3792102c55c5a",
+  "manifestDigest": "3f4a1d70d7d96d486384ca1b01ae94beeaa3b5174a3e13c07ada1a04ea77e83c",
+  "hostArtifacts": [
+    {
+      "host": "codex",
+      "path": "agents/openai.yaml",
+      "digest": "9489568f75a39730b7ccf260d05218f82f638fe3994d66a1476310a6ad9ec91e",
+      "materializedFrontmatterDigest": "70bdc6b1c99d45aa6fcd2664be5f3c98a5c3875bd26fe53b58de83555e45bafa"
+    },
+    {
+      "host": "claude-code",
+      "materializedFrontmatterDigest": "160267434f147a32d692be91226b031372c2b0473cfd31e7bb8c6ed84e5e9665"
+    },
+    {
+      "host": "github-copilot",
+      "materializedFrontmatterDigest": "bf53942e17d6203bc7ed0a987b61185c3a204d2b623451d65e5dbf4cc5424c7e"
+    }
+  ]
+}
