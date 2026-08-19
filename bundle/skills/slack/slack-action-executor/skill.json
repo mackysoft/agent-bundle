@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Slack Action Executor",
-  "description": "対象、作用同一性、内容、通知面、期待結果、今回の明示許可が揃った一つのSlack効果を、preflight、実行試行、機械的回復、実行後の確認によって履行する。非適用と回復条件を確認できる試行は同じ効果として継続し、Slack上の観測から結果状態を返す。",
+  "description": "確定済みの一つのSlack作用を、同じtarget、payload、notification、actor、permissionを保持してpreflight、試行、有限の回復、確認、分類まで履行し、観測可能な結果を返すときに使う。",
   "dependencies": [
     "slack-context-reader"
   ]

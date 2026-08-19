@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Slack Interaction",
-  "description": "Slack URL、識別子、探索条件、またはSlack上の対応依頼について現在状態を読み、読み取り完了、目的確認、下書き、明示許可された一つのSlack効果から完了状態を選ぶ。Slack向け本文と作用条件を確定し、実行条件が成立した場合はexecutorの結果まで返す。",
+  "description": "Slack URL、参照、または対応依頼で、確認済みの業務入力と必要な場合に取得した現在のSlack状態から、読み取り、目的確認、下書き、外部作用不要、許可確認、または一作用の結果という完了状態を選ぶときに使う。",
   "dependencies": [
     "slack-action-executor",
     "slack-context-reader",

@@ -1,134 +1,49 @@
 ## 目的
 
-確定済みの一つのSlack効果を、今回の明示許可と作用同一性を保って履行し、Slack上の結果を返す。失敗した試行について非適用と回復条件を確認できる場合は、同じ効果として再試行する。
-
-このSkillは、実行直前の確認、Slackへの実行試行、機械的回復、実行後の確認、結果分類を所有する。作用、対象、内容、通知面、公開境界、実行actor、許可は確定済み入力として受け取る。
+確定済みの一つのSlack作用を、preflight、attempt、有限の機械的回復、postfetch、分類によって履行する。作用、target、payload、reaction、notification、actor、permissionは入力どおりに保持する。
 
 ## 入力
 
-- 作用種別
-- 作用同一性と、各実行試行で保持する不変条件
-- workspace、conversation、親message、thread、対象messageまたはreaction
-- Slack appと実行actor
-- 本文、blocks、添付指定、mention、broadcast、thread通知
-- conversationの公開・外部共有境界
-- 実行後に観測する期待結果
-- 対象、作用、内容、通知面を覆う今回の明示許可
-- 既存状態を許可済み結果として扱うno-op条件
+一作用の入力は、作用別の確定項目と共通項目で構成する。
 
-一意性を期待結果に含める場合は、安定した識別条件と確認範囲を入力に含める。独立したtaskやactorをまたぐ一意性には、現在の実行環境で利用できる冪等性または排他の仕組みを必要とする。
-
-## Slack効果と実行試行
-
-| 対象 | 定義 |
+| 作用 | 確定項目 |
 | --- | --- |
-| 許可済み効果 | Slack上で成立させる一つの観測可能な結果 |
-| 作用同一性 | 複数の試行を同じ効果へ対応付ける不変条件 |
-| 実行試行 | 許可済み効果をSlackへ伝える一回のCLI実行 |
-| 機械的回復 | 作用同一性を保持したまま、実行条件の失敗原因を修正すること |
+| `parent_message` | conversation、confirmed payload、mentions、観測可能なnotification settings |
+| `thread_reply` | parent、payload、mentions、broadcast |
+| `message_update` | target、expected before state、replacement payload |
+| `message_delete` | target、取得済みのbefore state |
+| `reaction_add` / `reaction_remove` | target、exact reaction、actor |
+| `no_op` | 受入可能なexisting state、verification scope、その状態を受け入れるpermission |
 
-作用同一性には、作用種別、対象、本文、blocks、改行、Unicode文字、リンク、受信者、mention、通知面、公開境界、実行actor、案件や版の識別条件を含める。
+共通項目は、workspace、conversation、app、actor、期待するpublic・private・external-shared boundaryと検証条件、固定snapshot invariants、一作用のpermission、expected observable projection、作用別のattribution evidence、allowed no-op conditionである。stable identityは一意性が必要な場合にだけ含める。
 
-| 作用種別 | 必須となる確定内容 |
-| --- | --- |
-| `parent_message` | conversation、本文またはblocks、通知面 |
-| `thread_reply` | conversation、親message、本文またはblocks、thread通知 |
-| `message_update` | conversation、対象message、置換後の本文またはblocks |
-| `message_delete` | conversation、対象message |
-| `reaction_add` | conversation、対象message、reaction名 |
-| `reaction_remove` | conversation、対象message、reaction名 |
-| `no_op` | 既存状態が満たす観測可能な条件と、その状態を結果とする許可 |
+表現は、confirmed payload、submitted representation、expected observable projection、observed projectionを分けて保持する。submitted representationにはmethod、arguments、JSON、escaping、encodingなどの非secret表現を記録する。observed projectionはdispatch前のmethod contractで定めた正規化規則を使う。観測可能なnotificationはmention token、thread、broadcast、thread_broadcast、API attributeであり、人による配達、閲覧、理解はprojectionに含めない。
 
-## 実行経路
+## 履行
 
-Slack Web APIは、ローカルSlack CLIの `slack api` から呼び出す。methodと引数は、インストール済みCLIのhelpと現在のSlack公式資料から選ぶ。
+1. `$slack-context-reader` を適用して、target、current state、boundary、snapshot invariants、no-op条件、projection、attribution scopeをpreflightする。必要な観測、比較規則、boundary確認が不足または不一致なら `preflight_blocked` を返し、dispatchしない。readerのpaginationまたは読み取り継続はattemptに数えない。
+2. preflight後のno-op分岐を一度だけ判定する。input actionが `no_op` なら、authorized existing conditionを観測できたときは0 attemptで `no_op`、条件が不成立または観測不能なら `preflight_blocked` を返す。他のactionでは、allowed no-op conditionを観測したときは0 attemptで `no_op` を返す。expected resultが既に存在し、その状態をno-opとして受け入れるpermissionがないときは `preflight_blocked` を返す。それ以外はattempt 1へ進む。
+3. action attemptは最大2回とし、`not_dispatched` とmutation rate limitも1回のattemptとして数える。各attemptを `not_dispatched`、`rejected_not_applied`、`possibly_applied`、`accepted_unverified` の一つに分類し、submitted representationと観測根拠を残す。
+4. `possibly_applied` または `accepted_unverified` の後は `$slack-context-reader` を適用してpostfetchする。non-applicationを回復根拠にする場合も、action-specific required scopeを完全に取得して確認する。取得済みstateは取得範囲だけで記録する。
+5. attempt結果とpostfetch結果は、次の排他的な順序で分類する。第一に、action-specific required scopeを完全に取得し、今回attemptによるstate transitionがないことを証明できれば `confirmed non-applied` とする。この場合はattributionを評価しない。attempt 1が `possibly_applied` 後のpostfetchで `confirmed non-applied` となった場合を含め、全relevant attemptの非適用、新たに確認した具体的原因、semantic-preservingな別の修正、原因と修正の不反復、作用・target・payload・notification・actor・boundary・permissionの不変、repreflight通過を満たすときだけ、repreflightを経てattempt 2を行う。attempt 1でこの回復条件を満たさない場合は `recovery_blocked`、attempt 2が `confirmed non-applied` の場合は追加回復を行わず `recovery_blocked` を返し、attempt 3へ進まない。第二に、non-applicationが証明されず、required scopeがcompleteで、API response ID、actor、message IDまたはreaction IDなどで今回効果へ帰属できる場合は、normalized projectionが一致するとき `applied_verified`、異なるとき `applied_mismatch` を返す。第三に、required scopeがincompleteまたはunretrieved、application possibilityが残る、またはeffectを今回attemptへ帰属できない場合は `outcome_unknown` を返し、再送しない。取得済みstate、unretrieved scope、理由、resume conditionを返し、access、rate limit、paginationも該当するときに記録する。
 
-workspace、Slack app、実行actorは、preflight、各実行試行、回復後の再確認、実行後の確認で同じ主体を使う。credentialは実行環境で解決し、成果にはworkspace、Slack app、actorの識別子を記録する。
-
-`$slack-context-reader` を次の時点で使う。
-
-- 最初の実行試行の直前
-- 機械的回復後の次の実行試行の直前
-- 適用可能性またはAPI成功を観測した後
-
-preflightでは、対象、親子関係、現在内容、reaction、公開境界、既存効果、重複候補を期待結果の確認範囲まで取得する。readerにcursorまたはrate limitの再開条件があり、取得範囲が進む場合は、同じpreflight内で読み取りを継続する。
-
-## 実行試行の観測
-
-各実行試行を次のいずれか一つへ分類する。
-
-| 観測 | 成立条件 | 次の進行 |
-| --- | --- | --- |
-| `not_dispatched` | Slackへの変更要求より前に失敗した | 機械的回復を判定する |
-| `rejected_not_applied` | method契約、Slack応答、必要な再取得から非適用を確認した | 機械的回復を判定する |
-| `possibly_applied` | timeout、切断、応答解析失敗などにより適用可能性が残る | 実行後の確認へ進む |
-| `accepted_unverified` | API成功応答を得て、Slack上の確認が残る | 実行後の確認へ進む |
-
-分類に必要な証拠が不足する応答は `possibly_applied` として実行後の確認へ進める。
-
-## 機械的回復
-
-次の条件がすべて成立する場合は、失敗原因を修正してpreflightへ戻る。
-
-- これまでの実行試行についてSlackへの非適用を確認できる
-- 失敗原因と修正内容を特定できる
-- 修正対象が、引数表現、serialization、引用、encoding、確定済みactorのCLI選択などの実行条件である
-- 作用同一性と許可範囲を保持できる
-- 前の試行から原因を除く変化があり、次の試行で進捗を観測できる
-
-実行試行の継続は、この回復条件で判定する。rate limitでは、非適用、Slackが返した再開条件、その条件の成立を確認してpreflightへ戻る。回復条件の一つが未成立の場合は `recovery_blocked` とする。
-
-## 実行後の確認
-
-`$slack-context-reader` で対象を再取得し、作用に応じて次を照合する。
-
-- workspace、conversation、親message、thread、対象message
-- message ID、permalink、reaction主体
-- 本文、blocks、改行、Unicode文字、リンク
-- mention、broadcast、thread通知
-- conversationの公開・外部共有境界
-- 削除または不在を確認した取得範囲
-- 入力された範囲にある重複候補
-
-API応答、message ID、対象message、reaction主体、取得範囲から、観測した効果を今回の作用同一性へ対応付ける。readerにcursorまたはrate limitの再開条件があり、取得範囲が進む場合は、同じ確認を継続する。
-
-## 状態遷移
-
-| 現在状態 | 条件または観測 | 次の状態 |
-| --- | --- | --- |
-| `initial_preflight` | 許可済みno-op条件を既存状態が満たす | `no_op` |
-| `initial_preflight` | 入力作用が `no_op` で条件が未成立 | `preflight_blocked` |
-| `initial_preflight` | 期待結果が既に存在し、その状態を結果とする許可済みno-op条件がない | `preflight_blocked` |
-| `initial_preflight` | 必要な入力、確認範囲または実行条件が不足する | `preflight_blocked` |
-| `initial_preflight` | 入力、許可、actor、アクセス、対象、期待結果の確認範囲が揃った | `attempt_ready` |
-| `attempt_ready` | `not_dispatched` または `rejected_not_applied` | `recovery_pending` |
-| `attempt_ready` | `possibly_applied` または `accepted_unverified` | `verification_pending` |
-| `recovery_pending` | 機械的回復の条件がすべて成立する | `repreflight` |
-| `recovery_pending` | 機械的回復の条件が未成立 | `recovery_blocked` |
-| `repreflight` | 許可済みno-op条件を既存状態が満たす | `no_op` |
-| `repreflight` | 期待結果が既に存在し、その状態を結果とする許可済みno-op条件がない | `recovery_blocked` |
-| `repreflight` | 再確認に必要な条件が不足する | `recovery_blocked` |
-| `repreflight` | 対象、既存効果、許可、アクセス、実行条件を再確認した | `attempt_ready` |
-| `verification_pending` | 今回の作用同一性へ対応する効果が期待結果と一致する | `applied_verified` |
-| `verification_pending` | 今回の作用同一性へ対応する効果が期待結果と異なる | `applied_mismatch` |
-| `verification_pending` | 非適用を確認し、機械的回復の条件が成立する | `recovery_pending` |
-| `verification_pending` | 非適用を確認し、機械的回復の条件が未成立 | `recovery_blocked` |
-| `verification_pending` | 読み取りの進捗があり、結果確認が継続中である | `verification_pending` |
-| `verification_pending` | 適用可能性または効果との対応付けが未確定で、確認の継続条件が未成立 | `outcome_unknown` |
-
-独立したtaskやactorをまたぐ一意性が期待結果に含まれ、その成立手段を確認できない場合は、`initial_preflight` から `preflight_blocked` へ進む。確認範囲内の重複が期待結果と異なる場合は `applied_mismatch` とする。
+`applied_mismatch` または `outcome_unknown` の訂正は、現在の状態を入力にした新しい作用と新しいpermissionで行う。
 
 ## 結果
 
 | 状態 | 成立条件 |
 | --- | --- |
-| `preflight_blocked` | 最初の実行試行に必要な入力または確認条件が不足した |
-| `no_op` | 許可済みno-op条件を既存状態が満たし、このSkillによる外部効果が生じていない |
-| `applied_verified` | 今回の作用同一性へ対応するSlack上の効果が期待結果と一致した |
-| `recovery_blocked` | すべての試行について非適用を確認し、機械的回復の条件が不足した |
-| `applied_mismatch` | 今回の作用同一性へ対応するSlack上の効果が期待結果と異なった |
-| `outcome_unknown` | 適用可能性または観測した効果との対応付けが未確定である |
+| `preflight_blocked` | dispatch前に必要な観測、比較規則またはboundary確認を満たさない。 |
+| `no_op` | 許可されたexisting stateをdispatchなしで検証した。 |
+| `applied_verified` | attemptへのattributionが成立し、observed projectionが期待と一致した。 |
+| `recovery_blocked` | attempt 1の回復条件を満たさない、またはattempt 2で非適用を確認した。 |
+| `applied_mismatch` | attemptへのattributionが成立し、observed projectionが期待と異なった。 |
+| `outcome_unknown` | 適用可能性、必要なfinal state、または今回attemptへのattributionを確定できない。 |
 
-`applied_mismatch` と `outcome_unknown` は現在のSkill適用を完了する。訂正、削除、再投稿などの修復は、現在状態に対応する確定入力と明示許可を持つ次のSlack効果として開始する。
+成果には、各attemptとdispatch classification、recovery、attribution、取得できたobserved final state、preflightとpostfetchのmethod・time・scope・unretrievedを含める。
 
-成果には、作用同一性、対象、実行主体、許可範囲、各実行試行と観測、回復内容、preflightと実行後の取得範囲、結果状態を含める。
+## 完了条件
+
+- 一作用の確定入力を保持し、preflightから終端状態までを追跡できる。
+- action attemptは最大2回であり、retryは非適用の証明、異なるsemantic-preservingな修正、repreflightを伴う。
+- final stateとattemptへのattributionを分け、終端状態を根拠とともに返している。
