@@ -151,8 +151,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Test git skill helpers
-        shell: bash
+      - shell: bash
         run: sh scripts/test-git-skill-helpers.sh
 
   required:
