@@ -236,7 +236,7 @@ Agent bindings materialize as host-specific files while `AGENT.md` remains host-
 | `claude-code` | Claude Code skill directory | `.claude/agents` |
 | `github-copilot` | GitHub Copilot skill directory | `.github/agents` |
 
-See the [Agent Distribution command reference](https://github.com/mackysoft/agent-distribution/blob/6.0.0/README.md#run-standard-commands) for selector, scope, target-directory, ownership-state, and reload details.
+See the [Agent Distribution command reference](https://github.com/mackysoft/agent-distribution/blob/6.1.0/README.md#run-standard-commands) for selector, scope, target-directory, ownership-state, and reload details.
 
 ## Development
 

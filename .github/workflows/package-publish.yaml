@@ -420,7 +420,7 @@ jobs:
           expected-release-sha: ${{ steps.source.outputs.release_sha }}
 
       - name: Verify Agent Distribution
-        uses: mackysoft/agent-distribution/actions/verify@6.0.0
+        uses: mackysoft/agent-distribution/actions/verify@6.1.0
         with:
           source: bundle
 

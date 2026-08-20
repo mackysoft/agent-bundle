@@ -1,28 +1,33 @@
 ## 目的
-現在ブランチをリモートへ反映する。
+現在ブランチを、最新性を確認したうえで安全にリモートへ反映する。
 
 ## フロー
 
-### Phase 1: 作業状態を確認する
-- detached HEAD では停止する。
-- 現在ブランチ、`origin`、upstream を確認する。
-- `--force` と `--force-with-lease` は使わない。
+### Phase 1: publish 前に同期する
+`$sync-latest` を適用する。`completed` または `no-op` の場合だけ Phase 2 へ進む。
 
-### Phase 2: コミットする
-未コミット差分がある場合は `$commit` を使い、責務単位でコミットする。
-コミット対象がない場合は作成しない。
+`blocked` の `commit-required` では `$commit` を適用する。`$commit` が `completed` または `no-op` の場合だけ、同じ同期対象で `$sync-latest` を一度だけ再適用する。その再実行が `completed` または `no-op` の場合だけ Phase 2 へ進む。
 
-### Phase 3: 最新化する
-push 前の最新化は `$sync-latest` に委譲する。
-`$sync-latest` が同期不要と判断した場合は、そのまま進む。
-同期で衝突、未解決事項、未コミット差分の保護が必要な状態になった場合は push しない。
+`conflict`、その他の `blocked`、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では Git 操作を追加せず handoff する。
 
-### Phase 4: push する
-upstream がある場合は `git push` を実行する。
-upstream がない場合は `git push -u origin <current_branch>` を実行する。
+### Phase 2: 現在ブランチを publish する
+実行する `sh` 環境で、この Skill の配置ディレクトリと対象 worktree を `pwd -P` により絶対 physical POSIX path として固定する。Windows host の `C:\...` をそのまま `sh` に渡さない。
 
-push 対象がない場合は、その理由を残して停止する。
-push が non-fast-forward で失敗した場合は `$sync-latest` を実行し、同期できた場合だけ1回再試行する。
+```sh
+skill_root=$(CDPATH= cd "<skill-directory-visible-to-sh>" && pwd -P)
+worktree=$(CDPATH= cd "<worktree-directory-visible-to-sh>" && pwd -P)
+```
 
-### Phase 5: 状態を残す
-作成したコミット、同期結果、push 先、push 結果、停止理由を残す。
+次を実行する。
+
+```sh
+sh "$skill_root/scripts/push-flow.sh" publish-current \
+  --worktree "$worktree"
+```
+
+`completed` は publish と postcondition が完了した状態、`no-op` は反映する commit がない状態である。いずれも完了として残す。
+
+`blocked` の `commit-required` では Phase 1 へ戻る。`blocked` の `non-fast-forward` では `$sync-latest` を一度だけ適用し、その結果が `completed` または `no-op` の場合だけ Phase 2 を一度だけ再実行する。再試行後の `non-fast-forward`、`conflict`、その他の `blocked`、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では Git 操作を追加せず handoff する。
+
+### Phase 3: 状態を残す
+同期結果、作成した commit、publish 先、push 結果、再試行の有無、停止理由を残す。
