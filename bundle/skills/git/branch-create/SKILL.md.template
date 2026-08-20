@@ -14,17 +14,17 @@
 ### Phase 2: ブランチ名を決める
 ブランチ種別が指定されていれば採用する。指定がなければ Issue、ユーザー指示、差分の目的から一般的な開発語彙に沿って選ぶ。
 
-| 変更の性質 | branch type | 対応する Conventional Commit type |
-| --- | --- | --- |
-| 利用者に見える機能追加 | `feature` | `feat` |
-| バグ修正 | `fix` | `fix` |
-| 振る舞いを変えない構造整理 | `refactor` | `refactor` |
-| 性能改善 | `perf` | `perf` |
-| テスト | `test` | `test` |
-| ドキュメント | `docs` | `docs` |
-| CI 設定 | `ci` | `ci` |
-| build、依存、リリース設定 | `build` | `build` |
-| その他の保守作業 | `chore` | `chore` |
+| 変更の性質 | branch type |
+| --- | --- |
+| 利用者に見える機能追加 | `feature` |
+| バグ修正 | `fix` |
+| 振る舞いを変えない構造整理 | `refactor` |
+| 性能改善 | `perf` |
+| テスト | `test` |
+| ドキュメント | `docs` |
+| CI 設定 | `ci` |
+| build、依存、リリース設定 | `build` |
+| その他の保守作業 | `chore` |
 
 判断できない場合は `chore` を使う。ブランチ名が指定されていれば slug 化して使い、未指定なら Issue、ユーザー指示、差分の目的から slug を作る。Issue がある場合は `<type>/issue-<N>-<branch_name>`、ない場合は `<type>/<branch_name>` にする。slug は ASCII 小文字、数字、ハイフンで構成し、空なら `goal` を使う。
 
@@ -41,13 +41,13 @@ sh "$script_path" ensure \
   [--preserve-current]
 ```
 
-script が返す `completed` は、必要な branch 操作と postcondition 確認まで完了した状態である。`no-op` は既に対象ブランチへ安全に接続済みである。どちらも `result.branchRef` が確定 ref と一致する場合だけ次へ進む。
+script が返す `completed` は、必要な branch 操作と postcondition 確認まで完了した状態である。`no-op` は既に対象ブランチへ安全に接続済みである。どちらも次へ進む。
 
-`blocked`、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では、手動の Git 操作、別 action での再試行、または自動復旧を行わず、script の reason と result を handoff する。
+`blocked`、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では、手動の Git 操作、別 action での再試行、または自動復旧を行わず、script の outcome と reason を handoff する。
 
 ### Phase 4: base と同期する
 対象ブランチが確立した後で、Phase 1 の base remote-tracking ref を指定ブランチとして `$sync-latest` へ渡す。
 `$sync-latest` が `同期完了` を返した場合だけ base 同期を完了とする。判断待ち競合または未完了なら、自動で同期を再実行せず、ブランチ接続済みと base 同期の判断待ち・未完了を別状態として報告する。
 
 ### Phase 5: 状態を残す
-対象 worktree の絶対パス、確定した branch ref、base ref、`--preserve-current` の有無、flow script の outcome / reason / result、同期の完了または未完了、停止理由を残す。
+対象 worktree の絶対パス、確定した branch ref、base ref、`--preserve-current` の有無、flow script の outcome / reason、同期の完了または未完了、停止理由を残す。

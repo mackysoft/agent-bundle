@@ -10,18 +10,15 @@ export GIT_EDITOR=:
 worktree=
 published_ref=
 remote_oid=
+required_ref_list=
 
 emit() {
-    printf '{"schemaVersion":1,"outcome":"%s","reason":"%s","result":%s}\n' "$1" "$2" "$3"
+    printf '{"outcome":"%s","reason":"%s"}\n' "$1" "$2"
 }
 
 is_oid() {
     case "$1" in ''|*[!0123456789abcdef]*) return 1 ;; esac
     case ${#1} in 40|64) return 0 ;; *) return 1 ;; esac
-}
-
-json_oid() {
-    if is_oid "$1"; then printf '"%s"' "$1"; else printf 'null'; fi
 }
 
 is_branch_ref() {
@@ -30,16 +27,10 @@ is_branch_ref() {
     git check-ref-format "$1" >/dev/null 2>&1
 }
 
-json_ref() {
-    if is_branch_ref "$1"; then
-        escaped_ref=$(printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' 2>/dev/null) || {
-            printf 'null'
-            return
-        }
-        printf '"%s"' "$escaped_ref"
-    else
-        printf 'null'
-    fi
+is_remote_tracking_ref() {
+    case "$1" in refs/remotes/?*/?*) ;; *) return 1 ;; esac
+    case "$1" in *'@{'*|*'^'*|*'~'*|*':'*|*'..'*|*'//'*) return 1 ;; esac
+    git check-ref-format "$1" >/dev/null 2>&1
 }
 
 validate_worktree() {
@@ -128,26 +119,71 @@ remote_head_oid() {
     remote_oid=$1
 }
 
-result_json() {
-    printf '{"head":{"state":"%s","ref":' "$head_state"
-    json_ref "$head_ref"
-    printf ',"oid":'
-    json_oid "$head_oid"
-    printf '},"originConfigured":%s,"upstream":{"configured":%s,"ref":' "$origin_configured" "$upstream_configured"
-    json_ref "$upstream_ref"
-    printf '},"hasChanges":%s,"hasUnmerged":%s,"operation":"%s","publishedRef":' \
-        "$has_changes" "$has_unmerged" "$operation_state"
-    json_ref "$published_ref"
-    printf ',"remoteOid":'
-    json_oid "$remote_oid"
-    printf '}'
+parse_required_ref() {
+    is_remote_tracking_ref "$1" || return 1
+    required_ref=$1
+    required_tail=${required_ref#refs/remotes/}
+    required_remote=${required_tail%%/*}
+    required_branch=${required_tail#*/}
+    [ -n "$required_remote" ] && [ -n "$required_branch" ] && [ "$required_branch" != "$required_tail" ] || return 1
+    case "$required_remote" in -*) return 1 ;; esac
+    required_branch_ref="refs/heads/$required_branch"
+    is_branch_ref "$required_branch_ref" || return 1
+}
+
+fetch_remote() {
+    git fetch --prune "$1" >/dev/null 2>&1
+}
+
+resolve_required_ref_oid() {
+    required_oid=
+    if git show-ref --verify --quiet "$required_ref"; then
+        candidate_oid=$(git rev-parse "$required_ref^{commit}" 2>/dev/null) || return 1
+        is_oid "$candidate_oid" || return 1
+        required_oid=$candidate_oid
+        return 0
+    fi
+    return 2
+}
+
+check_required_refs_integrated() {
+    while IFS= read -r listed_ref; do
+        [ -n "$listed_ref" ] || continue
+        parse_required_ref "$listed_ref" || emit_current input-invalid invalid-required-integrated-ref
+        remote_exists "$required_remote" || emit_current blocked required-remote-not-configured
+    done <<EOF
+$required_ref_list
+EOF
+
+    while IFS= read -r listed_ref; do
+        [ -n "$listed_ref" ] || continue
+        parse_required_ref "$listed_ref" || emit_current input-invalid invalid-required-integrated-ref
+        fetch_remote "$required_remote" || emit_current blocked remote-unavailable
+    done <<EOF
+$required_ref_list
+EOF
+
+    while IFS= read -r listed_ref; do
+        [ -n "$listed_ref" ] || continue
+        parse_required_ref "$listed_ref" || emit_current input-invalid invalid-required-integrated-ref
+        resolve_required_ref_oid
+        resolve_status=$?
+        case "$resolve_status" in
+            0) ;;
+            2) emit_current blocked required-ref-unresolved ;;
+            *) emit_current blocked comparison-unavailable ;;
+        esac
+        git merge-base --is-ancestor "$required_oid" "$source_oid" >/dev/null 2>&1 \
+            || emit_current blocked sync-required
+    done <<EOF
+$required_ref_list
+EOF
 }
 
 emit_current() {
     outcome=$1
     reason=$2
-    result=$(result_json) || { emit unknown-after-attempt result-unavailable null; exit 0; }
-    emit "$outcome" "$reason" "$result"
+    emit "$outcome" "$reason"
     exit 0
 }
 
@@ -179,32 +215,38 @@ select_publish_target() {
 }
 
 if ! command -v git >/dev/null 2>&1; then
-    emit runtime-unavailable git-not-found null
+    emit runtime-unavailable git-not-found
     exit 0
 fi
-[ "$#" -eq 3 ] && [ "$1" = publish-current ] && [ "$2" = --worktree ] || {
-    emit input-invalid invalid-arguments null
-    exit 0
-}
-validate_worktree "$3" || { emit input-invalid invalid-worktree null; exit 0; }
-cd "$worktree" 2>/dev/null || { emit blocked worktree-unavailable null; exit 0; }
-repository_root=$(git rev-parse --show-toplevel 2>/dev/null) || { emit blocked not-git-worktree null; exit 0; }
-repository_root=$(CDPATH= cd "$repository_root" 2>/dev/null && pwd -P) || { emit blocked repository-root-unavailable null; exit 0; }
-[ "$repository_root" = "$worktree" ] || { emit input-invalid worktree-root-mismatch null; exit 0; }
+[ "${1-}" = publish-current ] || { emit input-invalid invalid-operation; exit 0; }
+shift
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --worktree)
+            [ "$#" -ge 2 ] && [ -z "$worktree" ] || { emit input-invalid invalid-arguments; exit 0; }
+            validate_worktree "$2" || { emit input-invalid invalid-worktree; exit 0; }
+            shift 2
+            ;;
+        --require-integrated-ref)
+            [ "$#" -ge 2 ] || { emit input-invalid invalid-arguments; exit 0; }
+            is_remote_tracking_ref "$2" || { emit input-invalid invalid-required-integrated-ref; exit 0; }
+            required_ref_list="${required_ref_list}${2}
+"
+            shift 2
+            ;;
+        *)
+            emit input-invalid invalid-arguments
+            exit 0
+            ;;
+    esac
+done
+[ -n "$worktree" ] || { emit input-invalid missing-worktree; exit 0; }
+cd "$worktree" 2>/dev/null || { emit blocked worktree-unavailable; exit 0; }
+repository_root=$(git rev-parse --show-toplevel 2>/dev/null) || { emit blocked not-git-worktree; exit 0; }
+repository_root=$(CDPATH= cd "$repository_root" 2>/dev/null && pwd -P) || { emit blocked repository-root-unavailable; exit 0; }
+[ "$repository_root" = "$worktree" ] || { emit input-invalid worktree-root-mismatch; exit 0; }
 
-observe_publish_state || { emit blocked state-unavailable null; exit 0; }
-block_if_unsafe
-select_publish_target
-select_status=$?
-case "$select_status" in
-    0) ;;
-    1) emit_current blocked upstream-invalid ;;
-    *) emit_current blocked origin-not-configured ;;
-esac
-remote_head_oid "$publish_remote" "$published_ref" || emit_current blocked remote-unavailable
-if [ "$initial_push" = false ] && [ "$remote_oid" = "$head_oid" ]; then emit_current no-op no-commits-to-push; fi
-
-observe_publish_state || { emit blocked state-unavailable null; exit 0; }
+observe_publish_state || { emit blocked state-unavailable; exit 0; }
 block_if_unsafe
 select_publish_target
 select_status=$?
@@ -214,15 +256,22 @@ case "$select_status" in
     *) emit_current blocked origin-not-configured ;;
 esac
 source_oid=$head_oid
+check_required_refs_integrated
+
+fetch_remote "$publish_remote" || emit_current blocked remote-unavailable
 remote_head_oid "$publish_remote" "$published_ref" || emit_current blocked remote-unavailable
 if [ "$initial_push" = false ] && [ "$remote_oid" = "$source_oid" ]; then emit_current no-op no-commits-to-push; fi
+if [ -n "$remote_oid" ] \
+    && ! git merge-base --is-ancestor "$remote_oid" "$source_oid" >/dev/null 2>&1; then
+    emit_current blocked sync-required
+fi
 
 if [ "$initial_push" = true ]; then
     if push_output=$(git push -u origin "$head_ref:$head_ref" 2>&1); then push_status=0; else push_status=$?; fi
 else
     if push_output=$(git push "$publish_remote" "$head_ref:$published_ref" 2>&1); then push_status=0; else push_status=$?; fi
 fi
-observe_publish_state || { emit unknown-after-attempt postcondition-unavailable null; exit 0; }
+observe_publish_state || { emit unknown-after-attempt postcondition-unavailable; exit 0; }
 remote_head_oid "$publish_remote" "$published_ref" || emit_current unknown-after-attempt postcondition-unavailable
 if [ "$push_status" -eq 0 ] && [ "$remote_oid" = "$source_oid" ]; then
     if [ "$initial_push" = true ] && { [ "$upstream_configured" = false ] || [ "$upstream_valid" = false ] || [ "$upstream_remote" != origin ] || [ "$upstream_ref" != "$head_ref" ]; }; then
@@ -232,7 +281,15 @@ if [ "$push_status" -eq 0 ] && [ "$remote_oid" = "$source_oid" ]; then
 fi
 if [ "$push_status" -ne 0 ]; then
     case "$push_output" in
-        *non-fast-forward*|*'fetch first'*|*'[rejected]'*) emit_current blocked non-fast-forward ;;
+        *non-fast-forward*|*'fetch first'*|*'[rejected]'*)
+            if fetch_remote "$publish_remote" \
+                && remote_head_oid "$publish_remote" "$published_ref" \
+                && [ -n "$remote_oid" ] \
+                && ! git merge-base --is-ancestor "$remote_oid" "$source_oid" >/dev/null 2>&1; then
+                emit_current blocked sync-required
+            fi
+            emit_current blocked non-fast-forward
+            ;;
     esac
     emit_current unknown-after-attempt push-failed
 fi

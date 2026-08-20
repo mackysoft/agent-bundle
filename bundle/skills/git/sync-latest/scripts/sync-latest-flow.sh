@@ -19,11 +19,14 @@ target_relation=null
 target_ahead=null
 target_behind=null
 target_merge_base_oid=
-applied_refs=
 changed=false
 
 emit() {
-    printf '{"schemaVersion":1,"outcome":"%s","reason":"%s","result":%s}\n' "$1" "$2" "$3"
+    if [ "$#" -eq 3 ] && [ "$3" != null ]; then
+        printf '{"outcome":"%s","reason":"%s","result":%s}\n' "$1" "$2" "$3"
+    else
+        printf '{"outcome":"%s","reason":"%s"}\n' "$1" "$2"
+    fi
 }
 
 is_oid() {
@@ -177,44 +180,27 @@ target_is_integrated() {
     git merge-base --is-ancestor "$target_oid" "$head_oid" >/dev/null 2>&1
 }
 
-json_applied_refs() {
-    printf '['
-    first=true
-    while IFS= read -r applied_ref; do
-        [ -n "$applied_ref" ] || continue
-        if [ "$first" = true ]; then first=false; else printf ','; fi
-        json_ref "$applied_ref"
-    done <<EOF
-$applied_refs
-EOF
-    printf ']'
-}
-
-result_json() {
-    printf '{"head":{"state":"%s","ref":' "$head_state"
-    json_ref "$head_ref"
-    printf ',"oid":'
-    json_oid "$head_oid"
-    printf '},"hasChanges":%s,"hasUnmerged":%s,"operation":"%s","preHeadOid":' \
-        "$has_changes" "$has_unmerged" "$operation_state"
+conflict_result_json() {
+    printf '{"preHeadOid":'
     json_oid "$pre_head_oid"
     printf ',"target":{"ref":'
     json_ref "$target_ref"
     printf ',"oid":'
     json_oid "$target_oid"
-    printf ',"relation":%s,"ahead":%s,"behind":%s,"mergeBaseOid":' \
-        "$target_relation" "$target_ahead" "$target_behind"
+    printf ',"mergeBaseOid":'
     json_oid "$target_merge_base_oid"
-    printf '},"appliedTargets":'
-    json_applied_refs
-    printf '}'
+    printf '}}'
 }
 
 emit_current() {
     outcome=$1
     reason=$2
-    result=$(result_json) || { emit unknown-after-attempt result-unavailable null; exit 0; }
-    emit "$outcome" "$reason" "$result"
+    if [ "$outcome" = conflict ] && [ "$reason" = merge-conflict ]; then
+        result=$(conflict_result_json) || { emit unknown-after-attempt result-unavailable; exit 0; }
+        emit "$outcome" "$reason" "$result"
+    else
+        emit "$outcome" "$reason"
+    fi
     exit 0
 }
 
@@ -229,8 +215,6 @@ block_if_start_unsafe() {
 }
 
 append_applied_target() {
-    applied_refs="${applied_refs}${target_ref}
-"
     changed=true
 }
 

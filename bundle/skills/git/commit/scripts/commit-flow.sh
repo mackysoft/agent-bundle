@@ -17,33 +17,16 @@ newline='
 carriage_return=$(printf '\r')
 
 emit() {
-    printf '{"schemaVersion":1,"outcome":"%s","reason":"%s","result":%s}\n' "$1" "$2" "$3"
+    if [ "$#" -eq 3 ] && [ "$3" != null ]; then
+        printf '{"outcome":"%s","reason":"%s","result":%s}\n' "$1" "$2" "$3"
+    else
+        printf '{"outcome":"%s","reason":"%s"}\n' "$1" "$2"
+    fi
 }
 
 is_oid() {
     case "$1" in ''|*[!0123456789abcdef]*) return 1 ;; esac
     case ${#1} in 40|64) return 0 ;; *) return 1 ;; esac
-}
-
-json_oid() {
-    if is_oid "$1"; then printf '"%s"' "$1"; else printf 'null'; fi
-}
-
-is_branch_ref() {
-    case "$1" in refs/heads/?*) ;; *) return 1 ;; esac
-    git check-ref-format "$1" >/dev/null 2>&1
-}
-
-json_ref() {
-    if is_branch_ref "$1"; then
-        escaped_ref=$(printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' 2>/dev/null) || {
-            printf 'null'
-            return
-        }
-        printf '"%s"' "$escaped_ref"
-    else
-        printf 'null'
-    fi
 }
 
 validate_worktree() {
@@ -105,27 +88,14 @@ observe_commit_state() {
     esac
 }
 
-result_json() {
-    printf '{"head":{"state":"%s","ref":' "$head_state"
-    json_ref "$head_ref"
-    printf ',"oid":'
-    json_oid "$head_oid"
-    printf '},"hasChanges":%s,"hasStagedChanges":%s,"hasUnmerged":%s,"operation":"%s","preHeadOid":' \
-        "$has_changes" "$has_staged_changes" "$has_unmerged" "$operation_state"
-    json_oid "$pre_head_oid"
-    printf ',"commitOid":'
-    json_oid "$commit_oid"
-    printf '}'
-}
-
 emit_current() {
     outcome=$1
     reason=$2
-    result=$(result_json) || {
-        emit unknown-after-attempt result-unavailable null
-        exit 0
-    }
-    emit "$outcome" "$reason" "$result"
+    if [ "$outcome" = completed ] && [ "$reason" = committed ]; then
+        emit "$outcome" "$reason" "{\"commitOid\":\"$commit_oid\"}"
+    else
+        emit "$outcome" "$reason"
+    fi
     exit 0
 }
 

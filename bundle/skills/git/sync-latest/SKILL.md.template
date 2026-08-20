@@ -63,4 +63,4 @@ candidate 前後一致、`HEAD` / ref / index stage / merge metadata の許可�
 continue が成功した場合は、Phase 2 と同じ順序の ref で `synchronize` を一度実行し、`completed` または `no-op` なら `同期完了` とする。それ以外は返された状態のまま handoff する。
 
 ### Phase 4: 状態を残す
-通常完了時は対象 worktree の絶対パス、基準 ref と OID、同期前後の ahead / behind、merge commit の有無、次の作業を残す。停止時は現在 `HEAD`、完了・未完了基準、base / ours / theirs OID、unmerged entries、根拠と検証結果、現在の操作状態、必要な人の判断、再開条件を handoff として残す。
+通常完了時は対象 worktree の絶対パス、基準 ref と OID、merge commit の有無、次の作業を残す。停止時は現在 `HEAD`、完了・未完了基準、base / ours / theirs OID、unmerged entries、根拠と検証結果、現在の操作状態、必要な人の判断、再開条件を handoff として残す。

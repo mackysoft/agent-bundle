@@ -25,20 +25,21 @@ sh "$skill_root/scripts/pr-submit-flow.sh" prepare \
   --base-ref "<literal-fully-qualified-base-ref>"
 ```
 
-- `outcome=completed` かつ `reason=ready` なら Phase 4 へ進む。
+- `outcome=completed` かつ `reason=ready` なら Phase 5 へ進む。
 - `outcome=no-op` かつ `reason=no-change` なら PR 対象なしとして停止する。
-- `blocked`、`runtime-unavailable`、`input-invalid`、または実行不能なら、Git 状態を変更せず結果を handoff する。
+- `outcome=blocked` かつ `reason=commit-required` または `reason=sync-required` なら Phase 4 へ進む。
+- それ以外の `blocked`、`runtime-unavailable`、`input-invalid`、または実行不能なら、Git 状態を変更せず結果を handoff する。
 
-### Phase 4: 依存 Skill で作業を公開可能な状態にする
-- `$commit` を実行する。`completed` または `no-op` の完了状態だけを次の入力として使い、それ以外は handoff する。
-- `$sync-latest` を、Phase 2 で決めた base に対して実行する。完了状態だけを次の入力として使い、競合、停止、または不明な結果では handoff する。
-- Phase 3 の `prepare` を再実行する。`outcome=no-op, reason=no-change` は PR 対象なし、`outcome=blocked` などは handoff、`outcome=completed, reason=ready` だけが検証へ進む。
+以後の `prepare` 再実行もこの分類に従う。
+
+### Phase 4: `prepare` が要求した依存 Skill だけを実行する
+`blocked/commit-required` では `$commit`、`blocked/sync-required` では Phase 2 の base に対する `$sync-latest` を実行する。依存 Skill が完了した場合だけ Phase 3 を再実行する。
 
 ### Phase 5: 検証する
-`$verification-gate` を PR 前用途で実行する。失敗または未検証範囲が残る場合は PR を作成または更新しない。検証が成果物更新や整形を残した場合は Phase 4 に戻る。
+`$verification-gate` を PR 前用途で実行する。失敗または未検証範囲が残る場合は PR を作成または更新しない。検証が成果物更新や整形を残した場合は Phase 3 に戻る。
 
 ### Phase 6: 公開する
-`$push` を実行する。完了状態だけを受け取り、失敗、競合、停止、または不明な結果では handoff する。完了後に Phase 3 の `prepare` を再実行し、`outcome=completed, reason=ready` だけが PR 作成または更新へ進む。
+`$push` には、Phase 2 で決めた base に対応する remote-tracking fully-qualified ref を `--require-integrated-ref` として渡す。`completed` または `no-op` なら Phase 7 へ進む。`blocked/sync-required` なら `$sync-latest`、Phase 3 の `prepare`、Phase 5 の検証の順に戻る。それ以外は handoff する。
 
 ### Phase 7: PR タイトルと本文を書く
 差分、コミット履歴、検証結果、Issue 本文から PR タイトルと本文を作る。
@@ -56,23 +57,6 @@ PR タイトルと本文の文章前提は `$writing` に従う。PR タイト�
 | `References` | 任意 | レビュー時に確認すべき資料、仕様、外部 URL、リポジトリ内の相対パスを書く。ローカル環境の絶対パスは書かない。 |
 
 `Changelog` の本文は `$changelog` の埋め込み用エントリとして作る。`## Changelog` はこの Skill で置き、`$changelog` 側では重複させない。カテゴリ見出しが必要な場合は、`## Changelog` の下に `### Added` のような1段下の見出しを置く。空の任意セクションは置かない。長い補足やログを本文に含める必要がある場合だけ `<details>` を使う。
-
-```md
-## Summary
-- <summary item>
-
-## Changelog
-<$changelog が作る埋め込み用エントリ>
-
-## Scope
-- <scope item>
-
-## Verification
-- `<command or check>`
-
-## References
-- <repository-relative path or URL>
-```
 
 ### Phase 8: PR を作成または更新する
 同じブランチの open PR がある場合は、その PR を更新する。open PR がない場合は `gh pr create` で作成する。

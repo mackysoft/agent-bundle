@@ -10,6 +10,7 @@ trap 'rm -rf "$fixture_root"' EXIT HUP INT TERM
 test_number=0
 last_case=
 last_output=
+result_is_expected=false
 
 fail() {
     printf '%s\n' "git skill flow test failed: $*" >&2
@@ -32,14 +33,25 @@ assert_envelope() {
     line_count=$(awk 'END { print NR }' "$output_file")
     [ "$line_count" = 1 ] || fail "$last_case: stdout must contain exactly one JSON line"
     last_output=$(sed -n '1p' "$output_file")
-    printf '%s\n' "$last_output" | grep -Eq '^\{"schemaVersion":1,"outcome":"[^"]+","reason":"[^"]+","result":(null|\{.*\})\}$' \
-        || fail "$last_case: stdout is not the flow JSON envelope"
-    for field in schemaVersion outcome reason result; do
+    if [ "$result_is_expected" = true ]; then
+        printf '%s\n' "$last_output" | grep -Eq '^\{"outcome":"[^"]+","reason":"[^"]+","result":\{.*\}\}$' \
+            || fail "$last_case: stdout is not the flow JSON envelope with a result"
+    else
+        printf '%s\n' "$last_output" | grep -Eq '^\{"outcome":"[^"]+","reason":"[^"]+"\}$' \
+            || fail "$last_case: stdout is not the minimal flow JSON envelope"
+    fi
+    for field in outcome reason; do
         printf '%s\n' "$last_output" | grep -F -- "\"$field\":" >/dev/null \
             || fail "$last_case: JSON envelope is missing $field"
     done
     assert_json_string outcome "$expected_outcome"
     assert_json_string reason "$expected_reason"
+}
+
+run_flow_with_result() {
+    result_is_expected=true
+    run_flow "$@"
+    result_is_expected=false
 }
 
 run_flow() {
@@ -184,11 +196,13 @@ assert_equal "$(git -C "$core_repository" symbolic-ref -q HEAD)" refs/heads/feat
 
 printf '%s\n' feature > "$core_repository/feature.txt"
 core_pre_commit_oid=$(git -C "$core_repository" rev-parse HEAD)
+result_is_expected=true
 run_flow_with_stdin 'commit stages and commits the selected path' "$commit_flow" completed committed 'feat: add feature' \
     create --worktree "$core_repository" --path feature.txt
+result_is_expected=false
 core_commit_oid=$(git -C "$core_repository" rev-parse HEAD)
 [ "$core_commit_oid" != "$core_pre_commit_oid" ] || fail "$last_case: expected HEAD to change"
-assert_json_string commitOid "$core_commit_oid"
+assert_equal "$last_output" "{\"outcome\":\"completed\",\"reason\":\"committed\",\"result\":{\"commitOid\":\"$core_commit_oid\"}}" 'commit result'
 assert_clean "$core_repository"
 
 run_flow 'push publishes the current branch and sets upstream' "$push_flow" completed published \
@@ -199,11 +213,110 @@ assert_equal "$(git -C "$core_repository" config --get branch.feature.merge)" re
 run_flow 'push rerun is a no-op after publication' "$push_flow" no-op no-commits-to-push \
     publish-current --worktree "$core_repository"
 
+# An initial publish must not overwrite an existing same-name remote branch.
+# It can establish upstream only when that branch is already included in HEAD.
+initial_publish_repository="$fixture_root/initial-publish"
+initial_publish_remote="$fixture_root/initial-publish-origin.git"
+initial_publish_writer="$fixture_root/initial-publish-writer"
+create_repository "$initial_publish_repository" "$initial_publish_remote"
+git clone -q "$initial_publish_remote" "$initial_publish_writer"
+git -C "$initial_publish_writer" config user.name 'Git Skill Flow Test'
+git -C "$initial_publish_writer" config user.email 'git-skill-flow-test@example.invalid'
+git -C "$initial_publish_writer" checkout -qb remote-only
+commit_file "$initial_publish_writer" remote.txt remote 'remote-only'
+git -C "$initial_publish_writer" push -q origin remote-only
+initial_publish_remote_only_oid=$(remote_ref_oid "$initial_publish_remote" refs/heads/remote-only)
+
+git -C "$initial_publish_repository" checkout -qb remote-only
+commit_file "$initial_publish_repository" local.txt local 'local-only'
+run_flow 'push blocks an initial publish behind an existing same-name remote branch' "$push_flow" blocked sync-required \
+    publish-current --worktree "$initial_publish_repository"
+assert_remote_ref_oid "$initial_publish_remote" refs/heads/remote-only "$initial_publish_remote_only_oid"
+assert_equal "$(git -C "$initial_publish_repository" config --get branch.remote-only.remote 2>/dev/null || true)" '' \
+    'blocked initial publish must not configure upstream'
+
+git -C "$initial_publish_writer" checkout -qb remote-ancestor origin/main
+commit_file "$initial_publish_writer" ancestor.txt ancestor 'remote ancestor'
+git -C "$initial_publish_writer" push -q origin remote-ancestor
+initial_publish_ancestor_oid=$(remote_ref_oid "$initial_publish_remote" refs/heads/remote-ancestor)
+git -C "$initial_publish_repository" fetch -q origin
+git -C "$initial_publish_repository" checkout -qb remote-ancestor refs/remotes/origin/remote-ancestor
+git -C "$initial_publish_repository" config --unset-all branch.remote-ancestor.remote 2>/dev/null || true
+git -C "$initial_publish_repository" config --unset-all branch.remote-ancestor.merge 2>/dev/null || true
+run_flow 'push publishes an initial branch when the same-name remote branch is an ancestor' "$push_flow" completed published \
+    publish-current --worktree "$initial_publish_repository"
+assert_remote_ref_oid "$initial_publish_remote" refs/heads/remote-ancestor "$initial_publish_ancestor_oid"
+assert_equal "$(git -C "$initial_publish_repository" config --get branch.remote-ancestor.remote)" origin \
+    'initial publish upstream remote'
+assert_equal "$(git -C "$initial_publish_repository" config --get branch.remote-ancestor.merge)" refs/heads/remote-ancestor \
+    'initial publish upstream ref'
+
+# Publication refuses to write until every explicitly required base has been
+# integrated.  A remotely advanced configured upstream is the same sync gate.
+push_gate_repository="$fixture_root/push-gates"
+push_gate_remote="$fixture_root/push-gates-origin.git"
+push_gate_main_updater="$fixture_root/push-gates-main-updater"
+push_gate_branch_updater="$fixture_root/push-gates-branch-updater"
+create_repository "$push_gate_repository" "$push_gate_remote"
+git -C "$push_gate_repository" checkout -qb push-gate
+commit_file "$push_gate_repository" feature.txt feature 'add feature'
+advance_remote_main "$push_gate_main_updater" "$push_gate_remote" remote.txt remote
+push_gate_before_sync=$(git -C "$push_gate_repository" rev-parse HEAD)
+run_flow 'push requires an integrated base before initial publication' "$push_flow" blocked sync-required \
+    publish-current --worktree "$push_gate_repository" \
+    --require-integrated-ref refs/remotes/origin/main
+assert_equal "$(git -C "$push_gate_repository" rev-parse HEAD)" "$push_gate_before_sync" 'push sync-required HEAD'
+[ -z "$(remote_ref_oid "$push_gate_remote" refs/heads/push-gate)" ] \
+    || fail "$last_case: push wrote the branch before the required base was integrated"
+run_flow 'sync-latest integrates the required push base' "$sync_latest_flow" completed synchronized \
+    synchronize --worktree "$push_gate_repository" --target-ref refs/remotes/origin/main
+push_gate_published_oid=$(git -C "$push_gate_repository" rev-parse HEAD)
+run_flow 'push publishes after the required base is integrated' "$push_flow" completed published \
+    publish-current --worktree "$push_gate_repository" \
+    --require-integrated-ref refs/remotes/origin/main
+assert_remote_ref_oid "$push_gate_remote" refs/heads/push-gate "$push_gate_published_oid"
+
+git clone -q "$push_gate_remote" "$push_gate_branch_updater"
+git -C "$push_gate_branch_updater" config user.name 'Git Skill Flow Test'
+git -C "$push_gate_branch_updater" config user.email 'git-skill-flow-test@example.invalid'
+git -C "$push_gate_branch_updater" config core.autocrlf false
+git -C "$push_gate_branch_updater" checkout -qb push-gate origin/push-gate
+commit_file "$push_gate_branch_updater" remote-feature.txt remote 'remote feature change'
+git -C "$push_gate_branch_updater" push -q origin push-gate
+push_gate_remote_ahead_oid=$(remote_ref_oid "$push_gate_remote" refs/heads/push-gate)
+commit_file "$push_gate_repository" local-feature.txt local 'local feature change'
+run_flow 'push normalizes an advanced upstream to the sync gate before writing' "$push_flow" blocked sync-required \
+    publish-current --worktree "$push_gate_repository"
+assert_remote_ref_oid "$push_gate_remote" refs/heads/push-gate "$push_gate_remote_ahead_oid"
+
 run_flow 'pr-submit prepares a changed branch for PR work' "$pr_submit_flow" completed ready \
     prepare --worktree "$core_repository" --base-ref refs/remotes/origin/main
-assert_json_string headRef refs/heads/feature
-assert_json_string headOid "$core_commit_oid"
-assert_json_string baseRef refs/remotes/origin/main
+
+# PR preparation never advances a dirty or base-behind worktree itself.  Once
+# the two prerequisites are satisfied, it reports the worktree as ready.
+pr_gate_repository="$fixture_root/pr-submit-gates"
+pr_gate_remote="$fixture_root/pr-submit-gates-origin.git"
+pr_gate_updater="$fixture_root/pr-submit-gates-updater"
+create_repository "$pr_gate_repository" "$pr_gate_remote"
+git -C "$pr_gate_repository" checkout -qb pr-gate
+commit_file "$pr_gate_repository" feature.txt feature 'add feature'
+printf '%s\n' dirty >> "$pr_gate_repository/feature.txt"
+pr_gate_dirty_head=$(git -C "$pr_gate_repository" rev-parse HEAD)
+run_flow 'pr-submit requires a commit before preparing a dirty worktree' "$pr_submit_flow" blocked commit-required \
+    prepare --worktree "$pr_gate_repository" --base-ref refs/remotes/origin/main
+assert_equal "$(git -C "$pr_gate_repository" rev-parse HEAD)" "$pr_gate_dirty_head" 'dirty worktree HEAD'
+git -C "$pr_gate_repository" checkout -- feature.txt
+
+advance_remote_main "$pr_gate_updater" "$pr_gate_remote" remote.txt remote
+git -C "$pr_gate_repository" fetch -q origin
+pr_gate_before_sync=$(git -C "$pr_gate_repository" rev-parse HEAD)
+run_flow 'pr-submit requires sync when the base is not integrated' "$pr_submit_flow" blocked sync-required \
+    prepare --worktree "$pr_gate_repository" --base-ref refs/remotes/origin/main
+assert_equal "$(git -C "$pr_gate_repository" rev-parse HEAD)" "$pr_gate_before_sync" 'sync-required HEAD'
+run_flow 'sync-latest integrates the PR base before preparation' "$sync_latest_flow" completed synchronized \
+    synchronize --worktree "$pr_gate_repository" --target-ref refs/remotes/origin/main
+run_flow 'pr-submit reports a synchronized changed worktree as ready' "$pr_submit_flow" completed ready \
+    prepare --worktree "$pr_gate_repository" --base-ref refs/remotes/origin/main
 
 no_change_repository="$fixture_root/pr-submit-no-change"
 no_change_remote="$fixture_root/pr-submit-no-change-origin.git"
@@ -235,9 +348,11 @@ git -C "$conflict_repository" checkout -qb conflict-feature
 commit_file "$conflict_repository" README.md local 'local README change'
 conflict_head_oid=$(git -C "$conflict_repository" rev-parse HEAD)
 advance_remote_main "$conflict_updater" "$conflict_remote" README.md remote
-run_flow 'sync-latest preserves an unresolved merge conflict' "$sync_latest_flow" conflict merge-conflict \
+run_flow_with_result 'sync-latest preserves an unresolved merge conflict' "$sync_latest_flow" conflict merge-conflict \
     synchronize --worktree "$conflict_repository" --target-ref refs/remotes/origin/main
-assert_json_string preHeadOid "$conflict_head_oid"
+conflict_target_oid=$(git -C "$conflict_repository" rev-parse refs/remotes/origin/main)
+conflict_merge_base_oid=$(git -C "$conflict_repository" merge-base "$conflict_head_oid" "$conflict_target_oid")
+assert_equal "$last_output" "{\"outcome\":\"conflict\",\"reason\":\"merge-conflict\",\"result\":{\"preHeadOid\":\"$conflict_head_oid\",\"target\":{\"ref\":\"refs/remotes/origin/main\",\"oid\":\"$conflict_target_oid\",\"mergeBaseOid\":\"$conflict_merge_base_oid\"}}}" 'conflict result'
 git -C "$conflict_repository" rev-parse -q --verify MERGE_HEAD >/dev/null \
     || fail "$last_case: conflict flow unexpectedly removed MERGE_HEAD"
 [ -n "$(git -C "$conflict_repository" ls-files -u)" ] \

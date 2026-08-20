@@ -10,8 +10,7 @@ worktree=
 base_ref=
 
 emit() {
-    printf '{"schemaVersion":1,"outcome":"%s","reason":"%s","result":%s}\n' \
-        "$1" "$2" "$3"
+    printf '{"outcome":"%s","reason":"%s"}\n' "$1" "$2"
 }
 
 is_oid() {
@@ -19,26 +18,10 @@ is_oid() {
     case ${#1} in 40|64) return 0 ;; *) return 1 ;; esac
 }
 
-json_oid() {
-    if is_oid "$1"; then printf '"%s"' "$1"; else printf 'null'; fi
-}
-
 is_literal_ref() {
     case "$1" in refs/heads/?*|refs/tags/?*|refs/remotes/?*/?*) ;; *) return 1 ;; esac
     case "$1" in *'@{'*|*'^'*|*'~'*|*':'*|*'..'*|*'//'*) return 1 ;; esac
     git check-ref-format "$1" >/dev/null 2>&1
-}
-
-json_ref() {
-    if is_literal_ref "$1"; then
-        escaped_ref=$(printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' 2>/dev/null) || {
-            printf 'null'
-            return
-        }
-        printf '"%s"' "$escaped_ref"
-    else
-        printf 'null'
-    fi
 }
 
 validate_worktree() {
@@ -110,23 +93,16 @@ detect_operation() {
 
 compare_base() {
     base_oid=
-    base_relation=
-    base_ahead=
     base_behind=
-    base_tree_changes=null
+    base_unrelated=false
+    base_tree_changes=
     if ! resolve_ref_oid "$base_ref"; then return 0; fi
     base_oid=$resolved_oid
     is_oid "$head_oid" || return 0
 
     merge_base=$(git merge-base "$head_oid" "$base_oid" 2>/dev/null) || merge_base=
     if ! is_oid "$merge_base"; then
-        base_relation=unrelated
-        git diff --quiet --no-ext-diff "$base_oid" "$head_oid" -- >/dev/null 2>&1
-        case "$?" in
-            0) base_tree_changes=false ;;
-            1) base_tree_changes=true ;;
-            *) return 1 ;;
-        esac
+        base_unrelated=true
         return 0
     fi
 
@@ -134,49 +110,14 @@ compare_base() {
     set -- $counts
     [ "$#" -eq 2 ] || return 1
     case "$1:$2" in *[!0-9:]*|:) return 1 ;; esac
-    base_ahead=$1
     base_behind=$2
-    if [ "$base_ahead" -eq 0 ] && [ "$base_behind" -eq 0 ]; then
-        base_relation=equal
-    elif [ "$base_ahead" -gt 0 ] && [ "$base_behind" -eq 0 ]; then
-        base_relation=head-ahead
-    elif [ "$base_ahead" -eq 0 ] && [ "$base_behind" -gt 0 ]; then
-        base_relation=ref-ahead
-    else
-        base_relation=diverged
-    fi
+    [ "$base_behind" -gt 0 ] && return 0
     git diff --quiet --no-ext-diff "$base_oid" "$head_oid" -- >/dev/null 2>&1
     case "$?" in
         0) base_tree_changes=false ;;
         1) base_tree_changes=true ;;
         *) return 1 ;;
     esac
-}
-
-collect_publication() {
-    origin_configured=false
-    if git remote get-url origin >/dev/null 2>&1; then origin_configured=true; fi
-    [ "$head_state" = attached ] || return 0
-    [ "$origin_configured" = true ] || return 0
-
-    remote_query=$(git ls-remote --heads origin "$head_ref" 2>/dev/null) || return 2
-    [ -n "$remote_query" ] || return 0
-    set -- $remote_query
-    [ "$#" -eq 2 ] || return 1
-    [ "$2" = "$head_ref" ] || return 1
-    is_oid "$1" || return 1
-}
-
-result_json() {
-    printf '{"headRef":'
-    json_ref "$head_ref"
-    printf ',"headOid":'
-    json_oid "$head_oid"
-    printf ',"baseRef":'
-    json_ref "$base_ref"
-    printf ',"baseOid":'
-    json_oid "$base_oid"
-    printf '}'
 }
 
 if ! command -v git >/dev/null 2>&1; then
@@ -225,47 +166,34 @@ compare_base || {
     emit blocked git-comparison-failed null
     exit 0
 }
-collect_publication
-publication_rc=$?
-case "$publication_rc" in
-    0) ;;
-    2)
-        emit blocked remote-unavailable null
-        exit 0
-        ;;
-    *)
-        emit blocked git-observation-failed null
-        exit 0
-        ;;
-esac
-result=$(result_json)
-
 case "$operation_state" in
     unknown-or-unsupported)
-        emit blocked unknown-or-unsupported-operation "$result"
+        emit blocked unknown-or-unsupported-operation
         exit 0
         ;;
     none)
         ;;
     *)
-        emit blocked operation-in-progress "$result"
+        emit blocked operation-in-progress
         exit 0
         ;;
 esac
 if [ "$has_unmerged" = true ]; then
-    emit blocked unmerged "$result"
+    emit blocked unmerged
 elif [ "$head_state" = detached ]; then
-    emit blocked detached-head "$result"
+    emit blocked detached-head
 elif [ "$head_state" = unborn ]; then
-    emit blocked unborn-head "$result"
+    emit blocked unborn-head
 elif ! is_oid "$base_oid"; then
-    emit blocked base-ref-unresolved "$result"
-elif [ "$base_relation" = unrelated ]; then
-    emit blocked unrelated-base "$result"
-elif [ "$has_changes" = false ] && { [ "$base_tree_changes" = false ] || [ "$base_ahead" = 0 ]; }; then
-    emit no-op no-change "$result"
-elif [ "$origin_configured" = false ]; then
-    emit blocked origin-not-configured "$result"
+    emit blocked base-ref-unresolved
+elif [ "$base_unrelated" = true ]; then
+    emit blocked unrelated-base
+elif [ "$has_changes" = true ]; then
+    emit blocked commit-required
+elif [ "$base_behind" -gt 0 ]; then
+    emit blocked sync-required
+elif [ "$base_tree_changes" = false ]; then
+    emit no-op no-change
 else
-    emit completed ready "$result"
+    emit completed ready
 fi

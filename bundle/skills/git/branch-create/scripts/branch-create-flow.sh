@@ -10,8 +10,7 @@ export GIT_TERMINAL_PROMPT=0
 export GIT_EXTERNAL_DIFF=
 
 emit() {
-  printf '{"schemaVersion":1,"outcome":"%s","reason":"%s","result":%s}\n' \
-    "$1" "$2" "$3"
+  printf '{"outcome":"%s","reason":"%s"}\n' "$1" "$2"
 }
 
 is_oid() {
@@ -47,24 +46,6 @@ git_path_to_posix() {
 
 gitc() {
   git -C "$worktree" "$@" 2>/dev/null
-}
-
-json_string_or_null() {
-  if [ -z "$1" ]; then
-    printf 'null'
-    return
-  fi
-
-  json_escaped=$(printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g') || return 1
-  printf '"%s"' "$json_escaped"
-}
-
-json_oid_or_null() {
-  if [ -n "$1" ]; then
-    printf '"%s"' "$1"
-  else
-    printf 'null'
-  fi
 }
 
 validate_ref() {
@@ -226,17 +207,8 @@ contains_current_head() {
   gitc merge-base --is-ancestor "$current_head_oid" "$1" >/dev/null
 }
 
-result_json() {
-  result_branch_ref=$(json_string_or_null "$current_head_ref") || return 1
-  result_head_oid=$(json_oid_or_null "$current_head_oid")
-  result_upstream_ref=$(json_string_or_null "$upstream_ref") || return 1
-  printf '{"branchRef":%s,"headOid":%s,"upstreamRef":%s}' \
-    "$result_branch_ref" "$result_head_oid" "$result_upstream_ref"
-}
-
 emit_result() {
-  result=$(result_json) || result='{}'
-  emit "$1" "$2" "$result"
+  emit "$1" "$2"
 }
 
 blocked() {
@@ -245,10 +217,6 @@ blocked() {
 }
 
 unknown_after_attempt() {
-  observe_current >/dev/null 2>&1 || true
-  if [ "$current_head_ref" = "$branch_ref" ]; then
-    read_branch_upstream >/dev/null 2>&1 || true
-  fi
   emit_result unknown-after-attempt "$1"
   exit 0
 }

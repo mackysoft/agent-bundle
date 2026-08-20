@@ -1,14 +1,12 @@
 ## 目的
-現在ブランチを、最新性を確認したうえで安全にリモートへ反映する。
+現在ブランチを、安全な同期状態だけでリモートへ反映する。
 
 ## フロー
 
-### Phase 1: publish 前に同期する
+### Phase 1: 同期済みの基準を固定する
 `$sync-latest` を適用する。`completed` または `no-op` の場合だけ Phase 2 へ進む。
 
-`blocked` の `commit-required` では `$commit` を適用する。`$commit` が `completed` または `no-op` の場合だけ、同じ同期対象で `$sync-latest` を一度だけ再適用する。その再実行が `completed` または `no-op` の場合だけ Phase 2 へ進む。
-
-`conflict`、その他の `blocked`、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では Git 操作を追加せず handoff する。
+`blocked / commit-required` では `$commit` を適用し、完了後に同じ同期対象で `$sync-latest` を一度だけ再適用する。再実行が `completed` または `no-op` の場合だけ Phase 2 へ進む。その他の結果は handoff する。
 
 ### Phase 2: 現在ブランチを publish する
 実行する `sh` 環境で、この Skill の配置ディレクトリと対象 worktree を `pwd -P` により絶対 physical POSIX path として固定する。Windows host の `C:\...` をそのまま `sh` に渡さない。
@@ -22,12 +20,15 @@ worktree=$(CDPATH= cd "<worktree-directory-visible-to-sh>" && pwd -P)
 
 ```sh
 sh "$skill_root/scripts/push-flow.sh" publish-current \
-  --worktree "$worktree"
+  --worktree "$worktree" \
+  --require-integrated-ref "<Phase 1 で確定した remote-tracking-ref>"
 ```
 
-`completed` は publish と postcondition が完了した状態、`no-op` は反映する commit がない状態である。いずれも完了として残す。
+Phase 1 で同期基準を複数選んだ場合は、同じ順序で `--require-integrated-ref` を繰り返す。基準を値として確定できない場合は、この引数を渡さない。
 
-`blocked` の `commit-required` では Phase 1 へ戻る。`blocked` の `non-fast-forward` では `$sync-latest` を一度だけ適用し、その結果が `completed` または `no-op` の場合だけ Phase 2 を一度だけ再実行する。再試行後の `non-fast-forward`、`conflict`、その他の `blocked`、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では Git 操作を追加せず handoff する。
+script は指定基準を fetch した後、各 ref が現在の `HEAD` に含まれることを確認してから publish する。`completed` と `no-op` は完了として残す。
+
+`blocked / commit-required` では `$commit`、`blocked / sync-required` では `$sync-latest` を一度だけ適用し、完了後に Phase 2 を一度だけ再実行する。その他の結果は handoff する。`non-fast-forward` の観測、fetch、同期要否の判定は script が所有する。
 
 ### Phase 3: 状態を残す
 同期結果、作成した commit、publish 先、push 結果、再試行の有無、停止理由を残す。
