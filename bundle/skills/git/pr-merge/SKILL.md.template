@@ -56,7 +56,7 @@ auto-merge はまず `gh pr merge <number> --auto --merge --delete-branch --matc
 
 | 結果 | 次に進む先 |
 | --- | --- |
-| auto-merge を設定できた | 後でマージされる状態として Phase 9 へ進む。 |
+| auto-merge を設定できた | 後でマージされる状態として Phase 8 へ進む。 |
 | merge queue がマージ方式の指定を受け付けない | `--merge` を外して再実行し、結果をこの表で判定する。 |
 | auto-merge を設定できないが、チェック監視で続行できる | Phase 6 へ進む。 |
 | head SHA 不一致、認証不足、権限不足、PR 状態の不整合で失敗した | 停止する。 |
@@ -80,10 +80,5 @@ Phase 6 は、チェックの検出待ちまたは監視が必要な場合に実
 
 保護ルール起因で失敗した場合も、`privileged-merge` の明示がなければ停止する。
 
-### Phase 8: ブランチ削除を確認する
-実マージが完了している場合だけ、リモートブランチとローカルブランチの残存を確認する。
-リモートブランチが残っている場合だけ `git push origin --delete <headRefName>` を実行する。
-ローカルブランチが残っており、現在ブランチでない場合だけ `git branch -d <headRefName>` を実行する。
-
-### Phase 9: 状態を残す
-PR URL、更新に使ったスキル、チェック結果、マージ経路、`privileged-merge` 指定の有無、auto-merge 設定結果、マージ結果、ブランチ削除結果、停止理由を残す。
+### Phase 8: 状態を残す
+PR URL、更新に使ったスキル、チェック結果、マージ経路、`privileged-merge` 指定の有無、auto-merge 設定結果、マージ結果、停止理由を残す。
