@@ -136,8 +136,7 @@ jobs:
       - name: Smoke test CLI tool package
         run: bash scripts/verify-cli-package.sh artifacts/packages 0.0.0
 
-  git-skill-helpers-non-ubuntu:
-    name: git skill helpers (${{ matrix.os }})
+  test:
     needs: source
     runs-on: ${{ matrix.os }}
 
@@ -162,7 +161,7 @@ jobs:
     needs:
       - source
       - verify
-      - git-skill-helpers-non-ubuntu
+      - test
     if: always()
 
     steps:
@@ -171,11 +170,11 @@ jobs:
         env:
           SOURCE_RESULT: ${{ needs.source.result }}
           VERIFY_RESULT: ${{ needs.verify.result }}
-          GIT_SKILL_HELPERS_NON_UBUNTU_RESULT: ${{ needs.git-skill-helpers-non-ubuntu.result }}
+          TEST_RESULT: ${{ needs.test.result }}
         run: |
           set -euo pipefail
 
-          for job in SOURCE VERIFY GIT_SKILL_HELPERS_NON_UBUNTU; do
+          for job in SOURCE VERIFY TEST; do
             result_variable="${job}_RESULT"
             result="${!result_variable}"
             if [[ "${result}" != "success" ]]; then
