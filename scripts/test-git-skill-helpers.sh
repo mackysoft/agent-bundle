@@ -6,6 +6,7 @@ repo_root=$(CDPATH= cd "$script_dir/.." && pwd -P)
 temp_root=${TMPDIR:-/tmp}
 fixture_root=$(mktemp -d "${temp_root%/}/git-skill-flows.XXXXXX")
 trap 'rm -rf "$fixture_root"' EXIT HUP INT TERM
+fixture_root=$(CDPATH= cd "$fixture_root" && pwd -P)
 
 test_number=0
 last_case=
