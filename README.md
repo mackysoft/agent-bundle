@@ -162,7 +162,7 @@ Root-task supervision and orchestration for user-operated tasks.
 
 | Skill | Purpose |
 | --- | --- |
-| `artifact-handoff` | Hand off temporary work artifacts by reference. |
+| `artifact-handoff` | Transfer temporary artifacts between agents by reference and expose task-scoped reuse only when it avoids duplicate work. |
 | `orchestrator` | Allocate one objective's outcome responsibilities to capable subagents and manage their handoffs, dependencies, and execution states. |
 | `supervisor` | Classify received work into independent objectives and create, update, or split user-operable tasks that apply the orchestrator Skill. |
 
