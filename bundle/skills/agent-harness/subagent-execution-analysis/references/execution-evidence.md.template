@@ -12,7 +12,7 @@
 | 委譲と継続入力 | 実行に対応付く委譲内容、対象範囲、制約、許可、必要な成果。 | 実際の行動、未観測の委譲内容。 |
 | 設定と行動 | executionに対応付く実効設定、行動、作用、成果物または外部状態の観測。 | definition default、許可された全作用、内部推論。 |
 | definition | execution-bound snapshot、digest、scope、時点と対応する定義。 | そのdefinitionがexecutionへ適用されたこと。 |
-| handoffとlifecycle | 親実行による受領・後続利用、親子実行の継続・停止・終了。 | 子実行成果の契約適合。 |
+| handoffとlifecycle | 親実行が所有する成果の受領・後続利用、親子実行の継続・停止・終了。 | 子実行成果の契約適合、または子実行定義がhandoffを所有すること。 |
 | 資源使用 | executionまたは計測範囲へ対応する使用量、計測端点、課金記録。 | sourceが報告しない指標、executionへ対応付けられない費用。 |
 
 ### identityとdefinition binding
@@ -23,7 +23,7 @@ agent originはidentity confidenceと独立したobservationとする。origin�
 
 ### handoff coverage
 
-handoff coverageは、親実行側のhandoff記録を、指定した分析範囲でsource固有の完全性保証とともに確認して評価する。`complete` は、範囲内の各開始済みexecutionへhandoffまたはその不在を対応付けられる場合だけ成立する。既知の記録欠落またはexecutionへの対応付け欠落は `partial`、完全または部分を判定するsource保証がない場合は `unverified` とする。
+handoff coverageは、親実行側のhandoff記録を、指定した分析範囲でsource固有の完全性保証とともに確認して評価する。`complete` は、範囲内の各開始済みexecutionへhandoffまたはその不在を対応付けられる場合だけ成立する。既知の記録欠落またはexecutionへの対応付け欠落は `partial`、完全または部分を判定するsource保証がない場合は `unverified` とする。このcoverageは親実行側の記録完全性を表し、子実行の契約責務を表さない。
 
 ### 分析範囲と順序
 

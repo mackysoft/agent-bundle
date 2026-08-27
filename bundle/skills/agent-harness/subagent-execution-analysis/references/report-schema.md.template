@@ -82,7 +82,7 @@ re_evaluation_triggers[]
 
 報告された課金額は対応する課金記録を根拠に `observed` とする。使用量から計算した費用は `derived` とし、measurement、usage metricと課金区分の関係、計算式、`pricing_ref` を持つ。必要な使用量、mapping、価格基準を確認できない指標は `value=null`、`claim_kind=unverified` とする。
 
-`child_handoffs` は子実行ごとのhandoffを記録する。`handoff_coverage.value` は [handoff coverage](execution-evidence.md#handoff-coverage) のsource完全性評価を表す。`complete` で空配列なら範囲内にhandoffはなく、`partial` または `unverified` で空配列の場合は不存在を断定しない。親実行の受領または利用はhandoffの根拠であり、子実行成果の適合を示さない。
+`child_handoffs` は、各子実行の結果に対して親実行側で観測したhandoffを記録する。`handoff_coverage.value` は [handoff coverage](execution-evidence.md#handoff-coverage) のsource完全性評価を表す。`complete` で空配列なら範囲内にhandoffはなく、`partial` または `unverified` で空配列の場合は不存在を断定しない。親実行の受領または利用は親実行が所有するhandoffの根拠であり、子実行成果の適合または子実行定義の契約要素を示さない。
 
 設定と権限のassessmentは `dimension` と `setting` ごとに保持する。`summary` はmismatchとviolationを列挙できるが、execution全体の合否を導かない。
 

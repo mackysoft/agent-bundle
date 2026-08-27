@@ -123,11 +123,11 @@ Software implementation, testing, review, documentation, issue planning, and int
 | `issue-planner` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | Write, create, update, or review structured GitHub Issue bodies. |
 | `review-triage` | Triage review comments against code, specifications, and evidence. |
-| `test-authoring` | Design, update, and consolidate minimal contract-based test suites. |
-| `test-oracle-assessment` | Assess whether test judgments are contract-aligned, independently derived, and supported by detection evidence. |
-| `ultra-review` | Orchestrate review planning, independent reviews, triage, responsibility-owned fixes, verification, and re-review until the work converges. |
+| `test-authoring` | After an authoritative basis confirms that the implementation change for the same target scope is complete or unnecessary, implement and maintain permitted tests that continuously detect concrete external-contract violations in an identified target implementation. |
+| `test-oracle-assessment` | Read-only assess important existing or candidate test judgments against the current external contract, independent expectations and observations, and evidence of detecting concrete violations after the scoped implementation change is complete or unnecessary. |
+| `ultra-review` | Define and converge review planning, independent review outcomes, triage, responsibility-owned fixes, verification, and re-review; return semantic requirements and resume conditions when a required outcome is missing. |
 | `unity-authoring-rules` | Apply Unity-specific implementation and review rules with the C# rules. |
-| `verification-gate` | Select and run the evidence needed for acceptance. |
+| `verification-gate` | After a scoped implementation change is complete or unnecessary, compare acceptance conditions with existing evidence, select, run, and re-evaluate permitted existing verification methods, then judge the target implementation. |
 | `xml-doc-writer` | Write contract-focused XML documentation comments. |
 
 ### git
@@ -208,7 +208,7 @@ agent-bundle agents install --host claude-code --scope user --agent architect,re
 agent-bundle agents install --host github-copilot --scope project --repository-root . --agent challenger --dry-run --print-diff
 ```
 
-The `agents` resource group supports `list`, `export`, `install`, `update`, `doctor`, `uninstall`, and `prune`. Agent selection uses exact names through `--agent`; installation and update start from the selected Agent → Skill dependencies and resolve their transitive Skill → Skill closure. Agent definitions never depend on other agents.
+The `agents` resource group supports `list`, `export`, `install`, `update`, `doctor`, `uninstall`, and `prune`. Agent selection uses exact names through `--agent`; installation and update start from the selected Agent → Skill dependencies and resolve their transitive Skill → Skill closure. Agent definitions declare direct Skill dependencies. Agent-to-agent relationships are runtime allocations owned by orchestration. Skill runtime dependencies form a Skill-only graph, while execution identities and bindings remain in the host and orchestration layer.
 
 ### Included custom agents
 
@@ -219,10 +219,11 @@ Custom agents use one flat catalog namespace:
 | `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
 | `challenger` | Returns non-blocking, evidence-backed challenges to questionable concrete choices in plans and artifacts. | `challenge` |
 | `evidence-organizer` | Organizes frozen evidence into a generic, traceable evidence package without interpretation. | `claim-grounding` |
-| `implementer` | Implements an agreed design, including natural-language artifacts, and reports implementation verification. | `code-authoring-rules`, `writing` |
+| `implementer` | Implements artifacts from a confirmed implementation contract and returns the implementation result, its correspondence to the authoritative current external contract, the chosen internal realization, and local check results. | `code-authoring-rules`, `writing` |
 | `interactive-tester` | Executes the execution portion of one frozen interactive execution-and-evidence envelope and returns its raw session result unchanged. | `interactive-session-execution` |
 | `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
-| `verifier` | Determines acceptance evidence and its result. | `verification-gate` |
+| `test-implementer` | After an authoritative basis confirms that the implementation change for the same target scope is complete or unnecessary, implements and maintains permitted tests that continuously detect concrete external-contract violations in an identified target implementation. | `test-authoring` |
+| `verifier` | After a scoped implementation change is complete or unnecessary, compares acceptance conditions with existing evidence, selects, runs, and re-evaluates permitted existing verification methods, then judges the target implementation. | `verification-gate` |
 | `researcher` | Finds and grounds the facts needed for a downstream decision, reports checked scope, and keeps missing evidence unconfirmed. | `claim-grounding` |
 | `operator` | Performs a fully specified closed action, including waiting for a long-running or external execution, and reports its terminal result or configured stop state. | None |
 

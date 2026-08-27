@@ -29,7 +29,7 @@
 判断できない場合は `chore` を使う。ブランチ名が指定されていれば slug 化して使い、未指定なら Issue、ユーザー指示、差分の目的から slug を作る。Issue がある場合は `<type>/issue-<N>-<branch_name>`、ない場合は `<type>/<branch_name>` にする。slug は ASCII 小文字、数字、ハイフンで構成し、空なら `goal` を使う。
 
 ### Phase 3: 対象ブランチを確立する
-この Skill の配置ディレクトリと対象 worktree は、`sh` を実行する同じ環境で `pwd -P` により absolute physical POSIX path へ解決する。Windows host の `C:\...` を Git Bash または WSL の `sh` へ直渡ししない。`skill_dir` から `script_path="$skill_dir/scripts/branch-create-flow.sh"` を得る。`sh` が利用できなければ無変更で handoff する。
+この Skill の配置ディレクトリと対象 worktree は、`sh` を実行する同じ環境で `pwd -P` により absolute physical POSIX path へ解決する。Windows host の `C:\...` を Git Bash または WSL の `sh` へ直渡ししない。`skill_dir` から `script_path="$skill_dir/scripts/branch-create-flow.sh"` を得る。`sh` が利用できなければ、無変更の状態、影響、再開条件を停止成果として返す。
 
 次だけを入力にして実行する。
 
@@ -43,7 +43,7 @@ sh "$script_path" ensure \
 
 script が返す `completed` は、必要な branch 操作と postcondition 確認まで完了した状態である。`no-op` は既に対象ブランチへ安全に接続済みである。どちらも次へ進む。
 
-`blocked`、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では、手動の Git 操作、別 action での再試行、または自動復旧を行わず、script の outcome と reason を handoff する。
+`blocked`、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では、script の outcome、reason、影響、再開条件を停止成果として返す。
 
 ### Phase 4: base と同期する
 対象ブランチが確立した後で、Phase 1 の base remote-tracking ref を指定ブランチとして `$sync-latest` へ渡す。

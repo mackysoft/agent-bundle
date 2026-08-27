@@ -47,7 +47,7 @@ printf '%s\n' "<commit-message>" |
     --path "<selected-repository-relative-path>" [--path "<selected-repository-relative-path>" ...]
 ```
 
-`completed` は次の単位または完了へ進む。`no-op` は選択した path に commit 対象がなかった状態として残す。`blocked`、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では、追加の Git 操作をせず handoff する。
+`completed` は次の単位または完了へ進む。`no-op` は選択した path に commit 対象がなかった状態として残す。`blocked`、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では、返された状態、影響、再開条件を停止成果として返す。
 
 ### Phase 4: 状態を残す
 作成した commit、選択した path、残った未コミット差分、分割できなかった理由、停止理由を残す。
