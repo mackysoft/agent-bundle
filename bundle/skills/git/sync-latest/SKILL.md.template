@@ -38,7 +38,7 @@ sh "$skill_root/scripts/sync-latest-flow.sh" synchronize \
 
 `completed` は同期と postcondition が完了した状態、`no-op` は全基準が既に取り込まれていた状態である。どちらも `同期完了` として結果を残す。
 
-`blocked` の `commit-required` では `$commit` を適用し、完了後に同じ順序の ref で一度だけ再実行する。`blocked` の他の理由、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では Git 操作を追加せず handoff する。`conflict` の `merge-conflict` だけは Phase 3 へ進む。
+`blocked` の `commit-required` では `$commit` を適用し、完了後に同じ順序の ref で一度だけ再実行する。`blocked` の他の理由、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では、返された状態、影響、再開条件を停止成果として返す。`conflict` の `merge-conflict` だけは Phase 3 へ進む。
 
 ### Phase 3: 自身が開始した merge の競合を扱う
 この Phase は、script が返した `conflict / merge-conflict` とその `MergeBoundary` に一致する merge の競合だけを扱う。開始前からの競合や他の進行操作を扱わない。
@@ -56,11 +56,11 @@ sh "$skill_root/scripts/sync-latest-flow.sh" synchronize \
 
 検証可能な暫定 candidate は未 stage の worktree だけに置く。元の conflict 内容、unmerged index stage、merge metadata を復元可能な状態で固定する。`$verification-gate` には固定 candidate manifest、根拠化結果、対象 worktree、許容書込み、受け入れ条件を渡す。検証は Git の読取・整合確認、または repository が書込み境界を明示した検証入口だけを使う。tracked file、index、ref、merge metadata の書込みは許可しない。ただし宣言済みの generated 全 output への書込みだけは例外とする。安全な入口がなければ未検証である。
 
-candidate 前後一致、`HEAD` / ref / index stage / merge metadata の許可外不変、直接の受入観測、書込み許容範囲、根拠忠実性と類型固有の確認がすべて成功した場合だけ、stage 前に予期しない変化がないことを確認する。candidate manifest の path だけを stage し、stage 内容が candidate と一致した場合だけ merge を continue する。continue が失敗した場合は abort、reset、retry をせず handoff する。
+candidate 前後一致、`HEAD` / ref / index stage / merge metadata の許可外不変、直接の受入観測、書込み許容範囲、根拠忠実性と類型固有の確認がすべて成功した場合だけ、stage 前に予期しない変化がないことを確認する。candidate manifest の path だけを stage し、stage 内容が candidate と一致した場合だけ merge を continue する。continue が失敗した場合は、現在状態、影響、再開条件を停止成果として返す。
 
 根拠不足、検証不能または失敗、候補不一致では自動 abort をしない。競合状態を保持した判断待ち競合として停止し、同一実行で次の merge、commit、push、同期再実行を行わない。
 
-continue が成功した場合は、Phase 2 と同じ順序の ref で `synchronize` を一度実行し、`completed` または `no-op` なら `同期完了` とする。それ以外は返された状態のまま handoff する。
+continue が成功した場合は、Phase 2 と同じ順序の ref で `synchronize` を一度実行し、`completed` または `no-op` なら `同期完了` とする。それ以外は返された状態のまま停止成果として返す。
 
 ### Phase 4: 状態を残す
-通常完了時は対象 worktree の絶対パス、基準 ref と OID、merge commit の有無、次の作業を残す。停止時は現在 `HEAD`、完了・未完了基準、base / ours / theirs OID、unmerged entries、根拠と検証結果、現在の操作状態、必要な人の判断、再開条件を handoff として残す。
+通常完了時は対象 worktree の絶対パス、基準 ref と OID、merge commit の有無、次の作業を残す。停止時は現在 `HEAD`、完了・未完了基準、base / ours / theirs OID、unmerged entries、根拠と検証結果、現在の操作状態、必要な人の判断、再開条件を停止成果として返す。

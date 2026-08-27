@@ -8,7 +8,7 @@ Issue と PR の意味、base、GitHub 権限、検証、PR 本文を扱い、�
 ### Phase 1: GitHub の利用可能性と既存 PR を確認する
 - `gh auth status` を確認する。
 - 同じブランチの open PR を確認する。
-- GitHub 認証、PR の取得、または更新権限を確認できない場合は停止し、必要な handoff を残す。
+- GitHub 認証、PR の取得、または更新権限を確認できない場合は、確認済み範囲、影響、再開条件を停止成果として返す。
 
 ### Phase 2: Issue と base を決める
 Issue は明示入力、ブランチ名の `issue-<N>`、既存 PR の関連情報の順に解決する。
@@ -28,7 +28,7 @@ sh "$skill_root/scripts/pr-submit-flow.sh" prepare \
 - `outcome=completed` かつ `reason=ready` なら Phase 5 へ進む。
 - `outcome=no-op` かつ `reason=no-change` なら PR 対象なしとして停止する。
 - `outcome=blocked` かつ `reason=commit-required` または `reason=sync-required` なら Phase 4 へ進む。
-- それ以外の `blocked`、`runtime-unavailable`、`input-invalid`、または実行不能なら、Git 状態を変更せず結果を handoff する。
+- それ以外の `blocked`、`runtime-unavailable`、`input-invalid`、または実行不能では、返された状態、影響、再開条件を停止成果として返す。
 
 以後の `prepare` 再実行もこの分類に従う。
 
@@ -39,7 +39,7 @@ sh "$skill_root/scripts/pr-submit-flow.sh" prepare \
 `$verification-gate` を PR 前用途で実行する。失敗または未検証範囲が残る場合は PR を作成または更新しない。検証が成果物更新や整形を残した場合は Phase 3 に戻る。
 
 ### Phase 6: 公開する
-`$push` には、Phase 2 で決めた base に対応する remote-tracking fully-qualified ref を `--require-integrated-ref` として渡す。`completed` または `no-op` なら Phase 7 へ進む。`blocked/sync-required` なら `$sync-latest`、Phase 3 の `prepare`、Phase 5 の検証の順に戻る。それ以外は handoff する。
+`$push` には、Phase 2 で決めた base に対応する remote-tracking fully-qualified ref を `--require-integrated-ref` として渡す。`completed` または `no-op` なら Phase 7 へ進む。`blocked/sync-required` なら `$sync-latest`、Phase 3 の `prepare`、Phase 5 の検証の順に戻る。それ以外は、返された状態、影響、再開条件を停止成果として返す。
 
 ### Phase 7: PR タイトルと本文を書く
 差分、コミット履歴、検証結果、Issue 本文から PR タイトルと本文を作る。

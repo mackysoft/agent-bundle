@@ -21,7 +21,7 @@
 
 ## 履行
 
-preflight前に、common workspace、app、actorに一致するCLI認証選択を一つへ固定する。preflight、全attempt、repreflight、postfetchでは同じ主体を使い、読み取りには同じ識別子を `$slack-context-reader` へ渡してその契約に従う。mutation dispatchはローカルSlack CLIの `slack api` だけで行い、methodとargumentsはインストール済みCLIのhelpと現在のSlack公式資料から選ぶ。agentが `slack api` を実行し、CLI内部でWeb API通信する経路を使い、agentのdirect HTTP、SDK、手書きのコードをrecovery candidateを含む代替またはfallbackにしない。credentialまたはtokenの値はCLIまたは実行環境で解決し、CLI arguments、submitted representation、log、result、handoffにはnon-secret情報とidentifierだけを残す。許可経路、契約の情報源、認証選択、安全なcredential解決を最初のaction attempt前に確定できなければ、0 attemptで `preflight_blocked` を返す。
+preflight前に、common workspace、app、actorに一致するCLI認証選択を一つへ固定する。preflight、全attempt、repreflight、postfetchでは同じ主体を使い、読み取りには同じ識別子を `$slack-context-reader` へ渡してその契約に従う。mutation dispatchはローカルSlack CLIの `slack api` だけで行い、methodとargumentsはインストール済みCLIのhelpと現在のSlack公式資料から選ぶ。Web API通信はCLI内部の経路を使う。credentialまたはtokenの値はCLIまたは実行環境で解決し、CLI arguments、submitted representation、log、resultにはnon-secret情報とidentifierだけを残す。許可経路、契約の情報源、認証選択、安全なcredential解決を最初のaction attempt前に確定できなければ、0 attemptで `preflight_blocked` を返す。
 
 1. `$slack-context-reader` を適用して、target、current state、boundary、snapshot invariants、no-op条件、projection、attribution scopeをpreflightする。必要な観測、比較規則、boundary確認が不足または不一致なら `preflight_blocked` を返し、dispatchしない。readerのpaginationまたは読み取り継続はattemptに数えない。
 2. preflight後のno-op分岐を一度だけ判定する。input actionが `no_op` なら、authorized existing conditionを観測できたときは0 attemptで `no_op`、条件が不成立または観測不能なら `preflight_blocked` を返す。他のactionでは、allowed no-op conditionを観測したときは0 attemptで `no_op` を返す。expected resultが既に存在し、その状態をno-opとして受け入れるpermissionがないときは `preflight_blocked` を返す。それ以外はattempt 1へ進む。

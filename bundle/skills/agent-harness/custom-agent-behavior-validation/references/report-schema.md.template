@@ -10,7 +10,7 @@ custom agentの挙動検証について、対象definition、host条件、シナ
 | --- | --- |
 | `target` | agent名、対象host、候補componentごとのsource refとdigest、またはそれらを一意に固定するbundle digest。 |
 | `validation_scope` | 対象契約、host binding、実行条件、観測・記録契約、許可作用、停止条件、対象外。 |
-| `contract_baseline` | 選択面、成果責務、入力、判断、行動、作用、成果、handoff、完了状態、停止条件、下位委譲方針。 |
+| `contract_baseline` | 選択面、成果責務、入力、判断、行動、作用、成果、呼び出し元への返却状態、完了状態、停止条件。対象agentが追加割当を所有する場合は下位委譲方針と上流handoff。 |
 | `scenarios` | 計画した各シナリオの契約。 |
 | `launch_attempts` | 親実行に対応する各起動試行、結果、対応する子実行。 |
 | `executions` | 開始済み子実行、継続入力、lifecycle state。 |
@@ -23,7 +23,7 @@ custom agentの挙動検証について、対象definition、host条件、シナ
 | `coverage` | 必須契約要素とシナリオの対応、正規化済み実行記録sourceの範囲、未実行または未解決の範囲。 |
 | `validation_status` | `conforms`、`violates`、`unverified`、`in_progress`、`blocked`。 |
 | `failures` | 直接確認した契約違反。 |
-| `unverified` | identity、binding、設定、行動、成果、handoff、終了について断定できない命題。 |
+| `unverified` | identity、binding、設定、行動、成果、返却、終了、および適用される場合の上流handoffについて断定できない命題。呼び出し元による受領と利用の未確認は、対象agentの未確認と分ける。 |
 | `rerun_scenarios` | 同じ入力で再実行するシナリオIDと、再実行前に変わる条件。 |
 
 ## scenario
@@ -48,7 +48,7 @@ custom agentの挙動検証について、対象definition、host条件、シナ
 - `observation_record_contract_refs`
 - `resource_measurement_plan`: 計測範囲、使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用、記録契約が定義する名称と単位、計測端点となるrecord refs、指標間の関係、課金区分への対応、価格基準、反復条件、集約方法、比較対象となる実行の成立条件
 
-期待する具体的な回答ではなく、契約から観測すべき選択、identity、設定、判断、行動、成果、handoff、状態を書く。
+期待する具体的な回答ではなく、契約から観測すべき選択、identity、設定、判断、行動、成果、呼び出し元への返却、状態を書く。対象agentが追加割当を所有する場合だけ、そのagentが上流として行うhandoffも書く。
 
 ## execution binding
 
@@ -66,7 +66,9 @@ custom agentの挙動検証について、対象definition、host条件、シナ
 - effective configuration
 - behavior/action observations
 - resource measurement refs
-- 継続とhandoff
+- 継続と対象agentによる返却
+- 呼び出し元による受領と利用
+- 対象agentが追加割当を所有する場合の上流handoff
 - 子executionと親executionのlifecycle state
 
 identity、agent origin、definition bindingを一つの確度へ集約しない。
@@ -88,7 +90,7 @@ identity、agent origin、definition bindingを一つの確度へ集約しない
 - `reason`
 - `missing_evidence`
 
-lifecycle state、成果の存在、親実行による受領、契約適合を別のassessmentとして保持する。該当契約要素に必要な候補componentが子実行へ結合されていない場合、そのassessmentを `conforms` または `violates` にせず `indeterminate` とする。
+lifecycle state、成果の存在、対象agentによる返却、親実行による受領と利用、契約適合を別に保持する。親実行による受領と利用は実行統合の観測であり、対象agentの契約assessmentにしない。対象agentが追加割当を所有する場合の上流handoffは、対象agentが開始した下位実行だけを評価する。該当契約要素に必要な候補componentが子実行へ結合されていない場合、そのassessmentを `conforms` または `violates` にせず `indeterminate` とする。
 
 ## resource measurement
 

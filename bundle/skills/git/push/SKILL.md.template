@@ -6,7 +6,7 @@
 ### Phase 1: 同期済みの基準を固定する
 `$sync-latest` を適用する。`completed` または `no-op` の場合だけ Phase 2 へ進む。
 
-`blocked / commit-required` では `$commit` を適用し、完了後に同じ同期対象で `$sync-latest` を一度だけ再適用する。再実行が `completed` または `no-op` の場合だけ Phase 2 へ進む。その他の結果は handoff する。
+`blocked / commit-required` では `$commit` を適用し、完了後に同じ同期対象で `$sync-latest` を一度だけ再適用する。再実行が `completed` または `no-op` の場合だけ Phase 2 へ進む。その他の結果は、状態、影響、再開条件を停止成果として返す。
 
 ### Phase 2: 現在ブランチを publish する
 実行する `sh` 環境で、この Skill の配置ディレクトリと対象 worktree を `pwd -P` により絶対 physical POSIX path として固定する。Windows host の `C:\...` をそのまま `sh` に渡さない。
@@ -28,7 +28,7 @@ Phase 1 で同期基準を複数選んだ場合は、同じ順序で `--require-
 
 script は指定基準を fetch した後、各 ref が現在の `HEAD` に含まれることを確認してから publish する。`completed` と `no-op` は完了として残す。
 
-`blocked / commit-required` では `$commit`、`blocked / sync-required` では `$sync-latest` を一度だけ適用し、完了後に Phase 2 を一度だけ再実行する。その他の結果は handoff する。`non-fast-forward` の観測、fetch、同期要否の判定は script が所有する。
+`blocked / commit-required` では `$commit`、`blocked / sync-required` では `$sync-latest` を一度だけ適用し、完了後に Phase 2 を一度だけ再実行する。その他の結果は、状態、影響、再開条件を停止成果として返す。`non-fast-forward` の観測、fetch、同期要否の判定は script が所有する。
 
 ### Phase 3: 状態を残す
 同期結果、作成した commit、publish 先、push 結果、再試行の有無、停止理由を残す。

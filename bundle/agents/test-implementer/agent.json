@@ -1,9 +1,8 @@
 {
   "schemaVersion": 1,
-  "displayName": "Test Authoring",
+  "displayName": "Test Implementer",
   "description": "同じ対象範囲の実装変更が完了、または実装変更不要と権威ある根拠で確定した後、対象実装に対応する権威ある現行外部契約について、権限ある反映または保守根拠と許可に従い、利用側境界から具体的違反を継続検出する自動テスト集合を実装、保守、収束させる。",
-  "dependencies": [
-    "code-authoring-rules",
-    "test-oracle-assessment"
+  "skillDependencies": [
+    "test-authoring"
   ]
 }
