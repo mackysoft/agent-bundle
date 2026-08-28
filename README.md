@@ -149,6 +149,7 @@ Authoring, isolated behavior validation, execution reconstruction, and deviation
 
 | Skill | Purpose |
 | --- | --- |
+| `agent-benchmarking` | Compare Skill, custom-agent, model, and reasoning-effort variants from fixed suites and direct evidence, producing a quantitative benchmark report package. |
 | `behavior-deviation-analysis` | Attribute behavior deviations to evidence-backed causes, repair owners, and revalidation scope. |
 | `custom-agent-authoring` | Create, update, and validate host-independent custom agent definitions and host bindings. |
 | `custom-agent-behavior-validation` | Exercise custom agents in isolated subagent runs and assess dispatch, runtime binding, behavior, handoff, termination, and resource efficiency. |
@@ -225,7 +226,7 @@ Agent bindings materialize as host-specific files while `AGENT.md` remains host-
 | `claude-code` | Claude Code skill directory | `.claude/agents` |
 | `github-copilot` | GitHub Copilot skill directory | `.github/agents` |
 
-See the [Agent Distribution command reference](https://github.com/mackysoft/agent-distribution/blob/6.0.0/README.md#run-standard-commands) for selector, scope, target-directory, ownership-state, and reload details.
+See the [Agent Distribution command reference](https://github.com/mackysoft/agent-distribution/blob/6.1.0/README.md#run-standard-commands) for selector, scope, target-directory, ownership-state, and reload details.
 
 ## Development
 
