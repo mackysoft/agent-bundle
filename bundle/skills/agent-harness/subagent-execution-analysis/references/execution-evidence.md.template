@@ -4,7 +4,7 @@
 
 環境固有の記録取得と対象単位への写像は入力提供責務が所有する。入力には元記録への参照、項目の意味、親子対応、順序規則、完全性保証、取得範囲を含める。このSkillは元記録の形式または取得方法を推定しない。
 
-親実行、起動試行、開始済み子実行、継続入力、definition、handoff、lifecycleを別の対象として扱う。locatorや表示用metadataは対象を探す手掛かりであり、identity、設定、委譲意図、actual actionの証拠ではない。
+親実行、起動試行、開始済み子実行、継続入力、message、input request、final return、handoff、definition、lifecycleを別の対象として扱う。locatorや表示用metadataは対象を探す手掛かりとして使う。identity、設定、委譲意図、actual action、通信の所有者、利用目的は、それぞれに対応する実行記録または契約参照を根拠とする。
 
 | 対象 | 直接観測として使える正規化済み入力 | 単独では確定しないこと |
 | --- | --- | --- |
@@ -12,6 +12,7 @@
 | 委譲と継続入力 | 実行に対応付く委譲内容、対象範囲、制約、許可、必要な成果。 | 実際の行動、未観測の委譲内容。 |
 | 設定と行動 | executionに対応付く実効設定、行動、作用、成果物または外部状態の観測。 | definition default、許可された全作用、内部推論。 |
 | definition | execution-bound snapshot、digest、scope、時点と対応する定義。 | そのdefinitionがexecutionへ適用されたこと。 |
+| 通信 | 送受信実行、channel、時点または順序、kind、内容または成果参照、受信後の状態変化、受け手の責務、source 完全性。 | 本文だけから推定した状態変化、用途、不存在。 |
 | handoffとlifecycle | 親実行が所有する成果の受領・後続利用、親子実行の継続・停止・終了。 | 子実行成果の契約適合、または子実行定義がhandoffを所有すること。 |
 | 資源使用 | executionまたは計測範囲へ対応する使用量、計測端点、課金記録。 | sourceが報告しない指標、executionへ対応付けられない費用。 |
 
@@ -24,6 +25,10 @@ agent originはidentity confidenceと独立したobservationとする。origin�
 ### handoff coverage
 
 handoff coverageは、親実行側のhandoff記録を、指定した分析範囲でsource固有の完全性保証とともに確認して評価する。`complete` は、範囲内の各開始済みexecutionへhandoffまたはその不在を対応付けられる場合だけ成立する。既知の記録欠落またはexecutionへの対応付け欠落は `partial`、完全または部分を判定するsource保証がない場合は `unverified` とする。このcoverageは親実行側の記録完全性を表し、子実行の契約責務を表さない。
+
+### communication coverage
+
+通信sourceは、表の観測項目と取得範囲、完全性保証を示す。受け手への効果は直接観測または責務契約を根拠とし、根拠がなければ `unverified` とする。coverage は、範囲内の完全性を確認できれば `complete`、記録の欠落または対応付け不能があれば `partial`、完全性の根拠がなければ `unverified` とする。通信の所有者、用途、存在または不在は、対応するsourceとcoverageから判断する。
 
 ### 分析範囲と順序
 

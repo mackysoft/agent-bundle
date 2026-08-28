@@ -2,7 +2,7 @@
 
 指定時点と範囲の親実行について、正規化済みの実行記録からsubagentの起動試行と開始済みの子実行を復元する。実行主体と適用定義の同定確度を示し、委譲から終了までを契約へ照合した分析結果を作る。
 
-成果は、対象範囲の起動試行と開始済みexecutionを復元し、実行主体、適用定義、設定、行動、成果、handoff、終了、資源使用を根拠に対応付けた、読み取り専用の分析結果である。このスキルは実行記録、定義、成果物を変更せず、期待との差、原因、対応候補、再検証範囲は `behavior-deviation-analysis`、受入条件への最終判定は `verification-gate` が所有する。
+成果は、対象範囲の起動試行と開始済みexecutionを復元し、実行主体、適用定義、設定、行動、成果、通信、handoff、終了、資源使用を根拠に対応付けた、読み取り専用の分析結果である。期待との差、原因、対応候補、再検証範囲は `behavior-deviation-analysis`、受入条件への最終判定は `verification-gate` が所有する。
 
 ## 入力
 
@@ -20,6 +20,8 @@
 | 資源計測範囲 | 子実行、子孫、親実行、end-to-endの対象、必要な使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用、計測端点、使用量または課金記録、価格基準。記録sourceが提供しない指標は `unverified` とする。 |
 
 入力提供責務が環境固有の取得と正規化を所有する。このSkillはそれらを推定・実装せず、必要な対応、順序、完全性を入力から確定できなければ不足条件を返す。
+
+message、input request、final return、handoff ref は `kind` ごとの通信観測として復元し、送受信者、時点、内容、受け手の責務と変化を観測範囲で保持する。final return は子実行の結果返却、handoff は親実行による後続利用として扱う。通信の不在は、coverage が完全性を保証する範囲でだけ評価する。
 
 ## 証拠と同定
 
@@ -95,6 +97,7 @@ executionごとに、次の観点を独立に契約と照合する。
 | 行動と作用 | executionへ結び付く行動、作用、成果物または外部状態の観測。 |
 | 成果 | 子実行の成果、検証、失敗または未完了。 |
 | 継続 | 同じexecutionへの継続入力と、別executionの起動。 |
+| 通信 | 種別ごとの観測、受け手の責務と変化した状態、通信契約への適合。 |
 | handoff | 親実行が上流として、子実行の結果を受領、利用、保留、または未利用にした記録。 |
 | 終了 | 子実行と親実行のlifecycle、未完了の再開条件。 |
 
@@ -102,13 +105,11 @@ executionごとに、次の観点を独立に契約と照合する。
 
 handoffは親実行側の作用として記録する。子実行が成果を返したことと、親実行がその成果を受領、利用、または別責務へ配送したことを分け、親実行側のhandoffを子実行の定義または契約へ帰属させない。子実行自身がさらに下位実行を開始した範囲では、その子実行を上流とする別の親子関係として扱う。
 
+各通信を観測範囲ごとに評価する。既知の受け手、その責務、変わる状態、時点を確認できれば `conforms`、受け手の状態を変えない局所失敗、進捗、生ログの送信は `violates` とする。観測済み違反は `partial` coverage でも判定できる。通信の不在は `complete` の場合だけ `conforms` とし、ほかは `indeterminate` とする。final return と親実行の handoff は別の `kind` として扱う。
+
 ### Phase 7: 分析結果を報告する
 
-`$writing` を適用し、記録の転記ではなく、復元した単位、照合結果、根拠、未確認事項、再評価条件を読者が追える構造で返す。詳細なreport schemaは [references/report-schema.md](references/report-schema.md)、正規化済み実行記録の証拠契約は [references/execution-evidence.md](references/execution-evidence.md) に従う。
-
-## 出力
-
-詳細な形式は [references/report-schema.md](references/report-schema.md) に従う。分析範囲とcoverage、起動試行とexecution、設定と資源使用、照合、親実行のlifecycle、未確認事項、再評価条件を区別し、すべての観測、定義、導出、推定、未確認に `evidence_refs` を付ける。出力は変更案、原因帰属、受入判定を含めず、必要になった後続作業へ分析結果を渡す。
+`$writing` を適用し、分析範囲とcoverage、起動試行とexecution、設定と資源使用、照合、親実行のlifecycle、未確認事項、再評価条件を区別して返す。各命題には `evidence_refs` を付け、形式は [report schema](references/report-schema.md)、入力証拠は [execution evidence](references/execution-evidence.md) に従う。変更案、原因帰属、受入判定は後続責務へ委ねる。
 
 ## 完了条件
 
@@ -117,5 +118,7 @@ handoffは親実行側の作用として記録する。子実行が成果を返�
 - identityとdefinition bindingを別に示し、現在のdefinitionを過去の実行時点へ断定していない。
 - definition default、起動時指定、親実行からの指定、effective configuration、executionのaction observationを別に評価している。
 - 計測範囲ごとの使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用を値または `unverified` として示し、報告値、報告費用、価格基準からの導出値を区別している。
+- 各通信を、送受信者、種別、時点、内容、受け手の責務と状態変化に基づいて個別評価し、final return と親実行の handoff を区別している。
+- 観測済み違反と通信不在を区別し、不在の適合判定には `complete` coverage を対応付けている。
 - 各照合結果、子実行の終了、親実行のlifecycle、未確認事項を混同していない。
 - 各結論を `evidence_refs` から追跡でき、推定と未確認を観測事実として扱っていない。

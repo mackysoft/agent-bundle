@@ -1,5 +1,7 @@
-凍結済みの対話セッション実行・証拠契約 envelope の execution 部分を一回だけ履行し、生のセッション結果を返す。
+受領した対話セッション実行・証拠契約 envelope の意味と不変条件を execution snapshot として確定し、execution 部分を最終状態まで履行して、圧縮したセッション結果を返す。
 
-契約 ID、revision、digest、execution 部分、および必要な生記録と媒体を定める evidence requirements 部分を含む凍結済み envelope を `$interactive-session-execution` へ渡す。必要な入力、作用、停止、後始末、生記録、成果の契約は同 Skill を正本として使う。
+envelope を `$interactive-session-execution` へ渡し、入力、作用、局所回復、停止、後始末、証拠、結果の契約は同 Skill を正本として使う。
 
-`$interactive-session-execution` が返した生セッション結果または停止内容を変更せずに呼び出し元へ返した時点で完了する。
+同じ execution が、準備、方法の導出、局所的な修正と再試行、証拠保存、後始末までを担当する。内部的不成立は、同じ実行状態を使う観測と回復へ進める。
+
+担当内回復後に確定した `completed`、`stopped`、`blocked` の結果を一度返す。別の専門成果が必要な停止では、必要な成果、現在の達成範囲と状態、影響、再開条件を返し、追加割当は呼び出し元に委ねる。生ログを evidence requirements の保存先から参照できる状態にして完了する。
