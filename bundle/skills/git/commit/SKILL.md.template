@@ -47,7 +47,9 @@ printf '%s\n' "<commit-message>" |
     --path "<selected-repository-relative-path>" [--path "<selected-repository-relative-path>" ...]
 ```
 
-`completed` は次の単位または完了へ進む。`no-op` は選択した path に commit 対象がなかった状態として残す。`blocked`、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では、返された状態、影響、再開条件を停止成果として返す。
+helper の実行後は outcome だけで完了を決めない。選択済み path の staged diff と worktree diff を再観測し、未選択差分が index へ入らず、選択済み path だけがこの単位の内容として index にあることを確認する。commit が既に作成され、その tree と `HEAD` が選択済み内容を表す場合は次の単位へ進む。
+
+helper が stage 後に失敗した場合も、index が選択済み path の内容と完全に一致し、未選択差分を保持している場合だけ、通常の `git commit` でその index を commit してよい。まだ stage されていない場合は、選択済み path だけを通常の `git add --` で stage し、同じ一致を確認してから commit する。index の内容、対象範囲、または既存 commit を一意に確定できない場合は、index を巻き戻さず停止する。
 
 ### Phase 4: 状態を残す
-作成した commit、選択した path、残った未コミット差分、分割できなかった理由、停止理由を残す。
+作成した commit、選択した path、index と未選択差分の保持観測、残った未コミット差分、分割できなかった理由、利用した helper または native 操作、停止理由を残す。

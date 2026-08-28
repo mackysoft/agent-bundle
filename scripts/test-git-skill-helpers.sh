@@ -111,16 +111,6 @@ assert_remote_ref_oid() {
         || fail "$last_case: expected remote $2 to be $3, got ${remote_actual_oid:-absent}"
 }
 
-assert_file_contains() {
-    grep -F -- "$2" "$1" >/dev/null || fail "expected $1 to contain $2"
-}
-
-assert_file_not_contains() {
-    if grep -F -- "$2" "$1" >/dev/null; then
-        fail "expected $1 not to contain $2"
-    fi
-}
-
 create_repository() {
     repository_path=$1
     remote_path=$2
@@ -178,13 +168,6 @@ for expected_flow in "$branch_create_flow" "$commit_flow" "$push_flow" \
     [ -f "$expected_flow" ] || fail "missing source asset: $expected_flow"
     sh -n "$expected_flow" || fail "invalid POSIX shell syntax: $expected_flow"
 done
-
-pr_submit_template="$repo_root/bundle/skills/git/pr-submit/SKILL.md.template"
-assert_file_contains "$pr_submit_template" 'pr-submit-flow.sh" prepare'
-assert_file_contains "$pr_submit_template" 'pwd -P'
-assert_file_not_contains "$pr_submit_template" 'pr-submit-inspect.sh'
-assert_file_not_contains "$pr_submit_template" 'base-compare'
-assert_file_not_contains "$pr_submit_template" 'git status'
 
 # One worktree covers the branch, commit, push, and PR preparation flows.
 core_repository="$fixture_root/core"

@@ -1,7 +1,7 @@
 ## 目的
 作業内容、Issue、指定値から規約準拠の作業ブランチを確定し、現在作業を失わず対象 worktree をそのブランチへ接続する。
 
-この Skill は、Issue、base、ブランチ名、現在作業を保持する意図を決める。対象 worktree の観測、fetch、ブランチ作成・再利用・tracking・upstream 設定、完了確認はこの Skill 固有の flow script が所有する。
+この Skill は、Issue、base、ブランチ名、現在作業を保持する意図を決める。対象 worktree の観測、fetch、ブランチ作成・再利用・tracking・upstream 設定、完了確認を所有する。flow script はその優先手段であり、唯一の実現手段ではない。
 
 ## フロー
 
@@ -9,7 +9,9 @@
 - ユーザーが指定した worktree、または作業開始時の worktree root の absolute POSIX physical root を対象として固定する。
 - `gh auth status` を確認する。Issue が指定されている場合は `gh issue view` で存在と状態を確認し、open でなければ停止する。
 - base branch が指定されていれば採用し、未指定ならリポジトリの既定ブランチを採用する。base は `refs/remotes/<remote>/<branch>` 形式の remote-tracking ref として渡す。
-- 現在の commit または未コミット差分を保持する意図がある場合は `--preserve-current` を選ぶ。既定ブランチを起点に新しい作業を始める意図なら、この flag を渡さない。実際の Git 状態がその意図で安全に扱えるかは script の結果だけで判断する。
+- 呼出元が既存 PR の固定済み head remote と head ref を渡した場合は、それを対象ブランチの upstream と publish 先の正本として優先する。base の remote は同期基準としてだけ使い、同名 branch への fallback はしない。
+- 現在の commit または未コミット差分を保持する意図がある場合は `--preserve-current` を選ぶ。既定ブランチを起点に新しい作業を始める意図なら、この flag を渡さない。
+- 作用前に、進行中の Git 操作、unmerged entries、対象ブランチを使う他 worktree、現在の symbolic ref と `HEAD` OID、対象ブランチの upstream、開始時 `HEAD` が保持対象ブランチへ含まれる条件を観測する。競合、他 worktree 使用、または upstream の不整合がある場合は停止する。
 
 ### Phase 2: ブランチ名を決める
 ブランチ種別が指定されていれば採用する。指定がなければ Issue、ユーザー指示、差分の目的から一般的な開発語彙に沿って選ぶ。
@@ -29,7 +31,7 @@
 判断できない場合は `chore` を使う。ブランチ名が指定されていれば slug 化して使い、未指定なら Issue、ユーザー指示、差分の目的から slug を作る。Issue がある場合は `<type>/issue-<N>-<branch_name>`、ない場合は `<type>/<branch_name>` にする。slug は ASCII 小文字、数字、ハイフンで構成し、空なら `goal` を使う。
 
 ### Phase 3: 対象ブランチを確立する
-この Skill の配置ディレクトリと対象 worktree は、`sh` を実行する同じ環境で `pwd -P` により absolute physical POSIX path へ解決する。Windows host の `C:\...` を Git Bash または WSL の `sh` へ直渡ししない。`skill_dir` から `script_path="$skill_dir/scripts/branch-create-flow.sh"` を得る。`sh` が利用できなければ、無変更の状態、影響、再開条件を停止成果として返す。
+この Skill の配置ディレクトリと対象 worktree は、`sh` を実行する同じ環境で `pwd -P` により absolute physical POSIX path へ解決する。Windows host の `C:\...` を Git Bash または WSL の `sh` へ直渡ししない。`skill_dir` から `script_path="$skill_dir/scripts/branch-create-flow.sh"` を得る。
 
 次だけを入力にして実行する。
 
@@ -41,13 +43,13 @@ sh "$script_path" ensure \
   [--preserve-current]
 ```
 
-script が返す `completed` は、必要な branch 操作と postcondition 確認まで完了した状態である。`no-op` は既に対象ブランチへ安全に接続済みである。どちらも次へ進む。
+script の実行後は、outcome にかかわらず Phase 1 と同じ安全条件を再観測する。固定済み head remote/ref がある場合は、helper がその remote/ref を安全に upstream と publish 先へ反映できると確認できる場合だけ使う。反映できない場合は helper を完了条件にせず、通常の `git` 操作へ切り替える。最終状態は、対象 worktree が対象 branch ref を symbolic `HEAD` とし、保持対象 `HEAD` を失わず、対象ブランチの upstream が固定済み head remote/ref、または指定がなければ整合した通常 upstream を指し、unmerged entries と進行中の操作がない状態である。
 
-`blocked`、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では、script の outcome、reason、影響、再開条件を停止成果として返す。
+この事後条件が成立していれば `completed` または `no-op` として次へ進む。未成立でも残る branch 操作が一意で安全な場合は、通常の `git fetch`、`git switch`、`git branch`、`git branch --set-upstream-to` を使って同じ事後条件へ到達してよい。固定済み head remote/ref の URL、ref、OID を確認できない、開始時 `HEAD` を含められない、他 worktree が対象 branch を使用する、upstream が競合する、または次の作用を一意に決められない場合は、再試行、巻き戻し、force をせず停止する。
 
 ### Phase 4: base と同期する
 対象ブランチが確立した後で、Phase 1 の base remote-tracking ref を指定ブランチとして `$sync-latest` へ渡す。
 `$sync-latest` が `同期完了` を返した場合だけ base 同期を完了とする。判断待ち競合または未完了なら、自動で同期を再実行せず、ブランチ接続済みと base 同期の判断待ち・未完了を別状態として報告する。
 
 ### Phase 5: 状態を残す
-対象 worktree の絶対パス、確定した branch ref、base ref、`--preserve-current` の有無、flow script の outcome / reason、同期の完了または未完了、停止理由を残す。
+対象 worktree の絶対パス、確定した branch ref、base ref、固定済み head remote/ref の有無、`--preserve-current` の有無、最終 symbolic ref、保持した開始 `HEAD`、upstream、競合なしの観測、同期の完了または未完了、利用した helper または native 操作、停止理由を残す。
