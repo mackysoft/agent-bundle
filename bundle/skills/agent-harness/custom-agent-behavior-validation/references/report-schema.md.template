@@ -1,137 +1,52 @@
-# custom agentの挙動検証結果の形式
+# custom agentの挙動検証結果
 
-## 目的
+## 基本形式
 
-custom agentの挙動検証について、対象definition、host条件、シナリオ、起動試行、子実行、正規化済み実行記録、実行分析、assessment、資源measurement、coverage、再実行条件を同じ単位で保持する。
-
-## report
+検証結果は、今回の判定を再確認できる次の情報で構成する。固定スキーマへの機械的な適合より、各項目の意味と参照可能性を優先する。
 
 | 項目 | 内容 |
 | --- | --- |
-| `target` | agent名、対象host、候補componentごとのsource refとdigest、またはそれらを一意に固定するbundle digest。 |
-| `validation_scope` | 対象契約、host binding、実行条件、観測・記録契約、許可作用、停止条件、対象外。 |
-| `contract_baseline` | 選択面、成果責務、入力、判断、行動、作用、成果、呼び出し元への返却状態、完了状態、停止条件。対象agentが追加割当を所有する場合は下位委譲方針と上流handoff。 |
-| `scenarios` | 計画した各シナリオの契約。 |
-| `launch_attempts` | 親実行に対応する各起動試行、結果、対応する子実行。 |
-| `executions` | 開始済み子実行、継続入力、lifecycle state。 |
-| `normalized_execution_record_refs` | 各シナリオについて記録提供責務から受け取った正規化済み実行記録と記録契約への参照。 |
-| `execution_analysis_refs` | 各シナリオに対応するsubagentの実行分析結果への参照。 |
-| `assessments` | シナリオと契約要素ごとの照合結果。 |
-| `resource_measurements` | 記録契約が定義する指標について、実行および計測範囲ごとの値、単位、根拠、導出基準。 |
-| `resource_measurement_status` | 必要な資源指標の取得状態。`complete`、`partial`、`unverified`。 |
-| `efficiency_summary` | 同一比較条件の実行数、成立条件を満たす完了数、失敗または停止数、集約した資源使用、`cost per conforming completion`。 |
-| `coverage` | 必須契約要素とシナリオの対応、正規化済み実行記録sourceの範囲、未実行または未解決の範囲。 |
+| `target` | agent名、対象host、実行した候補を区別できる定義またはartifactへの参照。必要な場合だけ版、binding、digestを含める。 |
+| `scope` | 判定した契約要素と利用場面、対象外。 |
+| `observations` | 委譲入力、外部から観測した成果・作用・返却・終了状態、証拠参照。 |
+| `assessments` | 契約要素ごとの判定と、その判定に使った観測。 |
 | `validation_status` | `conforms`、`violates`、`unverified`、`in_progress`、`blocked`。 |
-| `failures` | 直接確認した契約違反。 |
-| `unverified` | identity、binding、設定、行動、成果、返却、終了、および適用される場合の上流handoffについて断定できない命題。呼び出し元による受領と利用の未確認は、対象agentの未確認と分ける。 |
-| `rerun_scenarios` | 同じ入力で再実行するシナリオIDと、再実行前に変わる条件。 |
+| `decision_changing_gaps` | 判定または必要な再作業を変える不足、違反、再開条件。なければ省略する。 |
+| `audit_trace` | identity、selection、binding、lifecycle、通信の追跡が明示的な検証条件である場合だけ、その記録参照を置く。 |
+| `resource_measurements` | 資源条件が受入条件である場合だけ、指標、範囲、値、単位、証拠または導出根拠を置く。 |
 
-## scenario
-
-各scenarioは次を持つ。
-
-- `scenario_id`
-- `required`: 必須なら `true`、任意なら `false`
-- `execution_status`: `planned`、`in_progress`、`ended`、`blocked`
-- `type`: `natural-selection`、`non-selection`、`explicit-selection`、`out-of-scope`、`configuration-and-effects`、`continuation`、`lifecycle-or-stop`、`regression`
-- `contract_refs`
-- `required_candidate_components`
-- `selection_request`
-- `delegation_input`
-- `initial_state`
-- `allowed_effects`
-- `continuation_inputs`
-- `expected_lifecycle_state`
-- `stop_condition`
-- `expected_observations`
-- `required_execution_evidence`
-- `observation_record_contract_refs`
-- `resource_measurement_plan`: 計測範囲、使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用、記録契約が定義する名称と単位、計測端点となるrecord refs、指標間の関係、課金区分への対応、価格基準、反復条件、集約方法、比較対象となる実行の成立条件
-
-期待する具体的な回答ではなく、契約から観測すべき選択、identity、設定、判断、行動、成果、呼び出し元への返却、状態を書く。対象agentが追加割当を所有する場合だけ、そのagentが上流として行うhandoffも書く。
-
-## execution binding
-
-各scenarioについて、次を正規化済み実行記録とsubagentの実行分析結果へ対応付ける。
-
-- 親execution
-- 分析範囲と端点の包含性
-- cutoffがある場合のcutoff mapping
-- 起動試行ID
-- 子実行ID
-- identity status
-- agent origin
-- definition binding IDsとstatus
-- candidate componentごとの期待digest、対応binding ID、照合結果
-- effective configuration
-- behavior/action observations
-- resource measurement refs
-- 継続と対象agentによる返却
-- 呼び出し元による受領と利用
-- 対象agentが追加割当を所有する場合の上流handoff
-- 子executionと親executionのlifecycle state
-
-identity、agent origin、definition bindingを一つの確度へ集約しない。
-
-候補componentの照合結果は `matched`、`mismatched`、`indeterminate` のいずれかとする。`matched` は、候補digestと一致する `exact` binding、または候補digestと一致する `time_correlated` bindingに、対象hostがそのcomponentを当該子実行へ適用したことを示す追加の実行証拠がある場合だけ使う。`current_only`、`unresolved`、digest不一致、追加根拠のない `time_correlated` は `matched` にしない。
+一つの子実行で複数の契約要素を判定できる場合は、観測を重複させず各assessmentから参照する。
 
 ## assessment
 
-各assessmentは次を持つ。
+各assessmentは次を示す。
 
-- `scenario_id`
-- `dimension`
-- `setting`: 設定単位を評価する場合の名前。それ以外は `null`。
-- `assessment`: `conforms`、`violates`、`indeterminate`、`in_progress`、`not_applicable`
-- `contract_refs`
-- `candidate_component_refs`
-- `definition_binding_refs`
-- `execution_evidence_refs`
-- `reason`
-- `missing_evidence`
+- 判定する契約要素または受入条件。
+- `conforms`、`violates`、`indeterminate`、`in_progress`、`not_applicable` のいずれか。
+- 判定に使った直接観測と証拠参照。
+- 判定できない場合だけ、不足と再開条件。
 
-lifecycle state、成果の存在、対象agentによる返却、親実行による受領と利用、契約適合を別に保持する。親実行による受領と利用は実行統合の観測であり、対象agentの契約assessmentにしない。対象agentが追加割当を所有する場合の上流handoffは、対象agentが開始した下位実行だけを評価する。該当契約要素に必要な候補componentが子実行へ結合されていない場合、そのassessmentを `conforms` または `violates` にせず `indeterminate` とする。
+対象agentの挙動を直接観測していない検証手段の失敗は `violates` にしない。他の直接証拠で条件を判定済みなら、判定を変えない手段の失敗はreportへ含めない。
 
-## resource measurement
+## 追跡監査
 
-各measurementは次を持つ。
+自然選択、複数候補やbindingの区別、親子実行、通信、厳密な再現性が検証条件である場合は、必要な範囲だけ次を `audit_trace` に加える。
 
-- `scenario_id`
-- `execution_ref`、または親実行とend-to-endを表すscope ref
-- `scope`: `child`、`descendants`、`parent`、`end_to_end`
-- `record_contract_ref`
-- `metric`: 使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用のいずれかに対応する、記録契約が定義する指標名
-- `value`、取得できない場合は `null`
-- `unit`
-- `claim_kind`: `observed`、`derived`、`unverified`
-- `evidence_refs`
-- `calculation`: 導出値の場合の式、入力measurement、価格基準への参照
-- `missing_reason`
+- scenario、起動試行、親execution、子executionの識別子。
+- identity、agent origin、selectionの観測。
+- 候補component、版、digest、definition binding、effective configurationの対応。
+- lifecycle、継続入力、対象agentによる返却。
+- 対象agentが追加割当を所有する場合の下位実行と上流handoff。
+- 記録の取得範囲または既知の欠落。
 
-各指標は、使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用の意味単位と、記録契約が定義する名称、値、単位、指標間の関係を保持する。記録契約が区別しない指標を推定で作らない。課金記録が報告する費用と、観測した使用量および時点付き価格基準から計算した費用は別measurementにする。価格基準は課金区分、通貨、単価、適用時点、source refを持つ。導出費用の計算には、各使用量指標が課金区分の総量、内数、または独立量のどれに対応するかを示すmappingを使う。mappingを確認できない指標を含む導出費用は `unverified` とする。
+これらを選ばなかった通常確認では、空の項目や未検証状態を作らない。親実行による成果利用は、対象agentの返却と分けて必要な場合だけ記録する。
 
-経過時間を計測する場合は、資源計測条件が範囲ごとに定めた開始と終了または停止のrecord refs、端点の包含性、計測範囲を保持する。両端を指定または観測できない範囲の経過時間は `unverified` とする。親実行、子実行、子孫、end-to-endを一つの時間または費用へ暗黙に集約しない。
+## 資源計測
 
-`resource_measurement_status=complete` は資源計測条件で必要とした各指標を値または適用外として確定できた場合、`partial` は一部を取得し一部が `unverified` の場合、`unverified` は比較に必要な指標を子実行へ結合できない場合に使う。
+資源上限または効率比較が受入条件である場合だけ、必要な指標について計測範囲、値、単位、観測または導出の別、証拠参照を残す。比較では同じ利用場面、入力、初期状態、許可作用、停止条件を使う。記録契約が提供しない値を推定で補わない。
 
-## efficiency summary
+資源条件を判定対象にしていない場合は `resource_measurements` を作らない。資源計測の不足を挙動契約の未検証へ波及させない。
 
-各summaryは、同じシナリオ、委譲入力、初期状態、許可作用、親実行の条件、計測範囲、停止条件、反復条件に対応するvalidation recordだけを集約する。次を持つ。
+## 利用者向け出力
 
-- 比較条件と対象record refs
-- 集約方法
-- 全起動試行数と開始済み子実行数
-- 成立条件を満たす完了数
-- 停止条件到達、blocked、契約不適合、その他の非成立数
-- 指標ごとの集約値とmeasurement refs
-- `cost_per_conforming_completion`: 費用指標が記録契約で定義されている場合の、全起動試行の費用合計、成立条件を満たす完了数、導出式、価格基準refs。完了数がゼロの場合は `null` と理由
-
-efficiency summaryは資源効率の比較材料であり、候補の採否またはhost binding設定の選択を表さない。
-
-## coverage
-
-coverageは、必須契約要素ごとに対応するscenario、必要な候補component、起動試行、開始済み子実行、identityとbindingの状態、assessmentを示す。資源計測については必要な指標、計測範囲、対応する実行記録または課金source、measurement statusを示す。全体を `conforms` にできるのは、各必須契約要素に必要な候補componentが対応する子実行へ `matched` で結合されている場合だけとする。実行記録sourceの完全性を確認できない範囲では、全起動試行、全子実行、または全資源使用を取得したと断定しない。
-
-## 再実行
-
-`rerun_scenarios` は、失敗、未確認、継続中、blockedのシナリオと、候補変更の影響が届く回帰シナリオを示す。各項目に、同じまま保持する委譲入力と、再実行前に変わるdefinition、binding、親実行の条件、実行条件、証拠取得条件を含める。
+利用者向けには全体判定を先頭に置き、判定に使った直接証拠を短く示す。`violates`、`unverified`、`in_progress`、`blocked` の場合だけ、判定を変えている問題と再開条件を加える。コマンドの誤り、修正済みの準備失敗、重複した試行などの作業ログは含めない。
