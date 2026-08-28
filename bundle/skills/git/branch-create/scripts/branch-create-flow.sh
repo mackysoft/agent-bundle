@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# The branch-create Skill supplies a branch goal and base policy. This flow owns
-# the Git-state checks and the only permitted branch-changing commands.
+# The branch-create Skill supplies a branch goal and base policy. This flow
+# performs its preferred Git-state checks and branch-changing commands.
 
 export GIT_OPTIONAL_LOCKS=0
 export GIT_PAGER=cat

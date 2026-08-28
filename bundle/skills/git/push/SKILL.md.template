@@ -8,6 +8,8 @@
 
 `blocked / commit-required` では `$commit` を適用し、完了後に同じ同期対象で `$sync-latest` を一度だけ再適用する。再実行が `completed` または `no-op` の場合だけ Phase 2 へ進む。その他の結果は、状態、影響、再開条件を停止成果として返す。
 
+呼出元が既存 PR の固定済み head remote と head ref を渡した場合は、base 同期 remote と独立に、その remote/ref を publish 先として固定する。upstream、remote URL、remote-tracking ref、現在 `HEAD` の包含関係がその固定値と整合しなければ停止し、base remote の同名 branch へ fallback しない。
+
 ### Phase 2: 現在ブランチを publish する
 実行する `sh` 環境で、この Skill の配置ディレクトリと対象 worktree を `pwd -P` により絶対 physical POSIX path として固定する。Windows host の `C:\...` をそのまま `sh` に渡さない。
 
@@ -26,9 +28,11 @@ sh "$skill_root/scripts/push-flow.sh" publish-current \
 
 Phase 1 で同期基準を複数選んだ場合は、同じ順序で `--require-integrated-ref` を繰り返す。基準を値として確定できない場合は、この引数を渡さない。
 
-script は指定基準を fetch した後、各 ref が現在の `HEAD` に含まれることを確認してから publish する。`completed` と `no-op` は完了として残す。
+script の実行後は outcome にかかわらず、現在が attached branch であること、worktree が clean であること、各統合必須 ref が `HEAD` に含まれること、push 先が fast-forward であることを再観測する。固定済み head remote/ref がある場合は、helper がその publish 先を安全に実現できると確認できる場合だけ使い、できない場合は native の明示 refspec へ切り替える。通信失敗または不明な結果の後に remote branch OID が期待する `HEAD` OID と一致していれば、再 push しない。
 
-`blocked / commit-required` では `$commit`、`blocked / sync-required` では `$sync-latest` を一度だけ適用し、完了後に Phase 2 を一度だけ再実行する。その他の結果は、状態、影響、再開条件を停止成果として返す。`non-fast-forward` の観測、fetch、同期要否の判定は script が所有する。
+未成立で残る作用が一意なら、明示 refspec の通常の `git push <remote> <local-ref>:<remote-ref>` を使って続行してよい。固定済み head remote/ref がある場合はその remote/ref だけを refspec と upstream に使う。force を使わず、non-fast-forward、detached HEAD、dirty worktree、未統合基準、固定済み head remote/ref の URL・OID・対応の不一致、または push 先を一意に確定できない場合は停止する。`blocked / commit-required` では `$commit`、`blocked / sync-required` では `$sync-latest` を一度だけ適用してから再観測する。
+
+publish 後は upstream 設定と remote branch OID を再観測し、両方が現在の branch と `HEAD`、固定済み head remote/ref があればその値に一致するときだけ完了とする。
 
 ### Phase 3: 状態を残す
-同期結果、作成した commit、publish 先、push 結果、再試行の有無、停止理由を残す。
+同期結果、作成した commit、publish 先と明示 refspec、upstream と remote OID の事後観測、helper または native 操作、再試行の有無、停止理由を残す。
