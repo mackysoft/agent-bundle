@@ -6,6 +6,12 @@
 - 作業前に `git status --short --branch` と対象差分を確認し、既存の未コミット変更や未追跡ファイルを他者の作業として保持する。
 - `AGENTS.md` は作業者向けの安定した判断規則を持つ。`README.md` は、インストール方法、CLI の使用例、公開パッケージに含まれる Skill と custom agent の案内を利用者へ示す反映先とし、その内容をここへ複製しない。カタログの正本は `bundle/bundle.json`、`bundle/skills/**`、`bundle/agents/**` とする。
 
+## Git Skill の実行回復
+
+- Git 系 Skill の helper script は目的を達成する手段であり、完了または停止の根拠そのものではない。helper の起動不能、実行環境の path 不適合、異常終了、または不完全な outcome の後も、同じ許可、安全条件、事後条件を満たす通常の `git` または `gh` 操作が一意に定まる場合は、その操作へ継続する。
+- helper を使った後は、対象の ref、worktree、index、リモートまたは GitHub の状態を再観測する。事後条件が成立していれば完了とし、未成立で安全な残作用が一意なら native 操作で続行する。不明な作用の再実行、巻き戻し、force、権限 bypass は行わない。
+- 部分作用があり得る失敗では、次の作用の前に状態を再観測して重複を避ける。安全な再開条件を確定できない場合は、現在状態、影響、必要な判断または再開条件を返す。
+
 ## プロジェクト概要
 
 AgentBundle は、再利用可能な Skill と custom agent を一つの正規 bundle として配布する .NET global tool である。NuGet パッケージ `MackySoft.AgentBundle` は、`agent-bundle` CLI とホスト別に生成された Agent Distribution bundle を一つの成果物として配布する。

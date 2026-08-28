@@ -36,12 +36,12 @@ sh "$skill_root/scripts/sync-latest-flow.sh" synchronize \
   [--target-ref "<next-fully-qualified-remote-ref>" ...]
 ```
 
-`completed` は同期と postcondition が完了した状態、`no-op` は全基準が既に取り込まれていた状態である。どちらも `同期完了` として結果を残す。
+helper の実行後は outcome にかかわらず、各 target ref を fetch して OID を解決し、`HEAD` との ahead/behind 関係、dirty 状態、unmerged entries、進行中の Git 操作を再観測する。全 target OID が `HEAD` に含まれ、競合がなく、作業状態が操作前から許可された範囲なら `同期完了` として結果を残す。
 
-`blocked` の `commit-required` では `$commit` を適用し、完了後に同じ順序の ref で一度だけ再実行する。`blocked` の他の理由、`unknown-after-attempt`、`runtime-unavailable`、`input-invalid` では、返された状態、影響、再開条件を停止成果として返す。`conflict` の `merge-conflict` だけは Phase 3 へ進む。
+未統合の target があり、clean な開始状態で通常の fast-forward または merge が一意に安全と確認できる場合は、同じ順序で通常の `git fetch` と `git merge --ff-only` または `git merge` を使って続行してよい。dirty 状態では `blocked / commit-required` として `$commit` を適用し、完了後に同じ順序の ref を一度だけ再評価する。merge が競合した場合は、helper の結果に依存せず、現在の index から `MergeBoundary` を固定して Phase 3 へ進む。既存の競合または他の進行操作、OID や ahead/behind を確定できない状態、未分類の異常終了では停止する。
 
 ### Phase 3: 自身が開始した merge の競合を扱う
-この Phase は、script が返した `conflict / merge-conflict` とその `MergeBoundary` に一致する merge の競合だけを扱う。開始前からの競合や他の進行操作を扱わない。
+この Phase は、helper またはこの Skill が開始した merge の `merge-conflict` と、その時点で固定した `MergeBoundary` に一致する競合だけを扱う。開始前からの競合や他の進行操作を扱わない。
 
 候補を作れるのは、次の類型のいずれか一つで、対応する `ResolutionRoot` と候補が完全に一致する場合だけである。
 
