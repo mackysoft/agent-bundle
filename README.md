@@ -119,7 +119,7 @@ Software implementation, testing, review, documentation, issue planning, and int
 | `code-authoring-rules` | Apply language-independent code design and authoring rules. |
 | `csharp-authoring-rules` | Apply C#-specific implementation and review judgment rules. |
 | `interactive-app-testing` | Design a frozen interactive execution-and-evidence envelope from user paths and interpret generic evidence packages into scoped comparison results and candidate findings. |
-| `interactive-session-execution` | Execute the execution portion of one frozen interactive execution-and-evidence envelope and return its raw action, wait, observation, media, and cleanup record. |
+| `interactive-session-execution` | Bind an interactive execution-and-evidence envelope to the current session, execute it through its final state, save evidence, and return a scoped result. |
 | `issue-planner` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | Write, create, update, or review structured GitHub Issue bodies. |
 | `review-triage` | Triage review comments against code, specifications, and evidence. |
@@ -218,9 +218,9 @@ Custom agents use one flat catalog namespace:
 | --- | --- | --- |
 | `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
 | `challenger` | Returns non-blocking, evidence-backed challenges to questionable concrete choices in plans and artifacts. | `challenge` |
-| `evidence-organizer` | Organizes frozen evidence into a generic, traceable evidence package without interpretation. | `claim-grounding` |
+| `evidence-organizer` | Organizes an execution-and-evidence envelope and saved session results into a generic, traceable evidence package without interpretation. | `claim-grounding` |
 | `implementer` | Implements artifacts from a confirmed implementation contract and returns the implementation result, its correspondence to the authoritative current external contract, the chosen internal realization, and local check results. | `code-authoring-rules`, `writing` |
-| `interactive-tester` | Executes the execution portion of one frozen interactive execution-and-evidence envelope and returns its raw session result unchanged. | `interactive-session-execution` |
+| `interactive-tester` | Executes an interactive execution-and-evidence envelope through its final state, saves evidence, and returns the scoped session result. | `interactive-session-execution` |
 | `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
 | `test-implementer` | After an authoritative basis confirms that the implementation change for the same target scope is complete or unnecessary, implements and maintains permitted tests that continuously detect concrete external-contract violations in an identified target implementation. | `test-authoring` |
 | `verifier` | After a scoped implementation change is complete or unnecessary, compares acceptance conditions with existing evidence, selects, runs, and re-evaluates permitted existing verification methods, then judges the target implementation. | `verification-gate` |

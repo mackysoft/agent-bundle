@@ -30,6 +30,14 @@ executions[]
   behavior_action_coverage { assessment, evidence_refs, missing_reason }
   outcome { value, claim_kind, evidence_refs, missing_reason }
   lifecycle_state { value, claim_kind, evidence_refs, missing_reason }
+communication_observations[]
+  id, sender_execution_ref, recipient_ref, channel, kind, lifecycle_point
+  occurred_at | null, source_order_ref | null, payload_or_artifact_ref, claimed_or_observed_use
+  recipient_responsibility { value, claim_kind, evidence_refs, missing_reason }
+  affected_receiver_state { dimension: input | decision | action | dependency | none | unknown, value, claim_kind, evidence_refs, missing_reason }
+  claim_kind, evidence_refs, missing_reason
+communication_coverage
+  value { complete | partial | unverified }, evidence_refs, missing_reason
 resource_usage[]
   scope { kind: child | descendants | parent | end_to_end, refs[] }
   metric { name, kind: usage | elapsed_time | launch_attempt_count | started_execution_count | relaunch_count | action_count | reported_cost | derived_cost | other }, value | null, unit
@@ -49,7 +57,8 @@ assessments[]
   execution_ref, dimension, setting | null
   contract_ref { value, claim_kind, evidence_refs, missing_reason } | null
   missing_evidence { value, claim_kind, evidence_refs, missing_reason } | null
-  assessment, scope { behavior_action_observation_ref | execution }
+  communication_requirement { recipient, recipient_responsibility_contract_ref, required_affected_receiver_state, timing, absence_claim, claim_kind, evidence_refs, missing_reason } | null
+  assessment, scope { behavior_action_observation_ref | communication_observation_ref | execution }
   rationale, evidence_refs, unverified_refs
 parent_lifecycle
   parent_execution_ref
@@ -74,9 +83,11 @@ re_evaluation_triggers[]
 
 `delegation_observations` は起動試行または開始済み子実行へ対応付く委譲入力を記録する。内容、対象範囲、制約、許可、必要な成果は観測できた項目だけを記録し、未観測の項目は `unverified` とする。継続入力は `continuation_refs` で同じexecutionへ結ぶ。
 
+`communication_observations` は通信を `kind` ごとに記録する。送受信者、内容、受け手の責務と状態変化は直接観測または契約参照を根拠とし、存在または不在の評価範囲は `communication_coverage.value` に従う。
+
 `contract_ref` は比較契約がある場合のevidence-bearing referenceである。比較契約が適用されない場合は `contract_ref=null` と `assessment=not_applicable`、比較に必要な契約が未取得の場合は `contract_ref=null`、`missing_evidence`、`assessment=indeterminate` を記録する。
 
-不完全な行動または作用の記録に基づくassessmentは、対応する `behavior_action_observation_ref` をscopeにする。execution全体のcoverageは `behavior_action_coverage` で別に示し、未観測範囲が評価を変え得る場合はexecution scopeのassessmentを `indeterminate` とする。lifecycle stateは終了の観測であり、成果契約の成功を単独で示さない。
+行動assessmentは対応する観測参照、通信assessmentは通信観測または不在を評価する execution をscopeとする。通信の必要条件は `communication_requirement` に保持する。観測済み違反は partial coverage でも `violates` にできるが、不在の `conforms` には `complete` coverage を要する。未観測範囲が execution 全体の評価を変え得る場合は `indeterminate` とする。lifecycle stateは終了の観測であり、成果契約の成功を単独で示さない。
 
 `resource_usage` は設定、行動、成果から独立したobservationである。使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用を意味単位として保持し、記録sourceが報告する指標名と値を対応付ける。未報告の指標を補わない。経過時間は計測範囲が定めた開始と終了または停止のrecord refsを入力にした `derived` とする。件数はcoverageが全件性を支える範囲だけを総数とし、それ以外は観測数として記録する。
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
   "displayName": "Interactive Session Execution",
-  "description": "凍結済みの対話セッション実行・証拠契約 envelope の execution 部分を、許可された対象に対して一回履行し、action→wait→observe の生記録、媒体、停止、reset、後始末、未実施範囲を持つ生セッション結果を作るときに使う。",
+  "description": "execution・evidence envelope を今回の snapshot に固定し、対話経路を最終状態まで操作して、証拠参照と結果状態を持つセッション結果を返すときに使う。",
   "dependencies": []
 }
