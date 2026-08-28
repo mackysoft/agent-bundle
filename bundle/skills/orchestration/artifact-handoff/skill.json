@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Artifact Handoff",
+  "description": "通常の保存先を持たない一時成果を作成担当と利用担当の間で参照により受け渡し、必要な場合は同一タスク内で再利用できる状態を成立させるときに使う。",
+  "dependencies": []
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Evidence Organizer",
-  "description": "凍結済みの対話セッション実行・証拠契約 envelope、生セッション結果、成果物参照を読み取り、完全性、時系列、要求と情報源の対応、不足および競合を追える汎用証拠パッケージへ整理する読み取り専用の実行主体が必要なときに使う。",
+  "description": "execution・evidence envelope、execution snapshot、生セッション結果、成果物参照を、完全性、時系列、要求対応を追える汎用証拠パッケージへ整理する実行主体が必要なときに使う。",
   "skillDependencies": [
     "claim-grounding"
   ]

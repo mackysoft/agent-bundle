@@ -1,31 +1,38 @@
 ## 目的
-現在ブランチをリモートへ反映する。
-
-未コミット差分がある場合は `$commit` を使う。
-push 前の最新化は `$sync-latest` に委譲する。
+現在ブランチを、安全な同期状態だけでリモートへ反映する。
 
 ## フロー
 
-### Phase 1: 作業状態を確認する
-- detached HEAD では停止する。
-- 現在ブランチ、`origin`、upstream を確認する。
-- `--force` と `--force-with-lease` は使わない。
+### Phase 1: 同期済みの基準を固定する
+`$sync-latest` を適用する。`completed` または `no-op` の場合だけ Phase 2 へ進む。
 
-### Phase 2: コミットする
-未コミット差分がある場合は `$commit` を使い、責務単位でコミットする。
-コミット対象がない場合は作成しない。
+`blocked / commit-required` では `$commit` を適用し、完了後に同じ同期対象で `$sync-latest` を一度だけ再適用する。再実行が `completed` または `no-op` の場合だけ Phase 2 へ進む。その他の結果は、状態、影響、再開条件を停止成果として返す。
 
-### Phase 3: 最新化する
-push 前の最新化は `$sync-latest` に委譲する。
-`$sync-latest` が同期不要と判断した場合は、そのまま進む。
-同期で衝突、未解決事項、未コミット差分の保護が必要な状態になった場合は push しない。
+呼出元が既存 PR の固定済み head remote と head ref を渡した場合は、base 同期 remote と独立に、その remote/ref を publish 先として固定する。upstream、remote URL、remote-tracking ref、現在 `HEAD` の包含関係がその固定値と整合しなければ停止し、base remote の同名 branch へ fallback しない。
 
-### Phase 4: push する
-upstream がある場合は `git push` を実行する。
-upstream がない場合は `git push -u origin <current_branch>` を実行する。
+### Phase 2: 現在ブランチを publish する
+実行する `sh` 環境で、この Skill の配置ディレクトリと対象 worktree を `pwd -P` により絶対 physical POSIX path として固定する。Windows host の `C:\...` をそのまま `sh` に渡さない。
 
-push 対象がない場合は、その理由を残して停止する。
-push が non-fast-forward で失敗した場合は `$sync-latest` を実行し、同期できた場合だけ1回再試行する。
+```sh
+skill_root=$(CDPATH= cd "<skill-directory-visible-to-sh>" && pwd -P)
+worktree=$(CDPATH= cd "<worktree-directory-visible-to-sh>" && pwd -P)
+```
 
-### Phase 5: 状態を残す
-作成したコミット、同期結果、push 先、push 結果、停止理由を残す。
+次を実行する。
+
+```sh
+sh "$skill_root/scripts/push-flow.sh" publish-current \
+  --worktree "$worktree" \
+  --require-integrated-ref "<Phase 1 で確定した remote-tracking-ref>"
+```
+
+Phase 1 で同期基準を複数選んだ場合は、同じ順序で `--require-integrated-ref` を繰り返す。基準を値として確定できない場合は、この引数を渡さない。
+
+script の実行後は outcome にかかわらず、現在が attached branch であること、worktree が clean であること、各統合必須 ref が `HEAD` に含まれること、push 先が fast-forward であることを再観測する。固定済み head remote/ref がある場合は、helper がその publish 先を安全に実現できると確認できる場合だけ使い、できない場合は native の明示 refspec へ切り替える。通信失敗または不明な結果の後に remote branch OID が期待する `HEAD` OID と一致していれば、再 push しない。
+
+未成立で残る作用が一意なら、明示 refspec の通常の `git push <remote> <local-ref>:<remote-ref>` を使って続行してよい。固定済み head remote/ref がある場合はその remote/ref だけを refspec と upstream に使う。force を使わず、non-fast-forward、detached HEAD、dirty worktree、未統合基準、固定済み head remote/ref の URL・OID・対応の不一致、または push 先を一意に確定できない場合は停止する。`blocked / commit-required` では `$commit`、`blocked / sync-required` では `$sync-latest` を一度だけ適用してから再観測する。
+
+publish 後は upstream 設定と remote branch OID を再観測し、両方が現在の branch と `HEAD`、固定済み head remote/ref があればその値に一致するときだけ完了とする。
+
+### Phase 3: 状態を残す
+同期結果、作成した commit、publish 先と明示 refspec、upstream と remote OID の事後観測、helper または native 操作、再試行の有無、停止理由を残す。

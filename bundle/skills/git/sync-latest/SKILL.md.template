@@ -1,88 +1,66 @@
 ## 目的
-対象 worktree と同期基準を固定し、取得した同期基準を対象 worktree の `HEAD` が含む状態へ安全に更新する。
+対象 worktree と同期基準を固定し、選択した基準を対象 worktree の `HEAD` が含む状態へ更新する。競合では、履歴と権限ある意図根拠から統合結果が明確に導ける場合だけ、自身が開始した merge を解消する。
+
+## 用語
+`MergeBoundary` は競合を返した `synchronize` 結果と現在の index から固定する記録であり、対象 worktree の絶対パス、`preHeadOid`、target ref と OID、`mergeBaseOid`、全 index stage、対象 path の path / mode / OID / stage、`workingState`、進行操作を含む。
+
+`ResolutionRoot` は各競合候補を正当化する根拠の型であり、`kind`、`source`、`sourceRevisionOrOid`、`authority`、`targetPaths`、`candidateEntries`、`derivationRule`、`failureConditions` をすべて持つ。`authority` は `repository-canonical`、`accepted-change-decision`、`git-observation`、`verification-observation` のいずれかに限る。commit message や一般的な設計推測は意図根拠にしない。
 
 ## フロー
 
-### Phase 1: 対象 worktree と作業状態を確認する
-ユーザーが指定した worktree、または作業開始時の worktree root の絶対パスを同期対象として固定する。
-fetch、同期、最終確認は同じ対象 worktree で行う。
-別の clone や worktree の状態は、対象 worktree の同期完了を示す証拠にしない。
+### Phase 1: 同期基準の意味と順序を決める
+ユーザーが指定した worktree、または作業開始時の worktree root の絶対パスを対象として固定する。対象 worktree で使う順序付きの fully-qualified remote ref を決める。
 
-- `origin` が存在することを確認する。
-- `HEAD`、ブランチまたは detached HEAD、upstream、open PR、既定ブランチ、指定ブランチ、未コミット差分、未解決の競合を確認する。
-- detached HEAD であることだけを理由に停止しない。
-- 最新状態を取得する前に、未コミット差分を commit、stash、破棄しない。
+- ブランチ上では、設定済み upstream を最初の基準にする。
+- 次の統合基準は、指定ブランチ、open PR の base、既定ブランチの順に一つ選ぶ。
+- PR base と既定ブランチは `refs/remotes/origin/<branch>` を使い、同名ローカルブランチへフォールバックしない。
+- 指定ブランチが remote 名を持つ場合は対応する `refs/remotes/<remote>/<branch>` を使い、それ以外は `refs/remotes/origin/<branch>` を使う。
+- detached HEAD では upstream と open PR を推定せず、指定ブランチまたは既定ブランチだけを基準にする。
 
-### Phase 2: 最新状態を取得する
-`git fetch origin --prune` で remote-tracking branch を更新する。
-同期基準に使う upstream が `origin` 以外の remote-tracking branch である場合は、その remote も取得する。
-判断に必要な場合だけ tag も取得する。
-前提確認なしに `git pull` を使わない。
+Issue、PR、既定ブランチ、指定値の意味上の選択はこの Skill が所有する。ref の fetch、OID 解決、比較、実行方法は script が所有する。
 
-同期基準は、次の規則で fetch 後の ref と commit OID に解決する。
+### Phase 2: 選択済み基準を同期する
+実行する `sh` 環境で、この Skill の配置ディレクトリと対象 worktree を `pwd -P` により絶対 physical POSIX path として固定する。Windows host の `C:\...` をそのまま `sh` に渡さない。
 
-- upstream は設定されている ref を使う。remote-tracking ref なら、その remote を fetch した後の OID を使う。
-- PR base と既定ブランチは、fetch 後の `refs/remotes/origin/<branch>` とその OID を使う。名前が同じローカルブランチへフォールバックしない。
-- 指定ブランチが `refs/remotes/<remote>/<branch>` 形式、または先頭要素が設定済み remote 名と一致する `<remote>/<branch>` 形式なら、その remote を fetch して `refs/remotes/<remote>/<branch>` の OID を使う。
-- それ以外の指定ブランチ名は、スラッシュを含む場合も `origin` 上のブランチ名として扱い、fetch 後の `refs/remotes/origin/<branch>` に解決する。名前が同じローカルブランチへフォールバックしない。
+```sh
+skill_root=$(CDPATH= cd "<skill-directory-visible-to-sh>" && pwd -P)
+worktree=$(CDPATH= cd "<worktree-directory-visible-to-sh>" && pwd -P)
+```
 
-fetch、必要な remote-tracking ref、または OID の解決に失敗した場合は、対象 worktree の `HEAD` を変更せず停止する。
+Phase 1 で決めた順序の ref だけを渡して次を一度実行する。
 
-### Phase 3: 最新化の要否と基準を決める
+```sh
+sh "$skill_root/scripts/sync-latest-flow.sh" synchronize \
+  --worktree "$worktree" \
+  --target-ref "<first-fully-qualified-remote-ref>" \
+  [--target-ref "<next-fully-qualified-remote-ref>" ...]
+```
 
-ブランチ上では、upstream を最初の同期基準にする。
-その後に使う統合基準は、次の優先順位で一つ選ぶ。
+helper の実行後は outcome にかかわらず、各 target ref を fetch して OID を解決し、`HEAD` との ahead/behind 関係、dirty 状態、unmerged entries、進行中の Git 操作を再観測する。全 target OID が `HEAD` に含まれ、競合がなく、作業状態が操作前から許可された範囲なら `同期完了` として結果を残す。
 
-1. 指定ブランチ。
-2. open PR がある場合は PR base。
-3. それ以外は既定ブランチ。
+未統合の target があり、clean な開始状態で通常の fast-forward または merge が一意に安全と確認できる場合は、同じ順序で通常の `git fetch` と `git merge --ff-only` または `git merge` を使って続行してよい。dirty 状態では `blocked / commit-required` として `$commit` を適用し、完了後に同じ順序の ref を一度だけ再評価する。merge が競合した場合は、helper の結果に依存せず、現在の index から `MergeBoundary` を固定して Phase 3 へ進む。既存の競合または他の進行操作、OID や ahead/behind を確定できない状態、未分類の異常終了では停止する。
 
-detached HEAD では upstream と open PR を推定せず、指定ブランチがあればそのブランチ、なければ既定ブランチを唯一の同期基準にする。
+### Phase 3: 自身が開始した merge の競合を扱う
+この Phase は、helper またはこの Skill が開始した merge の `merge-conflict` と、その時点で固定した `MergeBoundary` に一致する競合だけを扱う。開始前からの競合や他の進行操作を扱わない。
 
-各同期基準について `git rev-list --left-right --count HEAD...<基準 OID>` を確認する。
-左を対象 `HEAD` のみにある commit 数、右を同期基準のみにある commit 数として扱う。
-右が 0 の基準は取り込み不要とし、すべての基準で右が 0 なら同期操作は不要である。
+候補を作れるのは、次の類型のいずれか一つで、対応する `ResolutionRoot` と候補が完全に一致する場合だけである。
 
-ブランチ上で複数の基準を使う場合は、upstream、統合基準の順に同期する。
+1. conflict group の path、親 path、mode、OID、candidate 差分が stage 2 / 3 で完全一致し、rename、directory/file 競合などがない。
+2. 正本、generator、全入力 revision、全 output manifest が固定され、候補が全 output と一致する。
+3. 変換元、変換先、対象が特定 commit または正本で一対一に特定され、候補が完全一致する。
+4. 両変更の保持が明示仕様または repository-owned の機械検査可能な不変条件から直接確認でき、候補が既知差分の完全合成である。
 
-### Phase 4: 同期する
+`failureConditions` を満たす候補は採用しない。複数類型で候補が不一致なら、意図が絡む場合、根拠が不足する場合と同じく判断待ち競合とする。
 
-#### ブランチを同期する
-- 取り込む commit があり、同期で上書きされうる未コミット差分がある場合は、先に `$commit` で保護する。保護できない場合は同期せず停止する。
-- 現在ブランチが統合基準そのものに対応するローカルブランチなら、fast-forward のみ行う。
-- 作業ブランチでは、upstream と統合基準の OID を現在ブランチへ merge する。
-- 取り込み不要な基準は merge しない。
-- 既に共有済みのブランチでは履歴を書き換えない。
-- `--force` と `--force-with-lease` は使わない。
-- 衝突した場合は未解決として停止し、予定していた後続操作へ進まない。
+候補を書き込む前に、`$claim-grounding` へ `MergeBoundary`、conflict index stage、`ResolutionRoot`、正本・決定・履歴の役割、権限、対象、candidate と derivation を渡す。必須命題が確認済みで、意図、正本、candidate に未確認または競合がない場合だけ、候補を検証可能とする。
 
-#### detached HEAD を同期する
-同期基準のみにある commit 数が 0 の場合は、detached HEAD を移動しない。
-同期基準のみに commit がある場合は、次のすべてを満たす場合だけ detached HEAD を同期基準の OID へ進める。
+検証可能な暫定 candidate は未 stage の worktree だけに置く。元の conflict 内容、unmerged index stage、merge metadata を復元可能な状態で固定する。`$verification-gate` には固定 candidate manifest、根拠化結果、対象 worktree、許容書込み、受け入れ条件を渡す。検証は Git の読取・整合確認、または repository が書込み境界を明示した検証入口だけを使う。tracked file、index、ref、merge metadata の書込みは許可しない。ただし宣言済みの generated 全 output への書込みだけは例外とする。安全な入口がなければ未検証である。
 
-- 未コミット差分と未解決の競合がない。
-- 現在の `HEAD` が同期基準の OID の祖先である。
+candidate 前後一致、`HEAD` / ref / index stage / merge metadata の許可外不変、直接の受入観測、書込み許容範囲、根拠忠実性と類型固有の確認がすべて成功した場合だけ、stage 前に予期しない変化がないことを確認する。candidate manifest の path だけを stage し、stage 内容が candidate と一致した場合だけ merge を continue する。continue が失敗した場合は、現在状態、影響、再開条件を停止成果として返す。
 
-現在の `HEAD` と同期基準の OID が等しい場合は移動しない。
-祖先である場合は `git switch --detach <同期基準の OID>` を使い、ブランチ ref を作成または更新せず対象 worktree の detached HEAD を移動する。
+根拠不足、検証不能または失敗、候補不一致では自動 abort をしない。競合状態を保持した判断待ち競合として停止し、同一実行で次の merge、commit、push、同期再実行を行わない。
 
-同期基準のみに commit があり、未コミット差分がある場合、または現在の `HEAD` が同期基準の祖先でない場合は、現在の `HEAD` と差分を変更せず停止する。
-独自 commit または未コミット差分を保持するブランチを先に作成する必要があると報告する。
-ブランチの作成または接続はこのスキルでは行わない。
+continue が成功した場合は、Phase 2 と同じ順序の ref で `synchronize` を一度実行し、`completed` または `no-op` なら `同期完了` とする。それ以外は返された状態のまま停止成果として返す。
 
-別の clone や worktree で同期を続ける場合、その場所は別の同期対象として扱う。
-元の対象 worktree を変更できなければ、元の対象は未同期のまま停止したと報告する。
-
-### Phase 5: 完了状態を確認する
-次をすべて満たした場合だけ、対象 worktree の同期が完了したと判断する。
-
-- fetch、同期、最終確認を、Phase 1 で固定した対象 worktree で実行している。
-- 選択したすべての同期基準の OID が、対象 worktree の最終 `HEAD` の祖先である。
-- upstream があるブランチでは、upstream のみにある commit 数が 0 である。
-- detached HEAD を移動した場合は、最終 `HEAD` が同期基準の OID と一致する。
-- 未解決の競合がない。
-
-別の clone や worktree だけが条件を満たしても、対象 worktree の同期完了とは判断しない。
-
-### Phase 6: 状態を残す
-対象 worktree の絶対パス、ブランチまたは detached HEAD、同期基準の ref と OID、比較対象を明記した同期前後の ahead / behind、作成された merge commit の有無、完了または停止理由、次に進める作業を残す。
+### Phase 4: 状態を残す
+通常完了時は対象 worktree の絶対パス、基準 ref と OID、merge commit の有無、次の作業を残す。停止時は現在 `HEAD`、完了・未完了基準、base / ours / theirs OID、unmerged entries、根拠と検証結果、現在の操作状態、必要な人の判断、再開条件を停止成果として返す。

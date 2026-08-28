@@ -1,8 +1,8 @@
 ## 目的
 
-候補または更新済みのcustom agentを実際のsubagentとして起動し、選択からparent handoffと終了までの挙動を、確認済みのagent契約へ照合する。
+候補または更新済みのcustom agentを隔離した子実行として観測し、選択から成果または停止状態の返却と終了までの挙動を、確認済みのagent契約へ照合する。対象agentが追加の実行担当を割り当てる責務を持つ場合は、そのagentが上流として所有するhandoffも照合する。
 
-成果は、対象agentの契約と実行時の挙動をシナリオごとに照合し、同じ実行に結び付く資源使用を記録した、読み取り専用の検証結果である。このスキルは対象agentの定義とhost bindingを変更せず、実行記録と資源使用の復元は `subagent-execution-analysis`、逸脱の原因と対応候補は `behavior-deviation-analysis`、custom agentの作成と修正は `custom-agent-authoring`、変更全体の受入判定は `verification-gate` が所有する。候補の採否は、選定基準と判断権限を持つ後続責務が行う。
+成果は、対象agentの契約と実行時の挙動をシナリオごとに照合し、同じ実行に結び付く資源使用を記録した、読み取り専用の検証結果である。環境固有の実行と記録取得は、それぞれ実行提供責務と記録提供責務が所有する。このSkillは対象agentの定義とhost bindingを変更せず、実行記録の分析は `subagent-execution-analysis`、逸脱の原因と対応候補は `behavior-deviation-analysis`、custom agentの作成と修正は `custom-agent-authoring`、変更全体の受入判定は `verification-gate` が所有する。候補の採否は、選定基準と判断権限を持つ後続責務が行う。
 
 ## 入力
 
@@ -11,48 +11,49 @@
 | 項目 | 内容 |
 | --- | --- |
 | 対象agent | agent名、正本への参照、検証対象となるmetadata、host非依存指示、対象host bindingのcomponent名とdigest、またはそれらを一意に固定するbundle digest。 |
-| agent契約 | 権限ある要求または採用済み設計に基づく選択面、成果責務、入力、判断、行動、作用、成果、handoff、完了状態、停止条件、下位委譲方針。 |
-| host条件 | 対象host、surface、host binding、親runtime、利用可能なsubagent操作。 |
-| 検証範囲 | dispatch、明示spawn、主要分岐、責務外入力、follow-up、終了、変更した契約要素、対象外。 |
-| 実行条件 | 初期状態、許可作用、隔離方法、観測方法、cleanup条件。 |
-| 分析範囲 | 親taskまたはsession、時間範囲、端点の包含性、descendant depth、runtime source。 |
-| 資源計測条件 | child、descendant、parent、end-to-endの計測範囲、必要な指標、利用するruntimeまたは課金記録、範囲ごとの経過時間の端点、token区分の意味と課金区分への対応、価格基準、反復条件、集約方法、比較対象となるexecutionの成立条件。 |
+| agent契約 | 権限ある要求または採用済み設計に基づく選択面、成果責務、入力、判断、行動、作用、内部試行と回復、許可された通信、成果、final return、terminal state。追加の実行担当を割り当てる責務を持つ場合は、下位委譲方針と上流handoffも含む。 |
+| host条件 | 対象host、host binding、実効設定の条件、利用できる選択、起動、継続、停止の能力。 |
+| 検証範囲 | 自然選択、非選択、明示選択、主要分岐、責務外入力、継続、終了、変更した契約要素、対象外。 |
+| 実行計画 | 実行提供責務、シナリオ、委譲入力、初期状態、許可作用、隔離方法、停止条件、cleanup条件。 |
+| 観測・記録契約 | 記録提供責務、実行との対応、完全性、取得範囲、分析範囲、必要な正規化済み実行記録、通信分析と coverage の参照。 |
+| 資源計測条件 | 子実行、子孫、親実行、end-to-endの計測範囲、必要な使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用、記録契約が定義する名称と単位、計測端点、価格基準、反復条件、集約方法、比較対象となる実行の成立条件。 |
 | 停止条件 | 実行回数、時間、費用、外部状態、継続不能とする条件。 |
 | 回帰入力 | 過去に成立していた利用場面、失敗したシナリオ、修正後に再確認する条件。 |
 
-agent契約の根拠、適用範囲、採用状態を入力から直接確定できない場合は `$claim-grounding` を適用する。agent、definition、binding、spawn attempt、execution、turn、scenario の対応が曖昧で判定を変える場合は `$referent-modeling` を適用する。
+agent契約の根拠、適用範囲、採用状態を入力から直接確定できない場合は `$claim-grounding` を適用する。agent、definition、binding、起動試行、親実行、子実行、継続入力、scenarioの対応が曖昧で判定を変える場合は `$referent-modeling` を適用する。
 
-検証に必要な各componentまたはそれらを一意に固定するbundle digest、対象host、親runtime source、時間範囲を固定できない場合は、実行と対象agentを結び付けられないため、検証を開始せず必要な入力を返す。
+候補componentまたは一意なbundle digest、対象host、agent契約、実行計画、観測・記録契約を固定できない場合は、検証を開始せず不足する入力と再開条件を返す。実行参照と正規化済み実行記録は実行後に取得する。
 
 ## 不変条件
 
-- dispatchによる選択と、agentを指定する明示spawnを別の検証面として扱う。
-- runtime identity、agent origin、definition binding、definition default、runtime effective configuration、actual actionを別々に評価する。
-- spawn attemptと開始済みexecution、same-thread follow-upと新しいspawn、childの終了とparentの完了を区別する。
-- terminal state、成果の存在、parentによる受領、agent契約への適合を一つの成功へ集約しない。
+- 自然な依頼による選択と、agentを指定する明示選択を別の検証面として扱う。
+- 実行主体のidentity、agent origin、definition binding、definition default、effective configuration、actual actionを別々に評価する。
+- 起動試行と開始済み子実行、同じ子実行への継続入力と新しい起動試行、子実行の終了と親実行の完了を区別する。
+- lifecycle state、成果の存在、対象agentによる返却、親実行による受領と利用、agent契約への適合を一つの成功へ集約しない。親実行による受領と利用は呼び出し元の統合挙動であり、対象agentの契約適合へ帰属させない。
 - 対象agentは検証入力であり、このSkillの配布依存ではない。対象agentまたは別のcustom agentへのSkill依存を作らない。
 - 実行担当には、利用者相当の委譲入力だけを渡し、期待する結論、疑っている欠陥、意図した修正、採点基準を渡さない。
+- 対象agent自身に、selection、definition binding、host binding、実効設定、lifecycle、実行参照、資源使用、契約適合の報告を委譲入力または成果条件として要求しない。これらは記録提供責務が対象agentの領域成果とは別に取得する。
 - 候補definitionまたは生成物を、期待する挙動の唯一の根拠にしない。
 - 一つのvalidation recordでは、対象agentの候補component、host binding、比較基準を固定する。候補または比較基準を変更する場合は、元のrecordを保持して別のrecordを開始する。
 - 候補の契約適合と資源使用を別の観測として保持する。資源効率は、比較条件で定めた成立条件を満たすexecutionについて評価する。
-- token使用量はruntimeが報告する区分を保持し、課金額はprovider報告値と、token使用量および時点付き価格基準からの導出値を区別する。
-- child、descendant、parent、end-to-endの資源使用を計測範囲ごとに保持する。取得できない指標は値を補わず `unverified` として必要な証拠を残す。
+- 使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用は、記録契約が定義する名前、値、単位、指標間の関係を保持し、報告された費用と、使用量および時点付き価格基準からの導出費用を区別する。
+- 子実行、子孫、親実行、end-to-endの資源使用を計測範囲ごとに保持する。記録契約が提供しない指標は値を補わず `unverified` として必要な証拠を残す。
 
 ## フロー
 
 ### Phase 1: 比較基準と実行境界を固定する
 
-権限ある要求または採用済み設計からagent契約を復元し、候補agentの選択用description、host非依存の指示、直接Skill依存、対象hostのbindingへ実装された契約要素を対応付ける。候補definitionの記述だけから期待結果を作らず、独立した比較基準を確定できない契約要素は `unverified` とする。hostの実効設定とsubagent操作は、検証時点で有効なhost契約とruntime記録から確認し、本文へ固定された製品版やmodel一覧を比較基準にしない。
+権限ある要求または採用済み設計からagent契約を復元し、候補agentの選択用description、host非依存の指示、直接Skill依存、対象hostのbindingへ実装された契約要素を対応付ける。候補definitionの記述だけから期待結果を作らず、独立した比較基準を確定できない契約要素は `unverified` とする。hostが利用可能にする実効設定と実行能力は、検証時点で有効なhost契約とhost bindingから確認する。実行時の値は実行後の正規化済み実行記録から確認する。
 
-agent定義が期待する値と、親runtimeが上書きまたは継承させる値を区別する。定義と実効値の差がhost契約で成立する場合、その差だけをagent定義の違反にしない。
+agent定義が期待する値と、起動時または親実行から指定される値を区別する。定義と実効値の差がhost契約で成立する場合、その差だけをagent定義の違反にしない。
 
-検証対象のmetadata、host非依存指示、対象host bindingについて、component名、source ref、digestを候補componentとして記録する。bundle digestを使う場合も、runtime分析で照合するcomponentへ展開できる対応を保持する。
+検証対象のmetadata、host非依存指示、対象host bindingについて、component名、source ref、digestを候補componentとして記録する。bundle digestを使う場合も、実行分析で照合するcomponentへ展開できる対応を保持する。
 
-複数のhost binding候補を比較する場合は、候補ごとに別のvalidation recordを作り、シナリオ、委譲入力、初期状態、許可作用、観測方法、停止条件を固定する。一度に複数の設定値が異なる比較結果は、その設定の組み合わせにだけ適用し、model、reasoning effort、tool、permissionなど個別の設定へ原因を帰属させない。個別設定の影響を判断する場合は、その設定だけが異なる候補を比較する。
+複数のhost binding候補を比較する場合は、候補ごとに別のvalidation recordを作り、シナリオ、委譲入力、初期状態、許可作用、観測・記録契約、停止条件を固定する。一度に複数の設定値が異なる比較結果は、その設定の組み合わせにだけ適用する。個別設定の影響を判断する場合は、その設定だけが異なる候補を比較する。
 
-各validation recordで共通して記録する資源指標は、runtimeが提供するtoken区分、開始から終了または停止までの経過時間、spawn attempt数、開始済みexecution数、respawn数、tool call数、課金額である。計測範囲ごとの時刻の端点、token区分の包含関係と課金区分への対応、cacheを含む初期条件、反復条件、集約方法、比較対象となるexecutionの成立条件を資源計測条件として固定する。runtimeが一部のtoken区分、区分間の関係、課金額を提供しない場合も、その欠落を計測結果に含める。
+各validation recordで共通して扱う資源指標は、使用量区分、開始から終了または停止までの経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用である。資源計測条件には、利用目的に必要な指標、名前、単位、指標間の関係、計測範囲、開始と終了または停止の端点、課金区分への対応、価格基準、反復条件、集約方法、比較対象となるexecutionの成立条件を固定する。記録契約が指標、指標間の関係、課金額を提供しない場合は、その欠落を計測結果に含める。
 
-候補間の資源効率を比較する場合は、同じシナリオ、委譲入力、初期状態、許可作用、親runtime、計測範囲、停止条件、反復条件を使う。条件が異なる記録は一つの比較値へ集約せず、各条件に対応する観測として保持する。
+候補間の資源効率を比較する場合は、同じシナリオ、委譲入力、初期状態、許可作用、親実行の条件、計測範囲、停止条件、反復条件を使う。条件が異なる記録は一つの比較値へ集約せず、各条件に対応する観測として保持する。
 
 ### Phase 2: シナリオを設計する
 
@@ -60,88 +61,101 @@ agent定義が期待する値と、親runtimeが上書きまたは継承させ�
 
 | 種別 | 確認する挙動 |
 | --- | --- |
-| dispatch選択 | agentを明示しない依頼で、選択面に合うagentが選ばれる。 |
-| dispatch非選択 | 隣接する成果責務の依頼で、対象agentが選ばれない。 |
-| 明示spawn | 対象agentを指定した委譲で、成果責務を遂行する。 |
-| 責務外入力 | 対象agentが価値判断を補わず、必要な成果責務と不足内容を返す。 |
+| 自然選択 | agentを明示しない依頼で、選択面に合うagentが選ばれる。 |
+| 非選択 | 隣接する成果責務の依頼で、対象agentが選ばれない。 |
+| 明示選択 | 対象agentを指定した委譲で、成果責務を遂行する。 |
+| 責務外入力 | 対象agentが価値判断を補わず、必要な成果の意味と成立条件、不足内容を返す。 |
 | 設定と作用 | 実効設定と許可作用の範囲で行動する。 |
-| follow-up | 同じ成果責務の追加入力を同じexecutionで継続し、別責務は親へ返す。 |
-| 終了と停止 | terminal、running、blocked、停止条件、再開条件を区別する。 |
+| 継続 | 同じ成果責務の追加入力を同じ子実行で継続し、別責務は親実行へ返す。 |
+| 終了と停止 | lifecycle state、継続中、停止条件、再開条件を区別する。 |
 | 回帰 | 更新前に成立していた利用場面と、過去に失敗した利用場面を維持する。 |
 
-各シナリオに一意の `scenario_id`、必須または任意、種別、検証する契約要素、親への依頼、spawn入力、初期状態、許可作用、follow-up、終了状態、停止条件、期待する観測、必要なruntime証拠、資源計測条件を与える。同じ契約違反を観測するだけの重複シナリオは作らない。
+各シナリオに一意の `scenario_id`、必須または任意、種別、検証する契約要素、選択依頼、委譲入力、初期状態、許可作用、継続入力、期待するlifecycle state、停止条件、期待する観測、必要な実行証拠、資源計測条件を与える。同じ契約違反を観測するだけの重複シナリオは作らない。
 
-### Phase 3: 隔離したsubagent実行を開始する
+### Phase 3: 隔離した実行を準備する
 
-利用環境が提供するsubagent操作を使い、dispatch選択または明示spawnを実行する。親taskまたはsession、spawn attempt、child thread、開始時刻、対象host、指定したagent名と設定を記録する。
+実行提供責務が実行計画に必要な選択、起動、継続、停止の能力を提供でき、記録提供責務が観測・記録契約を満たせることを確認する。実行提供責務へ渡す選択依頼、委譲入力、対象host、指定するagent名と設定を固定する。identity、binding、lifecycle、execution metadata は実行提供責務と記録提供責務の制御・観測情報として保持し、対象agentへの委譲入力または期待成果へ混ぜない。
 
 共有状態を変更しない対象または隔離した複製を使う。外部状態への作用が必要な場合は、依頼者が許可した対象と作用へ限定し、開始状態、終了状態、cleanup条件をシナリオへ含める。
 
-対象agentを現在のruntimeへ読み込ませる境界をhost契約から特定する。候補definitionを現在の親が利用できない場合は、未確認のagentを別のagentとして推定せず、そのシナリオの `execution_status` を `blocked`、各未実行assessmentを `indeterminate`、全体の `validation_status` を `blocked` とし、対象hostで利用可能な隔離導入または再読み込み条件を残す。
+対象agentを隔離実行で利用可能にする境界をhost契約から特定する。候補definitionを実行提供責務が利用できない場合、または必要な実行能力か観測・記録契約を用意できない場合は、そのシナリオの `execution_status` を `blocked`、各未実行assessmentを `indeterminate`、全体の `validation_status` を `blocked` とし、再開に必要な条件を残す。
 
-### Phase 4: 継続と終了を観測する
+### Phase 4: 実行して継続と終了を観測する
 
-必要なfollow-upを同じchild threadへ届け、確定した終了状態または停止条件まで待つ。終了または停止の時刻と理由を記録し、計測範囲に含まれるattempt、execution、respawn、tool callを対応付ける。停止条件時点でchildが継続中なら、失敗へ補正せず `in_progress` とし、child参照、現在状態、再開条件、その時点までの資源使用を保持する。
+実行計画に従い、実行提供責務へ自然選択または明示選択を依頼する。実行提供責務から起動試行の参照、開始した場合は親実行と子実行の参照、開始時の観測を受け取る。開始を確認できない起動試行から子実行を作らない。
 
-同じ成果責務の修正または追加証拠取得はsame-thread follow-upとし、新しいthreadへのrespawnを別executionとして記録する。interruptが必要なシナリオでは、許可、実行時刻、終了後の状態を記録する。
+必要な継続入力は実行提供責務を通じて同じ子実行へ届け、確定した終了状態または停止条件まで待つ。新しい起動試行から開始した子実行は別の実行として記録する。停止要求が必要な場合は、許可、実行時刻、終了後の状態を記録する。停止条件時点で子実行が継続中なら、失敗へ補正せず `in_progress` とし、子実行の参照、現在状態、再開条件、その時点までに取得できた資源使用を保持する。
 
-### Phase 5: runtime証拠を復元する
+外部状態へ作用したシナリオはcleanup条件に従って後始末し、その結果を実行結果へ含める。cleanupを完了できない場合は後続の実行を停止し、現在状態と再開条件を残す。
 
-各シナリオの親、時間範囲、端点の包含性、descendant depth、runtime source、資源計測条件へ `$subagent-execution-analysis` を適用する。spawn attempts、executions、identity、agent origin、definition bindings、effective configuration、actual actions、成果、follow-up、parent handoff、terminal state、資源使用を取得する。
+### Phase 5: 正規化済み実行記録を取得する
 
-対象agentの挙動として評価するexecutionは、runtime identityが `confirmed` または `supported` で、対象agentとの対応に競合がないものに限る。identityが `inferred` または `unresolved` の場合は、対象agentの契約適合を `indeterminate` とし、必要なruntime証拠を示す。
+実行後、実行計画と観測・記録契約に従い、記録提供責務から親子実行に対応する正規化済み実行記録、coverage、資源計測に必要な観測を受け取る。環境固有の記録取得、識別子の解釈、正規化は行わない。
 
-各必須契約要素について、その挙動を決める候補componentのdigestを、executionのdefinition bindingへ照合する。`exact` はそのcomponentの結合根拠にできる。`time_correlated` は、対象hostがそのartifactを当該executionへ読み込んだことを示す追加のruntimeまたはhost契約と組み合わせた場合だけ結合根拠にできる。`current_only`、`unresolved`、digestの不一致、または追加根拠のない `time_correlated` は、候補componentが実行された証拠にしない。
+実行が開始または終了していても、必要な記録を取得または正規化できない場合は、該当する命題とassessmentを `unverified` または `indeterminate` とする。実行済みのシナリオを、記録不足だけで `blocked` へ変更しない。記録契約が提供しない資源指標は値を補わず、必要な証拠と再取得条件を残す。
 
-必要な候補componentをexecutionへ結合できない契約要素は `indeterminate` とし、対象agentの旧版または別bindingによる結果から候補definitionの適合を導かない。identityの一致をcomponent bindingの代わりにしない。
+### Phase 6: 実行記録を分析する
 
-dispatchで別agentが選ばれたことをruntime証拠から直接確認できる場合は、選択面の契約へ照合できる。実行結果の文体や内容だけから選択agentを推定しない。
+親子実行の参照、分析範囲、正規化済み記録、記録契約、資源計測条件へ `$subagent-execution-analysis` を適用する。実行主体、定義、設定、行動、成果、継続、通信、handoff、終了、資源使用の分析結果と未確定範囲を受け取る。親実行による成果利用は呼び出し元の統合挙動、対象agentが開始した下位実行のhandoffは対象agentの上流責務として評価する。
 
-### Phase 6: agent契約へ照合する
+対象agentの挙動として評価する子実行は、実行主体のidentityが `confirmed` または `supported` で、対象agentとの対応に競合がないものに限る。identityが `inferred` または `unresolved` の場合は、対象agentの契約適合を `indeterminate` とし、必要な実行証拠を示す。
+
+各必須契約要素について、その挙動を決める候補componentのdigestを、子実行のdefinition bindingへ照合する。`exact` はそのcomponentの結合根拠にできる。`time_correlated` は、対象hostがそのcomponentを当該子実行へ適用したことを示す追加の実行証拠またはhost契約と組み合わせた場合だけ結合根拠にできる。`current_only`、`unresolved`、digestの不一致、または追加根拠のない `time_correlated` は、候補componentが実行された証拠にしない。
+
+必要な候補componentを子実行へ結合できない契約要素は `indeterminate` とし、対象agentの旧版または別bindingによる結果から候補definitionの適合を導かない。identityの一致をcomponent bindingの代わりにしない。
+
+自然選択で別agentが選ばれたことを正規化済み実行記録から直接確認できる場合は、選択面の契約へ照合できる。実行結果の文体や内容だけから選択agentを推定しない。
+
+### Phase 7: agent契約へ照合する
 
 シナリオごとに次を独立して評価する。
 
 | 観点 | 照合する内容 |
 | --- | --- |
-| dispatch | 選択用description、依頼の成果責務、実際に選択されたagent。 |
-| identityとbinding | runtime identity、agent origin、実行時点のdefinitionとhost binding。 |
-| 委譲入力 | spawn prompt、渡したcontext、対象範囲、制約、許可、必要な成果。 |
-| 設定と権限 | definition default、spawn指定、親設定、runtime effective configuration。 |
-| 行動と作用 | 実際のtool、effects、読み取りまたは変更の境界。 |
+| 選択 | 選択用description、依頼の成果責務、自然選択または明示選択で実際に選択されたagent。 |
+| identityとbinding | 実行主体のidentity、agent origin、実行時点のdefinitionとhost binding。 |
+| 委譲入力 | 委譲内容、渡したcontext、対象範囲、制約、許可、必要な成果。 |
+| 設定と権限 | definition default、起動時または親実行からの設定指定、effective configuration。 |
+| 行動と作用 | 実際の行動、作用、読み取りまたは変更の境界。 |
 | 成果責務 | agentが所有する判断、成果、責務外入力の返却。 |
-| 継続とhandoff | same-thread follow-up、parentによる受領と利用、別責務の引き渡し。 |
-| 終了 | child terminal state、停止条件、running、再開条件。 |
-| 資源使用 | 計測範囲ごとのtoken使用量、経過時間、attempt、execution、respawn、tool call、課金額と、その証拠または導出基準。 |
+| 継続と返却 | 同じ子実行への継続入力、対象agentが成果または停止状態を呼び出し元へ返したこと。 |
+| 通信 | 同じ execution が局所回復を完了まで所有しているか。途中通信は、既知の受け手と、その時点で変わる判断または作用を持つか。 |
+| 上流handoff | 対象agentが追加割当を所有する場合に、対象agentが開始した下位実行の成果を受領し、利用先へ引き渡したこと。それ以外は `not_applicable`。 |
+| 終了 | 子実行のlifecycle state、停止条件、継続中の状態、再開条件。 |
+| 資源使用 | 使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用について、計測範囲ごとの値、単位、証拠または導出基準。 |
 
-各assessmentを `conforms`、`violates`、`indeterminate`、`in_progress`、`not_applicable` のいずれかで示し、契約参照、評価に必要な候補component、対応したdefinition binding、runtime evidence refsを対応付ける。identityを対象agentへ結合できない場合、または評価対象の候補componentをexecutionへ結合できない場合は、対象agentの該当契約要素に関する適合を断定しない。
+各assessmentを `conforms`、`violates`、`indeterminate`、`in_progress`、`not_applicable` のいずれかで示し、契約参照、評価に必要な候補component、対応したdefinition binding、execution evidence refsを対応付ける。identityを対象agentへ結合できない場合、または評価対象の候補componentを子実行へ結合できない場合は、対象agentの該当契約要素に関する適合を断定しない。
+
+親実行による対象agent成果の受領と利用は、実行統合の観測として別に記録する。呼び出し元の委譲、返却条件、後続担当の選択、配送に差がある場合は、対象agentの契約違反ではなく、呼び出し元またはオーケストレーションの評価対象として残す。
 
 資源使用は契約assessmentと独立したmeasurementとして記録する。権限ある予算、時間制約、または資源上限がagent契約に含まれる場合だけ、その閾値への適合をassessmentとして評価する。資源計測の成立状態は `complete`、`partial`、`unverified` で示し、必要な指標ごとの値、単位、計測範囲、根拠、欠落理由を保持する。
 
-候補間の効率比較では、資源計測条件で定めた成立条件を満たすexecution数と、全attemptで消費した資源を保持する。`cost per conforming completion` は比較範囲の全attemptに対応する費用を、成立条件を満たす完了数で除した導出値として記録する。完了数がゼロの場合は値を作らず、成立条件を満たすexecutionがない状態を返す。候補の採否またはmodel選択は、このmeasurementと契約assessmentを受け取る後続責務が判断する。
+候補間の効率比較では、資源計測条件で定めた成立条件を満たす子実行数と、全起動試行で消費した資源を保持する。費用指標が記録契約で定義されている場合は、`cost per conforming completion` を、比較範囲の全起動試行に対応する費用を成立条件を満たす完了数で除した導出値として記録できる。完了数がゼロの場合は値を作らず、成立条件を満たす子実行がない状態を返す。候補の採否またはhost binding設定の選択は、このmeasurementと契約assessmentを受け取る後続責務が判断する。
 
-### Phase 7: 検証結果を残す
+### Phase 8: 検証結果を残す
 
-詳細な成果形式は [references/report-schema.md](references/report-schema.md) に従う。`$writing` を適用し、検証計画、spawn attempts、成立したexecutions、runtime分析、assessment、資源measurement、効率summary、未検証範囲、再実行条件を区別して返す。
+詳細な成果形式は [references/report-schema.md](references/report-schema.md) に従う。`$writing` を適用し、計画、実行記録、分析、assessment、資源measurement、未検証範囲、再実行条件を区別して返す。
 
 全体の `validation_status` は次の優先順位で決める。
 
 1. 必須シナリオでagent契約への違反を直接確認した場合は `violates`。
-2. 必須executionが停止条件時点で継続中の場合は `in_progress`。
-3. 必須executionを開始、継続、または対象definitionへ結合できる条件を用意できない場合は `blocked`。
-4. 必須の比較基準、identity、binding、runtime証拠が不足する場合は `unverified`。
-5. 必須シナリオの各契約要素について、現在の候補componentとexecutionの結合を確認でき、その候補に適用できる証拠で `conforms` の場合は `conforms`。
+2. 必須の子実行が停止条件時点で継続中の場合は `in_progress`。
+3. 必須の子実行を開始または継続する能力、候補definitionを利用可能にする条件、観測・記録契約を実行前に用意できない場合は `blocked`。
+4. 実行済みシナリオについて、必須の比較基準、identity、binding、正規化済み実行記録が不足する場合は `unverified`。
+5. 必須シナリオの各契約要素について、現在の候補componentと子実行の結合を確認でき、その候補に適用できる証拠で `conforms` の場合は `conforms`。
 
 `conforms` は対象custom agentの挙動検証結果であり、変更全体の受入判定ではない。`violates`、`unverified`、`blocked` では、原因または変更箇所を推定せず、`behavior-deviation-analysis` が使える証拠と再評価条件を残す。
 
 ## 完了条件
 
 - 対象agent、候補definitionの必須component、対象host binding、各digestを検証結果へ結び付けている。
-- dispatch選択と明示spawnを、実行した範囲と証拠に応じて区別している。
-- spawn attempt、execution、follow-up、respawn、childとparentの終了を区別している。
-- identity、binding、definition default、runtime effective configuration、actual actionを別々に評価している。
-- 対象agentのidentityと、評価に必要な候補componentの両方へ結合できるexecutionだけを、その候補の挙動として評価している。
-- 実行状態、成果の存在、parent handoff、agent契約への適合を分けている。
-- 計測範囲ごとの資源使用を値または `unverified` として記録し、provider報告費用と価格基準からの導出費用を区別している。
-- 効率比較では比較条件、成立条件、対象execution、全attemptの消費、集約方法を追跡できる。
-- 必須シナリオごとにassessment、runtime証拠、未検証範囲、再実行条件を残している。
+- 自然選択と明示選択を、実行した範囲と証拠に応じて区別している。
+- 起動試行、開始済み子実行、継続入力、新しい起動試行、子実行と親実行の終了を区別している。
+- identity、binding、definition default、起動時または親実行からの設定指定、effective configuration、actual actionを別々に評価している。
+- 対象agentのidentityと、評価に必要な候補componentの両方へ結合できる子実行だけを、その候補の挙動として評価している。
+- lifecycle state、成果の存在、対象agentによる返却、親実行による受領と利用、agent契約への適合を分け、親実行が所有するhandoffを対象agentへ帰属させていない。
+- 対象agentのhandoffを評価した場合は、そのagentが追加割当の上流責務を持ち、自身が開始した下位実行について評価したことを示している。
+- 計測範囲ごとの使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用を値または `unverified` として記録し、報告費用と価格基準からの導出費用を区別している。
+- 効率比較では比較条件、成立条件、対象となる子実行、全起動試行の消費、集約方法を追跡できる。
+- 必須シナリオごとにassessment、実行証拠、未検証範囲、再実行条件を残している。
 - 対象agentへのSkill依存、agent定義の変更、原因候補、変更全体の受入判定を作っていない。

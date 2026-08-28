@@ -1,0 +1,51 @@
+## 目的
+
+Slackの参照または依頼を、確認済みの業務入力と必要な場合に取得した現在のSlack状態から一つの完了状態へ進める。読み取りには `$slack-context-reader`、Slack向け本文の作成には `$writing`、確定済み一作用の履行には `$slack-action-executor` を適用する。
+
+## 判断に使う入力
+
+今回の完了目的、Slack参照、応答を支える事実、判断主体と権限、適用方針、currentnessを確認する。
+
+- 完了目的は、URL参照、読み取りまたは助言、下書き、一作用の実行のいずれかである。
+- 応答を支える事実は、相手が求める回答または行動、解決済みか、現在も必要か、本文に使う事実である。
+- 判断主体と権限は、責任または立場、未確定事項の所有者、許可主体である。
+- 適用方針は、今回の結果を変える受領表明の要否、reactionの意味、配置、対象範囲、mentionまたはbroadcast、訂正である。
+- currentnessは、Slackの取得範囲と時刻、後続返信、経過時間、外部変化、再評価条件である。
+
+業務規則は、今回確認できた業務入力と適用方針として扱う。案件固有の値を埋め込まず、業務規則の探索、保存、汎用既定化は成果に含めない。
+
+## 完了状態
+
+| 状態 | 成立条件 |
+| --- | --- |
+| `context_ready` | 読み取りまたは助言の完了目的を、取得したSlack状態で満たした。 |
+| `intent_unconfirmed` | URLまたは参照を取得したが、読み取り後の目的が未確定である。 |
+| `draft_ready` | 明示された下書き範囲の本文を完成した。 |
+| `no_external_effect` | 業務判断により今回の外部作用を必要としない。 |
+| `decision_required` | 業務事実、適用方針、指示関係または判断所有者が未確定または競合している。 |
+| `permission_required` | exact actionは確定したが、その作用を覆う明示許可がない。 |
+| `context_unavailable` | 現在の目的に必要なSlack観測または安定したsnapshotを得られない。 |
+| `action_result` | `$slack-action-executor` の終端成果を変更せずに保持する。 |
+
+`decision_required` には、未確定の命題、必要な事実または方針、その所有者、結果が変わる分岐、再開条件を含める。
+
+## 進行
+
+1. 完了目的を分類する。目的が競合するときは `decision_required` を返す。
+2. URL参照、読み取りまたは助言では、目的に必要なobservation scopeを定めて `$slack-context-reader` を適用する。下書きだけが目的なら、本文判断にSlackのcurrent stateが必要かを先に判定する。提供された業務事実だけで本文を作れるときはreaderを適用せず、message本文だけに `$writing` を適用して `draft_ready` を返す。URL、message、thread、actor、current contentが必要なときはreaderを適用する。実行またはcurrentness再評価でも、必要なobservation scopeを定めてreaderを適用する。
+3. `$slack-context-reader` を適用した後は、現在の目的に必要な各項目が観測済みまたは根拠を伴う明示的不在であることを確認する。この観測gateを通過できない場合は、未取得項目、理由、再開条件を含む `context_unavailable` を返す。readerのprimary state名だけで成否を決めず、`partial` でも未取得項目が目的に無関係なら進め、`complete` でも必要項目が未取得なら停止する。gate通過後にURLだけの依頼は `intent_unconfirmed`、読み取りまたは助言は `context_ready` で完了する。
+4. 実行指示の作用記述を、明示最終作用、条件付き方針、制約・候補・例示へ分類する。分類不能または競合は `decision_required` とする。明示最終作用は適用方針との整合を確認し、利用者が方針を明示的に上書きしたときだけ固定する。優先関係が不明なら `decision_required` とする。
+5. 最終作用が未固定なら、現在のsnapshotで条件付き方針を評価する。方針が一意にactionまたは外部作用不要を定めたら採用し、generic判断へ進まない。複数の結果は明示優先または完全に同一の結果へ収束するときだけ採用する。必要な観測が不足するときは `context_unavailable`、業務事実または方針が不足するときは `decision_required` とする。条件付き方針で結果が定まらないときは、具体的な回答または行動が必要ならmessage、messageが不要で受領表明が必要ならreaction、双方が不要なら `no_external_effect` を選ぶ。
+6. messageでは親messageまたはthreadの配置を先に確定し、次にmentionまたはbroadcastによる通知を独立して判断する。根拠のない通知は既定にしない。
+7. `$slack-action-executor` の作用別入力契約に従い、exact actionを一意に確定する。required fieldにreaction名、配置、payloadの事実、notification、targetなどの業務判断が不足するときは、未解決field、候補、所有者、影響する分岐、再開条件を含む `decision_required` を返す。必要なSlack観測が不足するときは `context_unavailable` を返す。
+8. exact actionが成立した後だけ許可を評価する。一作用を覆う明示許可がなければ `permission_required` を返す。この状態には不完全なactionを保持せず、同じ適用では待機または監視を行わない。
+9. 許可がある場合はexecutor直前にcurrentnessを確認する。初期snapshotが再評価条件を満たした場合は、最大一回 `$slack-context-reader` を再適用し、手順3の観測gateを通過してから手順4へ戻る。再度不安定またはstable snapshotを得られない場合は `context_unavailable` とする。作用、target、payload、notification、actor、boundaryのいずれかが変われば、旧許可を使わず `permission_required` を返す。
+10. 条件が成立したときだけ `$slack-action-executor` を一度適用する。そのSkill内の試行は同じ適用の記録として扱い、終端成果はすべて `action_result` に変更せず保持する。自動再適用または訂正は行わない。
+
+`no_external_effect` は、業務判断により作用を選ばず完了した状態である。`no_op` は、許可された一作用について `$slack-action-executor` が既存の受入可能な状態を検証し、dispatchなしで返す終端状態である。訂正は、新しいinteraction適用で新しいsnapshot、一作用、許可を確定して進める。
+
+## 完了条件
+
+- 完了目的と現在のsnapshotから、排他的な完了状態を一つ返している。
+- 反応選択は、確認済みの業務入力、適用方針、currentnessに対応している。
+- Slack作用は、確定した一作用、現在有効な許可、executorの終端成果へ対応している。

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Interactive Tester",
-  "description": "凍結済みの対話セッション実行・証拠契約 envelope の execution 部分に従って対象を実際に操作し、操作、待機、観測、媒体、停止、reset、後始末の生記録を変更せずに返す実行主体が必要なときに使う。",
+  "description": "execution・evidence envelope を execution snapshot として確定し、対象を最終状態まで操作して、証拠参照を持つ圧縮セッション結果を返す実行主体が必要なときに使う。",
   "skillDependencies": [
     "interactive-session-execution"
   ]

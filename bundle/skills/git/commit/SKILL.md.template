@@ -3,16 +3,10 @@
 
 ## フロー
 
-### Phase 1: 作業状態を確認する
-`git status --porcelain` を確認する。
-変更がなければコミットを作成しない。
-detached HEAD なら停止する。
+### Phase 1: コミット単位と対象 path を決める
+変更ファイルと差分を読み、1コミットを1つの責務と変更理由に揃える。異なる type、scope、目的の変更は分割を優先し、分割できない場合は理由を残す。
 
-### Phase 2: コミット単位を決める
-1コミットは1つの責務、1つの変更理由に揃える。
-変更ファイルと差分を読み、1コミット1責務になるように分ける。
-異なる type、異なる scope、異なる目的の変更は分割を優先する。
-分割できない場合は理由を残す。
+各単位について、stage する repository-relative path を明示的に選ぶ。未指定の全体 stage は使わない。
 
 type は次から選ぶ。
 
@@ -29,21 +23,33 @@ type は次から選ぶ。
 | 書式だけの変更 | `style` |
 | その他 | `chore` |
 
-### Phase 3: メッセージを作る
-件名は `type(scope): <subject>` 形式にする。
-scope は主要なモジュール名、または横断変更の対象領域にする。
-件名と本文は `$writing` で文章前提を固定してから書く。
-`type` と `scope` は Conventional Commits の規約語彙として小文字にする。
-`<subject>` は件名の言語、固有名詞、識別子、既存履歴の表記に合わせ、prefix 後の先頭も自然な表記を保つ。
-既存コミット履歴がある場合は粒度を合わせる。
+### Phase 2: メッセージを作る
+件名は `type(scope): <subject>` 形式にする。scope は主要なモジュール名、または横断変更の対象領域にする。
 
-本文には `Why`、`What Changed`、`Impact` を入れる。
-本文の見出しはこの3つに固定し、本文の言語に合わせて翻訳しない。
-作業ログや検討過程を並べない。
+件名と本文は `$writing` で文章前提を固定してから書く。`type` と `scope` は Conventional Commits の規約語彙として小文字にし、既存履歴がある場合は粒度と表記を合わせる。
 
-### Phase 4: コミットする
-コミット単位ごとに対象ファイルだけを stage する。
-`git commit -m "<subject>" -m "<body>"` で作成する。
+本文には `Why`、`What Changed`、`Impact` を入れる。見出しはこの3つに固定し、本文の言語に合わせて翻訳しない。作業ログや検討過程を並べない。
 
-### Phase 5: 状態を残す
-作成したコミット、残った未コミット差分、分割できなかった理由を残す。
+### Phase 3: 選択済み path をコミットする
+実行する `sh` 環境で、この Skill の配置ディレクトリと対象 worktree を `pwd -P` により絶対 physical POSIX path として固定する。Windows host の `C:\...` をそのまま `sh` に渡さない。
+
+```sh
+skill_root=$(CDPATH= cd "<skill-directory-visible-to-sh>" && pwd -P)
+worktree=$(CDPATH= cd "<worktree-directory-visible-to-sh>" && pwd -P)
+```
+
+各コミット単位について、確定した message を stdin で渡し、選択済み path ごとに `--path` を指定して次を一度実行する。
+
+```sh
+printf '%s\n' "<commit-message>" |
+  sh "$skill_root/scripts/commit-flow.sh" create \
+    --worktree "$worktree" \
+    --path "<selected-repository-relative-path>" [--path "<selected-repository-relative-path>" ...]
+```
+
+helper の実行後は outcome だけで完了を決めない。選択済み path の staged diff と worktree diff を再観測し、未選択差分が index へ入らず、選択済み path だけがこの単位の内容として index にあることを確認する。commit が既に作成され、その tree と `HEAD` が選択済み内容を表す場合は次の単位へ進む。
+
+helper が stage 後に失敗した場合も、index が選択済み path の内容と完全に一致し、未選択差分を保持している場合だけ、通常の `git commit` でその index を commit してよい。まだ stage されていない場合は、選択済み path だけを通常の `git add --` で stage し、同じ一致を確認してから commit する。index の内容、対象範囲、または既存 commit を一意に確定できない場合は、index を巻き戻さず停止する。
+
+### Phase 4: 状態を残す
+作成した commit、選択した path、index と未選択差分の保持観測、残った未コミット差分、分割できなかった理由、利用した helper または native 操作、停止理由を残す。

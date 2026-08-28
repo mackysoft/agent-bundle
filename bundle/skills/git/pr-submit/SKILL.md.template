@@ -1,100 +1,83 @@
 ## 目的
-現在作業を PR として作成または既存 open PR へ更新する。
+現在作業を PR として作成するか、同じブランチの open PR を更新する。detached HEAD の PR 対象作業は、現在作業を失わない branch を確立してから扱う。
 
-PR の base を決め、作業差分を `$commit` で保護し、`$sync-latest`、検証、`$push`、本文作成、PR 作成または既存 open PR の更新まで進める。
+Issue と PR の意味、base、GitHub 権限、検証、PR 本文、ローカル Git 準備の進行を扱う。helper と依存 Skill は、その進行を成立させる手段として使う。
 
 ## フロー
 
-### Phase 1: 作業状態を確認する
+### Phase 1: GitHub の利用可能性と既存 PR を確認する
 - `gh auth status` を確認する。
-- 現在ブランチ、未コミット差分、既存 open PR の有無を確認する。
-- detached HEAD で PR 対象を確定できない場合は停止する。
+- attached branch の場合だけ、同じブランチの open PR を確認する。detached HEAD では現在ブランチを推定しない。
+- GitHub 認証、PR の取得、または更新権限を確認できない場合は、確認済み範囲、影響、再開条件を停止成果として返す。
 
 ### Phase 2: Issue と base を決める
 Issue は明示入力、ブランチ名の `issue-<N>`、既存 PR の関連情報の順に解決する。
-Issue が解決できた場合は、`gh issue view` で本文、状態、受け入れ条件、base 指定を取得する。
-取得できなければ停止する。
-取得した Issue は、PR 本文末尾の `Closes #<N>` で Development へ紐付ける。
-Issue が解決できない場合は、Issue なしで進める。
+Issue が解決できた場合は `gh issue view` で本文、状態、受け入れ条件、base 指定を取得する。取得できなければ停止する。取得した Issue は、PR 本文末尾の `Closes #<N>` で Development へ紐付ける。Issue が解決できない場合は、Issue なしで進める。
 
-base branch は明示入力、既存 PR の base、Issue 側の指定、リポジトリの既定ブランチの順に決める。
+base branch は明示入力、既存 PR の base、Issue 側の指定、リポジトリの既定ブランチの順に決める。選んだ base を対応する literal fully-qualified ref として `prepare` へ渡す。Issue、PR、base の意味選択はこの Skill が所有する。
 
-### Phase 3: 作業差分をコミットする
-未コミット差分がある場合は `$commit` を使い、PR 対象の変更を責務単位でコミットする。
-コミット後も PR 対象差分がなく、未コミット差分もない場合は PR 対象なしとして停止する。
+### Phase 3: detached HEAD の PR 対象を branch へ接続する
+現在が attached branch なら Phase 4 へ進む。detached HEAD では、branch を作る前に現在 `HEAD` OID を固定し、その OID と一致する `headRefOid` を持つ open PR を read-only で探索する。
 
-### Phase 4: PR 対象を最新化する
-検証前に `$sync-latest` で base branch を現在ブランチへ同期する。
-同期で衝突した場合は検証や PR 作成へ進まない。
+候補が一意なら、PR 番号、URL、head branch、接続前の head OID、base、head repository、対応する local remote 名、head ref を既存 PR identity として固定し、接続前の head OID は元 head 保持の証拠として残す。head ref は `refs/remotes/<head-remote>/<head-branch>` とする。base は既存 PR の base を採用する。
 
-base との差分がなく、未コミット差分もない場合は PR 対象なしとして停止する。
+branch 作用前に、local remote URL が PR の head repository と一致し、head ref が存在しその OID が固定した元 head OID と一致することを read-only で確認する。remote 名、URL、head ref、OID のいずれかを安全に確定できない場合は、branch、push、PR 更新を行わず停止する。base remote の同名 branch へ fallback しない。
 
-### Phase 5: 検証する
-`$verification-gate` を PR 前用途で実行する。
-失敗した場合は PR を作成または更新しない。
-検証が成果物更新や整形で未完了になった場合は、Phase 3 に戻って変更をコミットしてから再検証する。
-未検証範囲が残る場合は、PR を作成または更新しない。
+`$branch-create` は一度だけ、既存 PR の head branch と一致する branch 名、既存 PR の base、固定済み head remote/ref、`--preserve-current` を入力として実行する。接続後は base 同期が完了していること、symbolic ref が既存 PR の head branch を指すこと、upstream が固定済み head remote/ref と同一であること、競合がないこと、元 head OID が現在 `HEAD` に含まれることを確認する。固定 OID との完全一致は要求しない。確認できた現在 `HEAD` OID を新しい作業 head として固定し、Phase 4 以後の prepare、push、PR 更新、返却へ渡す。元 head OID を含められない、競合がある、または base 同期が未完了なら停止する。
 
-### Phase 6: push する
-`$push` を使い、必要な最新化と push を行う。
-push の過程で、同期、追加コミット、生成物更新などにより検証後の内容が変わった場合は、PR タイトルと本文を書く前に Phase 5 の検証を再実行する。
+候補が複数、または PR 番号、URL、head branch、head OID、base、head repository、remote 名、head ref の同一性を確定できない場合は、branch または PR を新規作成せず停止する。候補がなければ、Phase 2 の base と比較して未コミット差分または PR 対象 commit があるかを read-only で確認する。対象がなければ空 PR を作らず、`no-change` として停止する。対象がある場合だけ、`$branch-create` へ Phase 2 の base、確定した branch 名、`--preserve-current` を渡す。この依存は一度だけ実行する。`$branch-create` が branch 接続を完了した後は、最終 symbolic ref、保持対象 `HEAD`、upstream、競合なしを確認して Phase 1 へ戻る。接続できない、または事後条件を確認できない場合は、現在状態、影響、再開条件を残して停止する。
 
-### Phase 7: PR タイトルと本文を書く
+### Phase 4: ローカル準備フローを実行する
+この Skill の配置ディレクトリを `skill_root` として固定する。`skill_root` と worktree は、`sh` を実行する環境内で `pwd -P` により physical POSIX path へ解決してから使い、Windows host の `C:\...` をそのまま渡さない。次を実行する。
+
+```sh
+sh "$skill_root/scripts/pr-submit-flow.sh" prepare \
+  --worktree "<absolute-posix-physical-worktree-root>" \
+  --base-ref "<literal-fully-qualified-base-ref>"
+```
+
+- `outcome=completed` かつ `reason=ready` なら Phase 6 へ進む。
+- `outcome=no-op` かつ `reason=no-change` なら PR 対象なしとして停止する。
+- `outcome=blocked` かつ `reason=commit-required` または `reason=sync-required` なら Phase 5 へ進む。
+
+helper の起動不能、異常終了、または壊れた outcome の後は、worktree の dirty 状態、進行操作、現在 branch、base の fetch OID と包含関係を再観測する。PR 対象がない場合は `no-change` とする。未コミット差分だけが残る場合は `$commit`、base が未統合の場合は `$sync-latest` を選ぶ。両方が満たされ、attached branch 上に PR 対象 commit がある場合は `ready` として Phase 6 へ進む。次の作用を一意に決められない、競合または他の進行操作がある場合は停止する。
+
+固定済みの既存 PR identity がある場合は、この再観測でも head branch/upstream が固定済み head remote/ref と同一であり、元 head OID が現在 `HEAD` に含まれることを確認する。base 同期で `HEAD` が変化した場合はその OID を新しい作業 head として再固定する。これらを確認できない場合は PR 更新へ進まない。
+
+### Phase 5: `prepare` が要求した依存 Skill だけを実行する
+`blocked/commit-required` では `$commit`、`blocked/sync-required` では Phase 2 の base に対する `$sync-latest` を実行する。固定済みの既存 PR identity がある場合は、同期後に元 head OID の包含、head branch/upstream の同一性、競合なし、base 同期完了を再観測し、現在 `HEAD` OID を新しい作業 head として再固定する。依存 Skill が完了した場合だけ Phase 4 を再実行する。
+
+### Phase 6: 検証する
+`$verification-gate` を PR 前用途で実行する。失敗または未検証範囲が残る場合は PR を作成または更新しない。検証が成果物更新や整形を残した場合は Phase 4 に戻る。
+
+### Phase 7: 公開する
+`$push` には、Phase 2 で決めた base に対応する remote-tracking fully-qualified ref を `--require-integrated-ref` として渡す。固定済みの既存 PR identity がある場合は、base 同期 remote とは独立に、固定済み head remote/ref と新しい作業 head も `$push` の入力として渡し、その remote/ref だけを upstream と publish 先にする。`completed` または `no-op` なら Phase 8 へ進む。`blocked/sync-required` なら `$sync-latest`、Phase 4 の `prepare`、Phase 6 の検証の順に戻る。それ以外は、返された状態、影響、再開条件を停止成果として返す。
+
+### Phase 8: PR タイトルと本文を書く
 差分、コミット履歴、検証結果、Issue 本文から PR タイトルと本文を作る。
 
-PR タイトルと本文の文章前提は `$writing` に従う。
-PR タイトルと本文は同じ言語で書く。
-PR タイトルに Issue 番号、scope、`type(scope):` 風の prefix を付ける場合も、prefix 後のタイトル本文は本文言語、固有名詞、識別子、既存 PR の表記に合わせる。
-本文は `##` 見出しと短い箇条書きを基本にする。
-本文の基本順は `Summary`、`Scope`、`Verification` にする。
-任意セクションは、必要な場合だけ次の表の順に差し込む。
-本文の見出しは本文の言語に合わせて翻訳しない。
-`Closes #<N>` のような GitHub の構文は原文のまま置く。
+PR タイトルと本文の文章前提は `$writing` に従う。PR タイトルと本文は同じ言語で書く。PR タイトルに Issue 番号、scope、`type(scope):` 風の prefix を付ける場合も、prefix 後のタイトル本文は本文言語、固有名詞、識別子、既存 PR の表記に合わせる。
+
+本文は `##` 見出しと短い箇条書きを基本にし、基本順は `Summary`、`Scope`、`Verification` とする。任意セクションは必要な場合だけ次の順に置く。本文の見出しは本文の言語に合わせて翻訳しない。`Closes #<N>` のような GitHub の構文は原文のまま置く。
 
 | 見出し | 必須 | 内容 |
 | --- | --- | --- |
 | `Summary` | 必須 | 変更の要点。レビュー前に把握すべき結論を短く書く。 |
-| `Changelog` | 任意 | 利用判断に使う変更説明が必要な場合に置く。項目は `$changelog` で作り、見出しはこのスキルで置く。 |
+| `Changelog` | 任意 | 利用判断に使う変更説明が必要な場合に置く。項目は `$changelog` で作り、見出しはこの Skill で置く。 |
 | `Scope` | 必須 | 変更した範囲、生成物、影響する機能や文書を列挙する。 |
 | `Verification` | 必須 | 実行した検証、確認できた結果、実行できなかった検証を書く。 |
-| `References` | 任意 | レビュー時に確認すべき資料、仕様、外部URL、リポジトリ内の相対パスを書く。ローカル環境の絶対パスは書かない。 |
-| `Risks / Rollback` | 任意 | レビュー判断に必要な具体的なリスク、未確認事項、通常のrevertだけでは足りない戻し方を書く。 |
+| `References` | 任意 | レビュー時に確認すべき資料、仕様、外部 URL、リポジトリ内の相対パスを書く。ローカル環境の絶対パスは書かない。 |
 
-`Changelog` の本文は `$changelog` の埋め込み用エントリとして作る。
-`## Changelog` はこのスキルで置き、`$changelog` 側では重複させない。
-カテゴリ見出しが必要な場合は、`## Changelog` の下に `### Added` のような1段下の見出しを置く。
-空の任意セクションは置かない。
-長い補足やログを本文に含める必要がある場合だけ `<details>` を使い、通常の説明は箇条書きまたは短い段落で書く。
+`Changelog` の本文は `$changelog` の埋め込み用エントリとして作る。`## Changelog` はこの Skill で置き、`$changelog` 側では重複させない。カテゴリ見出しが必要な場合は、`## Changelog` の下に `### Added` のような1段下の見出しを置く。空の任意セクションは置かない。長い補足やログを本文に含める必要がある場合だけ `<details>` を使う。
 
-本文の形は次を基準にし、任意セクションは必要なものだけ残す。
+### Phase 9: PR を作成または更新する
+Phase 3 で既存 PR identity を固定した場合は、その PR 番号と URL を更新対象として使い、同じ head branch、head repository、head remote/ref、base であることを再観測してから更新する。head OID は Phase 4 から Phase 7 の作業で変わり得るため、元 head OID の包含を保った新しい作業 head だけを publish し、更新後の OID を記録する。この経路で `gh pr create` は実行しない。
 
-```md
-## Summary
-- <summary item>
+既存 PR identity を固定していない場合は、同じブランチの open PR があるならその PR を更新し、open PR がない場合だけ `gh pr create` で作成する。
 
-## Changelog
-<$changelog が作る埋め込み用エントリ>
+Issue があり、受け入れ条件が未完了または未確認なら Draft PR にする。Issue があり、受け入れ条件が完了している場合は通常 PR にする。Issue がない場合は、検証が成功していれば通常 PR にする。
 
-## Scope
-- <scope item>
+`gh pr create` または更新が異常終了した後も、固定済みの既存 PR identity、または同じ branch、base、head OID の一意な open PR を再観測できれば重複作成せず、その PR を更新結果として扱う。PR の存在または残作用を一意に確定できない場合は停止する。PR の作成または更新後は `gh pr view` で PR 番号、URL、head branch、head OID、head repository、base、状態を再観測する。固定済みの既存 PR identity では PR 番号、URL、head branch、head repository、base が同一であり、返却する作業 head が元 head OID を含むことも確認する。作成または更新の helper や `gh` の出力だけで完了としない。
 
-## Verification
-- `<command or check>`
-
-## References
-- <repository-relative path or URL>
-
-## Risks / Rollback
-- <risk or rollback item>
-```
-
-### Phase 8: PR を作成または更新する
-同じブランチの open PR がある場合は、その PR を更新する。
-open PR がない場合は `gh pr create` で作成する。
-
-Issue があり、受け入れ条件が未完了または未確認なら Draft PR にする。
-Issue があり、受け入れ条件が完了している場合は通常 PR にする。
-Issue がない場合は、検証が成功していれば通常 PR にする。
-
-### Phase 9: 状態を残す
-PR URL、base branch、検証結果、push 結果、Draft 状態、Issue 連携、停止理由を残す。
+### Phase 10: 状態を残す
+PR 番号、URL、head branch、head repository、head remote/ref、元 head OID、新しい作業 head、base branch、検証結果、依存 Skill の結果、Draft 状態、Issue 連携、helper または native 操作、停止理由を残す。
