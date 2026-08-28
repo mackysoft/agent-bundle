@@ -1671,6 +1671,7 @@ def draw_pareto_chart(
             color="0.25",
             linestyle="--",
             linewidth=1.2,
+            label="Pareto frontier",
         )
         line.set_gid("pareto-frontier")
     axis.set(title=title, xlabel=x_label, ylabel=y_label)
