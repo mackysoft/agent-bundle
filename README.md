@@ -127,7 +127,7 @@ Software implementation, testing, review, documentation, issue planning, and int
 | `test-oracle-assessment` | Read-only assess important existing or candidate test judgments against the current external contract, independent expectations and observations, and evidence of detecting concrete violations after the scoped implementation change is complete or unnecessary. |
 | `ultra-review` | Define and converge review planning, independent review outcomes, triage, responsibility-owned fixes, verification, and re-review; return semantic requirements and resume conditions when a required outcome is missing. |
 | `unity-authoring-rules` | Apply Unity-specific implementation and review rules with the C# rules. |
-| `verification-gate` | After a scoped implementation change is complete or unnecessary, compare acceptance conditions with existing evidence, select, run, and re-evaluate permitted existing verification methods, then judge the target implementation. |
+| `verification-gate` | Judge a completed scoped change from existing evidence and only the minimum additional checks needed to decide its acceptance conditions. |
 | `xml-doc-writer` | Write contract-focused XML documentation comments. |
 
 ### git
@@ -150,10 +150,10 @@ Authoring, isolated behavior validation, execution reconstruction, and deviation
 | Skill | Purpose |
 | --- | --- |
 | `behavior-deviation-analysis` | Attribute behavior deviations to evidence-backed causes, repair owners, and revalidation scope. |
-| `custom-agent-authoring` | Create, update, and validate host-independent custom agent definitions and host bindings. |
-| `custom-agent-behavior-validation` | Exercise custom agents in isolated subagent runs and assess dispatch, runtime binding, behavior, handoff, termination, and resource efficiency. |
-| `skill-authoring` | Create, update, and review behaviorally effective agent skills. |
-| `skill-behavior-validation` | Exercise agent Skills in isolated scenarios and report contract conformance, gaps, and rerun scope. |
+| `custom-agent-authoring` | Create or update custom agent contracts, definitions, dependencies, host bindings, and the behavior checks needed for the change. |
+| `custom-agent-behavior-validation` | Use one independent executor to check the custom agent behaviors required for the current change, adding runtime trace or resource measurements only when required. |
+| `skill-authoring` | Create or update agent Skills and directly check the behavior needed for the change. |
+| `skill-behavior-validation` | Check the Skill behaviors required for the current change with the smallest sufficient set of independent usage scenarios. |
 | `subagent-execution-analysis` | Reconstruct subagent executions, lifecycle, configuration, actions, and resource usage from runtime evidence. |
 
 ### orchestration
@@ -223,7 +223,7 @@ Custom agents use one flat catalog namespace:
 | `interactive-tester` | Executes an interactive execution-and-evidence envelope through its final state, saves evidence, and returns the scoped session result. | `interactive-session-execution` |
 | `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
 | `test-implementer` | After an authoritative basis confirms that the implementation change for the same target scope is complete or unnecessary, implements and maintains permitted tests that continuously detect concrete external-contract violations in an identified target implementation. | `test-authoring` |
-| `verifier` | After a scoped implementation change is complete or unnecessary, compares acceptance conditions with existing evidence, selects, runs, and re-evaluates permitted existing verification methods, then judges the target implementation. | `verification-gate` |
+| `verifier` | Judges a completed scoped change from existing evidence and only the minimum additional checks needed to decide its acceptance conditions. | `verification-gate` |
 | `researcher` | Finds and grounds the facts needed for a downstream decision, reports checked scope, and keeps missing evidence unconfirmed. | `claim-grounding` |
 | `operator` | Performs a fully specified closed action, including waiting for a long-running or external execution, and reports its terminal result or configured stop state. | None |
 
