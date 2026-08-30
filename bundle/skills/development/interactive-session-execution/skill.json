@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
   "displayName": "Interactive Session Execution",
-  "description": "execution・evidence envelope を今回の snapshot に固定し、対話経路を最終状態まで操作して、証拠参照と結果状態を持つセッション結果を返すときに使う。",
+  "description": "設計済みの対話型アプリのテスト経路を実際に操作し、最終状態までの生記録と証拠を取得するときに使う。後続の評価で参照できる証拠と結果状態を持つセッション結果を返す。",
   "dependencies": []
 }

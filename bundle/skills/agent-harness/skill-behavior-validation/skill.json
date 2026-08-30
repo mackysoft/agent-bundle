@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Skill Behavior Validation",
-  "description": "候補または更新済みのエージェントSkillについて独立した挙動確認が必要なとき、今回の契約要素を最小限の実利用シナリオで観測し、必要十分な直接証拠から適合、逸脱、未検証範囲を返す。選択、版、bindingなどの追跡証拠は、それ自体が検証条件である場合だけ扱う。",
+  "description": "候補または更新済みのエージェントSkillが、必要な利用場面で確認済みの作業契約どおりに選択、判断、行動、完了するかを、作成時の文脈から独立して確認するときに使う。対象Skillを変更せず、契約適合、逸脱、判定不能とその根拠を示す検証結果を返す。",
   "dependencies": [
     "claim-grounding",
     "referent-modeling",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "PR Merge",
-  "description": "現在作業または指定PRを安全にマージする。現在作業をブランチへ載せ、PRを取得または作成し、push、Draft解除、auto-merge設定、CI監視、マージ、リモートブランチクリーンアップまで進める。admin merge や bypass が明示された場合は `privileged-merge` として確認なしで使う。",
+  "description": "現在作業または指定Pull Requestを、必要な権限と継続的インテグレーションの条件を守ってマージするときに使う。GitHub上のマージ完了と、許可された範囲のリモートブランチ後始末まで成立させる。",
   "dependencies": [
     "pr-submit",
     "push",

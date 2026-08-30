@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Issue Writer",
-  "description": "与えられたIssue構造、本文入力、文章前提に従ってGitHub Issue本文を作成、更新、点検する。Issue本文の項目、完了条件、依存関係、必要な検証、参照を整理し、必要なら `gh` で起票または本文更新まで進める作業で使う。",
+  "description": "確定したIssue構造と本文入力から、GitHub Issue本文を作成、更新、点検し、必要な場合は起票または本文更新まで完了するときに使う。実装者が作業範囲を判断でき、レビュー者が完了状態を判定できるIssueを成立させる。",
   "dependencies": [
     "writing"
   ]

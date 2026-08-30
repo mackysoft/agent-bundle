@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Skill Authoring",
-  "description": "エージェントSkillを新規作成、更新、レビューするときに、必要性、単一責務、発火面、判断規則、自由度、フロー、Skill間の構成、本文と補助ファイルの情報配置を評価し、実際の利用文脈で意図した判断と成果へ到達できる作業契約に仕上げる。構造検証と、変更に必要な範囲の直接的な挙動確認まで行う。",
+  "description": "エージェントSkillを新規作成、更新、レビューし、自然な依頼から適切に選択され、成立済みの入力から意図した判断、作業、完了状態へ到達できる作業契約を成立させる、またはその適合性と必要な差分を示すときに使う。",
   "dependencies": [
     "behavior-deviation-analysis",
     "claim-grounding",

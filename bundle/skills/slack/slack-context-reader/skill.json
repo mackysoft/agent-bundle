@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
   "displayName": "Slack Context Reader",
-  "description": "指定されたSlack URL、conversation、thread、message、reply、actor、file、attachment、unfurlを読み取り、確認した事実、取得済み・未取得範囲、pagination、アクセス状態、再開条件を返すときに使う。",
+  "description": "指定されたSlackの内容と周辺状況を読み取り、現在の状態を確認するときに使う。確認済みの事実、取得範囲、未取得範囲、アクセス上の制約を追跡できる読み取り結果を返す。",
   "dependencies": []
 }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "PR Submit",
-  "description": "現在作業を PR として作成または既存 open PR へ更新するときに、detached HEAD の作業ブランチ確立、`$commit`、`$sync-latest`、検証、`$push`、本文作成、PR 作成または更新までを一気通貫で実行する。Issue がある場合は Issue を優先して本文と base を決定し、PR タイトルと本文の言語は `$writing` で揃える。",
+  "description": "現在作業を新しいPull Requestとして作成するか、同じブランチの既存のopen Pull Requestへ更新するときに使う。Issue、base、変更内容、検証結果に整合するタイトルと本文を持ち、レビュー可能なPull Requestがリモートに反映された状態を成立させる。",
   "dependencies": [
     "branch-create",
     "changelog",

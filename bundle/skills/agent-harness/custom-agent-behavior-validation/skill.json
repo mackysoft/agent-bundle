@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Custom Agent Behavior Validation",
-  "description": "候補または更新済みのcustom agentについて独立した挙動確認が必要なとき、一人の検証担当が最小限の子実行を終端状態まで進め、今回必要な選択、成果責務、作用、返却、完了を直接観測する。identity、binding、lifecycle、通信、資源使用は、それ自体が検証条件である場合だけ追跡する。",
+  "description": "候補または更新済みのcustom agentが、確認済みの選択面と成果責務に適合して完了または契約上の停止状態へ到達するかを、作成担当から独立して確認するときに使う。対象定義を変更せず、契約適合、逸脱、判定不能とその根拠を示す検証結果を返す。",
   "dependencies": [
     "claim-grounding",
     "referent-modeling",
