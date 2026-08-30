@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Branch Create",
-  "description": "detached HEAD や未コミット差分を含む現在作業を保護しながら、規約準拠名の作業ブランチを対象 worktree に作成または再利用する。Issue がある場合は `<type>/issue-<N>-<branch_name>`、Issue がない場合は `<type>/<branch_name>` 形式を使う。",
+  "description": "detached HEADや未コミット差分を含む現在作業を保護しながら、対象worktreeに規約準拠の作業ブランチを作成または再利用するときに使う。作業内容とIssueに対応するブランチへ現在作業が接続された状態を成立させる。",
   "dependencies": [
     "sync-latest"
   ]

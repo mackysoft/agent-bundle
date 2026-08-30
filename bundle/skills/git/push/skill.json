@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Push",
-  "description": "push 指示を受けたときに、未コミット差分があれば `$commit` で責務単位コミットを作成し、現在ブランチを upstream 優先で安全に push する。upstream が無い場合は `origin/<current_branch>` を `-u` で設定して push する。",
+  "description": "現在ブランチの作業を安全にリモートへ反映するよう依頼されたときに使う。必要な未コミット変更を責務単位のコミットとして保持し、適切なupstreamへ同期された状態を成立させる。",
   "dependencies": [
     "commit",
     "sync-latest"

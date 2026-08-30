@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Custom Agent Authoring",
-  "description": "custom agentを新規作成、更新、レビューするときに、単一の成果責務、選択面、入力、判断、行動、作用、成果、呼び出し元への返却状態、停止条件、追加割当を所有する場合の上流責務を定め、host非依存の指示、Skill依存、host bindingへ分離する。構造と、変更に必要な範囲の挙動を確認して定義を仕上げる。",
+  "description": "custom agentを新規作成、更新、レビューし、呼び出し元が適切な成果責務として選択でき、起動後にその責務を完了または契約上の停止状態まで遂行できる定義を成立させる、またはその適合性と必要な差分を示すときに使う。",
   "dependencies": [
     "behavior-deviation-analysis",
     "custom-agent-behavior-validation",

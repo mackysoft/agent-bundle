@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Unity Authoring Rules",
-  "description": "Unity プロジェクトの C# コード、ゲームコード、Editor 拡張、テスト、Asset、Scene、Prefab、asmdef、プロジェクト構成を実装、修正、レビューするときに、C# 一般ルールと併用して Unity 固有の判断規則を適用する。Runtime、Editor、Test の境界、MonoBehaviour、SerializeField、UnityEngine.Object の寿命、Unity が管理する状態、生成物、ScriptableObject、Domain Reload、Unity メインスレッド、永続化を伴う副作用、依存方向の判断で使う。",
+  "description": "Unityプロジェクトのコード、Editor拡張、テスト、Asset、Scene、Prefab、asmdef、プロジェクト構成を実装、修正、レビューするときに使う。Unity固有の実行モデル、シリアライズ、オブジェクト寿命、永続化、責務境界に適合する成果を成立させる。",
   "dependencies": [
     "csharp-authoring-rules"
   ]
