@@ -1,17 +1,18 @@
 ## 目的
 作業内容、Issue、指定値から規約準拠の作業ブランチを確定し、現在作業を失わず対象 worktree をそのブランチへ接続する。
 
-Issue、base、ブランチ名、作業保持の意図を決め、branch接続、upstream設定、base同期を確認する。helperと通常のGit操作は、その手段として使う。
+Issue、base、ブランチ名、作業保持の意図を決め、必要な branch 接続、upstream 設定、base 同期まで行う。helper と通常の Git 操作は、その手段として使う。
 
 ## フロー
 
 ### Phase 1: 対象と作業意図を固定する
 - ユーザーが指定した worktree、または作業開始時の worktree root の absolute POSIX physical root を対象として固定する。
-- IssueなどGitHub情報の取得が必要な場合に `gh auth status` を確認する。指定Issueは `gh issue view` で存在と状態を確認し、openでなければ停止する。
-- base branch が指定されていれば採用し、未指定ならリポジトリの既定ブランチを採用する。base は `refs/remotes/<remote>/<branch>` 形式の remote-tracking ref として渡す。
+- 会話、依頼、履歴、staged / unstaged diff、未追跡ファイルから今回の作業と保持する他の作業を区別する。未コミット差分や detached HEAD は、それ自体を停止理由にしない。対象外の index、worktree、未追跡・ignored ファイルと開始時の commit を保持する。
+- Issue など GitHub 情報の取得が必要な場合に `gh auth status` を確認し、指定 Issue の存在、状態、作業との対応を `gh issue view` で調べる。closed という状態だけで作業を止めず、依頼と後続作業への影響を判断する。取得できない情報に依存する判断だけを保留し、確認済みの入力でできる準備を進める。
+- base から新規作成する場合、または後続操作が base の統合を必要とする場合に base を決める。指定値を優先し、未指定ならリポジトリの既定ブランチを対応する `refs/remotes/<remote>/<branch>` へ解決する。既存 branch への接続や現在 `HEAD` からの作成だけなら、不要な base や fetch を要求しない。
 - 呼出元が既存 PR の固定済み head remote と head ref を渡した場合は、それを対象ブランチの upstream と publish 先の正本として優先する。base の remote は同期基準としてだけ使い、同名 branch への fallback はしない。
-- 現在の commit または未コミット差分を保持する意図がある場合は `--preserve-current` を選ぶ。既定ブランチを起点に新しい作業を始める意図なら、この flag を渡さない。
-- 作用前に、進行中の Git 操作、unmerged entries、対象ブランチを使う他 worktree、現在の symbolic ref と `HEAD` OID、対象ブランチの upstream、開始時 `HEAD` が保持対象ブランチへ含まれる条件を観測する。競合、他 worktree 使用、または upstream の不整合がある場合は停止する。
+- 現在の commit を作業ブランチへ含める場合は `--preserve-current` を選ぶ。base 起点の新しい作業ではこの flag を渡さず、開始時の commit と他の作業が元の branch、保持用 ref、または別 worktree に残ることを確認する。未コミット差分の保持は flag の有無によらず必要である。
+- 作用前に、進行中の Git 操作、unmerged entries、対象ブランチを使う他 worktree、symbolic ref と `HEAD` OID、対象ブランチの upstream、保持対象の commit を観測する。進行中操作や競合は所有と意図を調べ、今回の範囲で根拠から導ける解消と検証を同じ担当が行う。他 worktree の利用や変更の干渉は、対象 worktree の選び直し、保持、分離で解決できるかを調べる。他者の不明な操作を中断・破棄しない。
 
 ### Phase 2: ブランチ名を決める
 完全なブランチ名が指定されている場合や、既存PRのhead branchへ接続する場合は、その名前をGit refとして検証して保持する。slug化やprefix追加をせずPhase 3へ進む。題材だけが示されている場合は、次の規則で新しい名前を作る。
@@ -35,23 +36,22 @@ Issue、base、ブランチ名、作業保持の意図を決め、branch接続�
 ### Phase 3: 対象ブランチを確立する
 この Skill の配置ディレクトリと対象 worktree は、`sh` を実行する同じ環境で `pwd -P` により absolute physical POSIX path へ解決する。Windows host の `C:\...` を Git Bash または WSL の `sh` へ直渡ししない。`skill_dir` から `script_path="$skill_dir/scripts/branch-create-flow.sh"` を得る。
 
-固定済みhead remote/refがある場合は、helperで同じupstreamと公開先を安全に設定できることを確認してから使う。対応できなければ通常のGit操作へ切り替える。helperには次の入力だけを渡す。
+固定済み head remote/ref がある場合は、その upstream と公開先を保持する。helper は既存 local branch とその upstream を再利用し、`--preserve-current` による新規作成は現在 `HEAD` を起点にする。この経路で base の fetch は行わない。base 起点の新規作成では、指定 remote 上の同名 branch があればそこへ接続し、なければ base から作成する。固定した head remote/ref を helper だけで設定できなければ通常の Git 操作を使う。
 
 ```sh
 sh "$script_path" ensure \
   --worktree "<対象 worktree>" \
   --branch-ref "refs/heads/<確定ブランチ名>" \
-  --base-ref "<確定した base remote-tracking ref>" \
+  [--base-ref "<必要な場合に確定した base remote-tracking ref>"] \
   [--preserve-current]
 ```
 
-実行結果にかかわらずPhase 1の安全条件を再観測する。対象worktreeのsymbolic `HEAD`が対象branch refを指し、保持対象HEADを含み、upstreamが固定済みhead remote/ref、または指定がなければ整合した通常upstreamを指し、競合・進行操作がなければ接続完了とする。
+実行結果にかかわらず Phase 1 の条件を再観測する。symbolic `HEAD` が対象 branch ref を指し、選択した起点または保持対象 commit の包含、対象外の作業の保持、競合・進行操作の解消が成立すれば接続完了とする。upstream は固定済み head remote/ref または既存の設定を保持する。新規作成で upstream が未設定なら、初回公開で設定する正当な状態として扱う。
 
-接続済みなら次へ進む。未成立でも残る操作が一意で安全なら、`git fetch`、`git switch`、`git branch`、`git branch --set-upstream-to` で同じ事後条件を成立させてよい。固定先のURL・ref・OIDを確認できない、開始HEADを含められない、他worktreeが対象branchを使用する、upstreamが競合する、または次の作用が不明なら、再試行・巻き戻し・forceをせず停止する。
+接続済みなら次へ進む。未成立なら、残る操作と実際の干渉を観測し、必要な `git fetch`、`git switch`、`git branch`、`git branch --set-upstream-to`、作業の保持・分離で事後条件を成立させる。switch は ignored ファイルの上書きや submodule の再帰更新を行わない。入力不足や一時失敗は調査・補正し、不明結果は現在 ref / OID と照合してから必要な作用だけを行う。調査しても対象・保持条件・所有を確定できない、または新たな権限や仕様判断が必要な場合に限り、依存する作用を保留する。巻き戻しや force で成立させない。
 
 ### Phase 4: base と同期する
-対象ブランチが確立した後で、Phase 1 の base remote-tracking ref を指定ブランチとして `$sync-latest` へ渡す。
-`$sync-latest` が `同期完了` を返した場合だけ base 同期を完了とする。判断待ち競合または未完了なら、自動で同期を再実行せず、ブランチ接続済みと base 同期の判断待ち・未完了を別状態として報告する。
+base の統合が必要な場合は、確立した対象ブランチと Phase 1 の base remote-tracking ref を `$sync-latest` へ渡す。同 Skill の調査、競合解消、検証、再観測を経て `同期完了` を確認する。接続だけで目的が成立する場合は、追加の同期を前提にしない。未解決の仕様判断や権限が残る場合は、接続済みの状態、同期への影響、必要な判断を分けて残す。
 
 ### Phase 5: 状態を残す
 対象 worktree の絶対パス、確定した branch ref、base ref、固定済み head remote/ref の有無、`--preserve-current` の有無、最終 symbolic ref、保持した開始 `HEAD`、upstream、競合なしの観測、同期の完了または未完了、利用した helper または native 操作、停止理由を残す。

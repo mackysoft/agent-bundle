@@ -66,12 +66,6 @@ resolve_head() {
 
 collect_local() {
     resolve_head
-    status_text=$(git status --porcelain --untracked-files=all --ignore-submodules=none 2>/dev/null) || return 1
-    if [ -n "$status_text" ]; then
-        has_changes=true
-    else
-        has_changes=false
-    fi
     unmerged_text=$(git ls-files -u 2>/dev/null) || return 1
     if [ -n "$unmerged_text" ]; then has_unmerged=true; else has_unmerged=false; fi
 }
@@ -188,8 +182,6 @@ elif ! is_oid "$base_oid"; then
     emit blocked base-ref-unresolved
 elif [ "$base_unrelated" = true ]; then
     emit blocked unrelated-base
-elif [ "$has_changes" = true ]; then
-    emit blocked commit-required
 elif [ "$base_behind" -gt 0 ]; then
     emit blocked sync-required
 elif [ "$base_tree_changes" = false ]; then

@@ -13,6 +13,8 @@ target_count=0
 newline='
 '
 pre_head_oid=
+expected_head_oid=
+expected_head_ref=
 target_ref=
 target_oid=
 target_relation=null
@@ -131,8 +133,6 @@ detect_operation() {
 observe_sync_state() {
     resolve_head
     detect_operation || return 1
-    status_text=$(git status --porcelain --untracked-files=all --ignore-submodules=none 2>/dev/null) || return 1
-    if [ -n "$status_text" ]; then has_changes=true; else has_changes=false; fi
     unmerged_text=$(git ls-files -u 2>/dev/null) || return 1
     if [ -n "$unmerged_text" ]; then has_unmerged=true; else has_unmerged=false; fi
 }
@@ -216,6 +216,20 @@ block_if_start_unsafe() {
 
 append_applied_target() {
     changed=true
+    expected_head_oid=$head_oid
+}
+
+source_unchanged() {
+    [ "$head_oid" = "$expected_head_oid" ] && [ "$head_ref" = "$expected_head_ref" ]
+}
+
+merge_is_complete() {
+    [ "$head_ref" = "$expected_head_ref" ] && [ "$operation_state" = none ] && [ "$has_unmerged" = false ] \
+        && git merge-base --is-ancestor "$pre_head_oid" "$head_oid" >/dev/null 2>&1 && target_is_integrated
+}
+
+operation_not_applied() {
+    source_unchanged && [ "$operation_state" = none ] && [ "$has_unmerged" = false ]
 }
 
 if ! command -v git >/dev/null 2>&1; then
@@ -255,6 +269,8 @@ repository_root=$(CDPATH= cd "$repository_root" 2>/dev/null && pwd -P) || { emit
 observe_sync_state || { emit blocked state-unavailable null; exit 0; }
 pre_head_oid=$head_oid
 block_if_start_unsafe
+expected_head_oid=$head_oid
+expected_head_ref=$head_ref
 
 fetched_remotes=
 while IFS= read -r listed_target; do
@@ -265,12 +281,15 @@ while IFS= read -r listed_target; do
         *" $target_remote "*) continue ;;
     esac
     observe_sync_state || emit_current blocked state-unavailable
-    pre_head_oid=$head_oid
+    source_unchanged || emit_current blocked source-state-changed
     block_if_start_unsafe
-    if ! git fetch --prune "$target_remote" >/dev/null 2>&1; then
+    if ! git fetch --prune --recurse-submodules=no "$target_remote" >/dev/null 2>&1; then
         observe_sync_state || emit_current blocked fetch-failed
         emit_current blocked fetch-failed
     fi
+    observe_sync_state || emit_current blocked state-unavailable
+    source_unchanged || emit_current blocked source-state-changed
+    block_if_start_unsafe
     fetched_remotes="$fetched_remotes $target_remote"
 done <<EOF
 $target_list
@@ -280,7 +299,7 @@ while IFS= read -r listed_target; do
     [ -n "$listed_target" ] || continue
     parse_target_ref "$listed_target" || { target_ref=$listed_target; emit_current input-invalid invalid-target-ref; }
     observe_sync_state || emit_current blocked state-unavailable
-    pre_head_oid=$head_oid
+    source_unchanged || emit_current blocked source-state-changed
     block_if_start_unsafe
     prepare_target
     prepare_status=$?
@@ -294,47 +313,50 @@ while IFS= read -r listed_target; do
         '"equal"'|'"head-ahead"') continue ;;
         '"unrelated"') emit_current blocked unrelated-history ;;
     esac
-    if [ "$head_state" = attached ] && [ "$head_ref" = "$target_branch_ref" ] && [ "$target_relation" = '"diverged"' ]; then
-        emit_current blocked same-branch-diverged
-    fi
-    if [ "$has_changes" = true ]; then emit_current blocked commit-required; fi
+    observe_sync_state || emit_current blocked state-unavailable
+    source_unchanged || emit_current blocked source-state-changed
+    block_if_start_unsafe
+    pre_head_oid=$head_oid
 
     if [ "$head_state" = detached ]; then
         [ "$target_relation" = '"ref-ahead"' ] || emit_current blocked detached-diverged
-        if git switch --detach "$target_oid" >/dev/null 2>&1; then switch_status=0; else switch_status=$?; fi
+        git switch --detach --no-overwrite-ignore --no-recurse-submodules "$target_oid" >/dev/null 2>&1
         observe_sync_state || emit_current unknown-after-attempt postcondition-unavailable
-        if [ "$switch_status" -eq 0 ] && [ "$head_state" = detached ] && [ "$head_oid" = "$target_oid" ] \
+        if [ "$head_state" = detached ] && [ "$head_oid" = "$target_oid" ] \
             && [ "$operation_state" = none ] && [ "$has_unmerged" = false ]; then
             append_applied_target
             continue
         fi
+        if operation_not_applied; then emit_current blocked switch-not-applied; fi
         emit_current unknown-after-attempt detach-postcondition-failed
     fi
 
     if [ "$target_relation" = '"ref-ahead"' ]; then
-        if git merge --ff-only "$target_oid" >/dev/null 2>&1; then merge_status=0; else merge_status=$?; fi
+        git -c submodule.recurse=false merge --ff-only --no-autostash --no-overwrite-ignore "$target_oid" >/dev/null 2>&1
         observe_sync_state || emit_current unknown-after-attempt postcondition-unavailable
-        if [ "$merge_status" -eq 0 ] && [ "$operation_state" = none ] && [ "$has_unmerged" = false ] \
-            && [ "$head_oid" = "$target_oid" ]; then
+        if [ "$head_oid" = "$target_oid" ] && merge_is_complete; then
             append_applied_target
             continue
         fi
+        if operation_not_applied; then emit_current blocked fast-forward-not-applied; fi
         emit_current unknown-after-attempt fast-forward-postcondition-failed
     fi
 
-    if git merge --no-edit "$target_oid" >/dev/null 2>&1; then merge_status=0; else merge_status=$?; fi
+    git -c submodule.recurse=false merge --no-edit --no-autostash --no-overwrite-ignore "$target_oid" >/dev/null 2>&1
     observe_sync_state || emit_current unknown-after-attempt postcondition-unavailable
-    if [ "$merge_status" -eq 0 ] && [ "$operation_state" = none ] && [ "$has_unmerged" = false ] && target_is_integrated; then
+    if merge_is_complete; then
         append_applied_target
         continue
     fi
     if [ "$operation_state" = merge ] || [ "$has_unmerged" = true ]; then emit_current conflict merge-conflict; fi
+    if operation_not_applied; then emit_current blocked merge-not-applied; fi
     emit_current unknown-after-attempt merge-postcondition-failed
 done <<EOF
 $target_list
 EOF
 
 observe_sync_state || emit_current unknown-after-attempt postcondition-unavailable
+source_unchanged || emit_current unknown-after-attempt source-state-changed
 block_if_start_unsafe
 if [ "$changed" = true ]; then emit_current completed synchronized; fi
 emit_current no-op already-synchronized

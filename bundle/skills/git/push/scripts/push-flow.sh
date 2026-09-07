@@ -98,8 +98,6 @@ collect_upstream() {
 observe_publish_state() {
     resolve_head
     detect_operation || return 1
-    status_text=$(git status --porcelain --untracked-files=all --ignore-submodules=none 2>/dev/null) || return 1
-    if [ -n "$status_text" ]; then has_changes=true; else has_changes=false; fi
     unmerged_text=$(git ls-files -u 2>/dev/null) || return 1
     if [ -n "$unmerged_text" ]; then has_unmerged=true; else has_unmerged=false; fi
     if remote_exists origin; then origin_configured=true; else origin_configured=false; fi
@@ -138,7 +136,6 @@ publish_snapshot_unchanged() {
         && [ "$head_ref" = "$source_ref" ] \
         && [ "$head_oid" = "$source_oid" ] \
         && [ "$operation_state" = none ] \
-        && [ "$has_changes" = false ] \
         && [ "$has_unmerged" = false ] || return 1
     if [ "$initial_push" = true ]; then
         [ "$upstream_configured" = false ]
@@ -226,7 +223,6 @@ block_if_unsafe() {
     if [ "$has_unmerged" = true ]; then emit_current blocked unmerged; fi
     if [ "$head_state" = detached ]; then emit_current blocked detached-head; fi
     if [ "$head_state" = unborn ]; then emit_current blocked unborn-head; fi
-    if [ "$has_changes" = true ]; then emit_current blocked commit-required; fi
 }
 
 select_publish_target() {

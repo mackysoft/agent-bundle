@@ -1,10 +1,12 @@
 ## 目的
-未コミット差分を責務単位に分け、Conventional Commits 形式でコミットする。
+今回の作業に属する未コミット差分を責務単位に分け、他の作業を保持して Conventional Commits 形式でコミットする。
 
 ## フロー
 
 ### Phase 1: コミット単位と対象 path を決める
-変更ファイルと差分を読み、1コミットを1つの責務と変更理由に揃える。type、scope、目的が異なれば分割を優先し、分割できない理由は残す。各単位でstageするrepository-relative pathを明示し、未指定の全体stageは使わない。
+会話、依頼、履歴と staged / unstaged diff、未追跡ファイルを読み、今回の変更を特定する。既存の stage、文書の編集、生成物の残差などを今回分と決めつけず、対象外の index と worktree の内容を保持する。帰属や境界は調査して確定し、収集できる材料で導ける判断を確認待ちにしない。
+
+1 コミットを 1 つの責務と変更理由に揃える。type、scope、目的が異なれば分割を優先し、分割できない理由は残す。各単位の repository-relative path と実際に含める内容を明示し、未指定の全体 stage は使わない。同じ path に対象外の変更が混在する場合は、path 全体をこの Skill の対象に拡張せず、内容単位で選択する。detached HEAD でも commit は可能であり、後続の公開に必要な branch 接続はその操作の前に行う。
 
 type は次から選ぶ。
 
@@ -36,7 +38,7 @@ skill_root=$(CDPATH= cd "<skill-directory-visible-to-sh>" && pwd -P)
 worktree=$(CDPATH= cd "<worktree-directory-visible-to-sh>" && pwd -P)
 ```
 
-各コミット単位について、確定した message を stdin で渡し、選択済み path ごとに `--path` を指定して次を一度実行する。
+path 内の変更全体が選択済み内容である単位は、確定した message を stdin で渡し、path ごとに `--path` を指定して次を実行する。helper は指定 path を stage し、`git commit --only` で対象外の staged 内容を含めずに commit する。
 
 ```sh
 printf '%s\n' "<commit-message>" |
@@ -45,9 +47,13 @@ printf '%s\n' "<commit-message>" |
     --path "<selected-repository-relative-path>" [--path "<selected-repository-relative-path>" ...]
 ```
 
-helperの結果にかかわらず、選択済みpathのstaged diffとworktree diff、作成済みcommitと `HEAD`、未選択差分の保持を再観測する。commitのtreeとHEADが選択済み内容を表し、未選択差分が保たれていれば次の単位へ進む。
+作用前に `HEAD` / symbolic ref、進行操作、選択内容、対象外の index と worktree を確認する。進行操作や競合があれば所有と意図を調べ、今回の範囲で導ける解消と検証を行ってから通常 commit へ戻る。進行中の merge を通常 commit と取り違えず、他者の不明な操作を中断しない。
 
-未コミットなら、indexが選択済み内容だけと完全に一致し、未選択差分を保持している場合に限り、通常の `git commit` で続行してよい。未stageなら選択済みpathだけを `git add --` でstageし、同じ一致を確認する。index、対象範囲、既存commitを一意に確定できなければ、indexを巻き戻さず停止する。
+helper の結果にかかわらず、選択済み path の staged diff と worktree diff、作成済み commit とその親、`HEAD` / symbolic ref、対象外の index と worktree を再観測する。作成した commit が開始時 `HEAD` の直子として選択済み内容だけを表し、対象外の変更が保持されていれば次の単位へ進む。選択内容が既に commit 済みなら、対象外の staged 内容だけを理由に commit を追加しない。
+
+未コミットなら、対象パスだけの `git add` と `git commit --only`、または同一 path 内の選択に必要な一時 index や別 worktree などの通常の Git 操作で続行する。全 index を commit する方法は、今回の単位だけが含まれると確認できる場合に使う。対象外の stage を消して全体を clean にすることを前提にしない。
+
+hook 失敗、入力不足、一時的な実行失敗は、現在の commit と index を確認して原因を修正し、未成立の作用を行う。hook を迂回しない。結果不明のまま同じ commit を重ねず、調査しても内容の帰属を確定できない、他者の不明な作業へ作用する、または新たな仕様判断・権限が必要な場合だけ依存する commit を保留する。
 
 ### Phase 4: 状態を残す
 作成した commit、選択した path、index と未選択差分の保持観測、残った未コミット差分、分割できなかった理由、利用した helper または native 操作、停止理由を残す。

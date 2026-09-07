@@ -3,10 +3,14 @@
 
 ## フロー
 
-### Phase 1: 同期と公開対象を確定する
-`$sync-latest` を適用し、選んだ基準をHEADが含む `同期完了` の場合だけ進む。依存Skillの意味上の結果を使い、そのhelper固有のJSON状態名を要求しない。コミット未実施の `commit-required` が返った場合は `$commit` を適用し、同じ基準で同期を一度だけ再評価する。判断待ち競合や未完了は影響と再開条件を返す。
+### Phase 1: 今回の変更、同期基準、公開対象を確定する
+会話、依頼、履歴、staged / unstaged diff、未追跡ファイルから今回の作業を特定する。必要な今回分だけを `$commit` で責務ごとの commit にし、対象外の index と worktree を保持する。無関係な文書の編集や生成物の残差を含めて全体を clean にすることは、push の前提ではない。
 
-公開先は現在branchの有効なupstreamを使い、未設定ならoriginの同名branchとする。既存PRの固定head remote/refが入力にある場合は、それを優先し、base同期remoteと分ける。repository、upstream、ref、現在HEADの包含が対応しなければ停止し、base側の同名branchへ代替しない。
+detached HEAD なら、現在 commit を保持して、明示された PR / ref または作業文脈に対応する branch へ接続する。通常の Git 操作で既存 branch の再利用または新規作成を行い、対象外の作業、既存の公開先、他 worktree を保護する。branch の対応は履歴と設定から調べ、detached という状態だけで公開準備を止めない。
+
+`$sync-latest` を適用し、選んだ基準を `HEAD` が含む `同期完了` を確認する。依存 Skill の意味上の結果を使い、その helper 固有の JSON 状態名を要求しない。同期が必要な準備や競合解消を残した場合は、同じ担当が調査、解消、検証、再評価まで行う。公開に必要な条件と、独立して続けられる準備を区別する。
+
+公開先は現在 branch の有効な upstream を使い、未設定なら origin の同名 branch とする。既存 PR の固定 head remote/ref が入力にある場合は、それを優先し、base 同期 remote と分ける。repository、upstream、ref、`HEAD` の対応に不整合があれば履歴と設定を調べ、依頼で確定できる範囲を補正する。対応を導けない公開先へ送信せず、base 側の同名 branch へ代替しない。
 
 実効push URLはGitの `remote get-url --push --all` で確認する。書換え後の公開先、remote branch、確認済みHEAD OIDを固定し、事前・事後観測もその公開先で行う。複数の公開先を一作用として一意に扱えない場合は、いずれへも送らず停止する。URLの表記差だけで同じrepositoryを別物としない。
 
@@ -23,11 +27,11 @@ sh "$skill_root/scripts/push-flow.sh" publish-current \
 
 同期基準が複数なら同じ順で `--require-integrated-ref` を繰り返す。基準を値として確定できない場合は省略する。固定PRの公開先をhelperが実現できない場合は、同じ契約を満たす通常のGit操作を使う。
 
-作用前に、対象branchとHEAD、clean状態、進行操作・競合なし、全必須基準の包含、公開先とのfast-forward関係を確認する。送信元は確認済みのOID、送信先は一つのbranch refに固定し、`--no-follow-tags --recurse-submodules=no` を使う。タグ、他ref、submoduleを追加で公開せず、forceやhookの迂回を使わない。
+作用前に、対象 branch と `HEAD`、今回分の commit 済み内容、対象外の作業の保持、進行操作・競合なし、全必須基準の包含、公開先との fast-forward 関係を確認する。送信元は確認済みの OID、送信先は一つの branch ref に固定し、`--no-follow-tags --recurse-submodules=no` を使う。タグ、他 ref、submodule を追加で公開せず、force や hook の迂回を使わない。
 
-helperが使えない場合も状態を再観測する。未成立の作用が一意に分かる場合だけ、`git push --no-follow-tags --recurse-submodules=no <remote> <confirmed-oid>:<remote-branch-ref>` で続行してよい。通信失敗や不明結果の後に公開先OIDが期待値と一致すれば再送しない。dirtyならcommit、未統合なら同期を必要な範囲で一度だけ適用する。対象・公開先・残作用が不明、detached、競合、non-fast-forwardなら停止する。
+helper の結果にかかわらず状態を再観測する。未成立の作用が一意に分かる場合は、`git push --no-follow-tags --recurse-submodules=no <remote> <confirmed-oid>:<remote-branch-ref>` でも続行できる。通信失敗や不明結果の後に公開先 OID が期待値と一致すれば再送しない。入力不足や一時失敗は補正し、今回分の未 commit、未統合、non-fast-forward、競合は Phase 1 の準備、履歴を保持する同期、解消と検証を経て再評価する。対象外の残差だけなら固定 OID の公開を進める。調査しても対象・公開先・所有を確定できない、または新たな仕様判断や権限が必要な場合だけ、依存する送信を保留する。
 
-公開後は実効push先を再確認し、remote branch OID、対象branchとHEAD、clean状態、必須基準の包含、upstreamを観測する。初回は対象branchのupstreamも成立させる。すべてが固定した対象に対応するときだけ `completed`、既に成立していて公開作用が不要なら `no-op` とする。作用後の不明は適用可能性を保持して返す。
+公開後は実効 push 先を再確認し、remote branch OID、対象 branch と `HEAD`、対象外の作業の保持、必須基準の包含、upstream を観測する。初回は対象 branch の upstream も成立させる。すべてが固定した対象に対応するときだけ `completed`、既に成立していて公開作用が不要なら `no-op` とする。作用後に状態を確定できない場合は、適用された可能性と確認できた範囲を保持して返す。
 
 ### Phase 3: 結果を残す
 同期とcommit、公開先と明示refspec、upstreamとremote OIDの事後観測、使用したhelperまたは通常操作、再試行、残る状態と再開条件を返す。
