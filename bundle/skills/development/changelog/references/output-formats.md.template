@@ -6,8 +6,6 @@
 既存形式が無い場合は、Keep a Changelog を基準にする。
 
 ```md
-## [Unreleased]
-
 ### Added
 
 - Added ...
@@ -39,7 +37,6 @@
 ## [x.y.z] - YYYY-MM-DD
 ```
 
-最新バージョンまたは `Unreleased` を上に置く。
 既存 changelog が空カテゴリを残していない限り、空カテゴリは書かない。
 
 ## 埋め込み用エントリ
