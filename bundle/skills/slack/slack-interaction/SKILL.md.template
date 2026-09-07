@@ -22,7 +22,7 @@ Slack参照と次の入力から判断する。
 | `intent_unconfirmed` | URLまたは参照を取得したが、読み取り後の目的が未確定である。 |
 | `draft_ready` | 明示された下書き範囲の本文を完成した。 |
 | `no_external_effect` | 業務判断により今回の外部作用を必要としない。 |
-| `decision_required` | 業務事実、適用方針、指示関係または判断所有者が未確定または競合している。 |
+| `decision_required` | 業務事実、適用方針、指示関係または判断所有者に未確定事項や未解消の競合があり、結果を一意に決められない。 |
 | `permission_required` | exact actionは確定したが、その作用を覆う明示許可がない。 |
 | `context_unavailable` | 現在の目的に必要なSlack観測または安定したsnapshotを得られない。 |
 | `action_result` | `$slack-action-executor` の終端成果を変更せずに保持する。 |
@@ -31,10 +31,10 @@ Slack参照と次の入力から判断する。
 
 ## 進行
 
-1. 完了目的を分類する。目的が競合するときは `decision_required` を返す。
+1. 完了目的を分類する。指示の優先関係を踏まえても一意に確定できないときは `decision_required` を返す。
 2. 現在のSlack状態が必要な範囲を定めて `$slack-context-reader` を適用する。URL参照、読取・助言、作用の実行やcurrentness再評価では必要な項目を取得する。下書きだけなら、提供された業務事実で書ける場合はreaderを使わず、本文に `$writing` を適用して `draft_ready` を返す。
 3. readerの結果では、目的に必要な各項目が観測済みまたは根拠を伴う明示的不在であることを確認する。状態名だけで成否を決めず、未取得が目的に無関係なら `partial` でも進む。必要項目が未取得なら `complete` でも停止し、未取得項目・理由・再開条件を含む `context_unavailable` を返す。この確認後、URLだけの依頼は `intent_unconfirmed`、読取・助言は `context_ready` で完了する。
-4. 実行指示の作用記述を、明示最終作用、条件付き方針、制約・候補・例示へ分類する。分類不能または競合は `decision_required` とする。明示最終作用は適用方針との整合を確認し、利用者が方針を明示的に上書きしたときだけ固定する。優先関係が不明なら `decision_required` とする。
+4. 実行指示の作用記述を、明示最終作用、条件付き方針、制約・候補・例示へ分類し、適用方針との整合を確認する。明示最終作用は、方針と整合する場合、またはその方針を変更する権限のある利用者の明示的な上書きで競合を解消できる場合に固定する。分類や優先関係の未確定により作用を一意に決められない場合、または競合を解消できない場合は `decision_required` とする。
 5. 最終作用が未固定なら、現在のsnapshotで条件付き方針を評価する。方針が一意にactionまたは外部作用不要を定めたら採用し、generic判断へ進まない。複数の結果は明示優先または完全に同一の結果へ収束するときだけ採用する。必要な観測が不足するときは `context_unavailable`、業務事実または方針が不足するときは `decision_required` とする。条件付き方針で結果が定まらないときは、具体的な回答または行動が必要ならmessage、messageが不要で受領表明が必要ならreaction、双方が不要なら `no_external_effect` を選ぶ。
 6. messageでは親messageまたはthreadの配置を先に確定し、次にmentionまたはbroadcastによる通知を独立して判断する。根拠のない通知は既定にしない。
 7. `$slack-action-executor` の入力契約に従い、exact actionを一意に確定する。reaction名、配置、payloadの事実、notification、targetなどの業務判断が不足する場合は、未解決項目と候補を含む `decision_required` を、必要なSlack観測が不足する場合は `context_unavailable` を返す。
