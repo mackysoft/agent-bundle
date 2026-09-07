@@ -21,12 +21,12 @@
 
 ## 履行
 
-workspace、app、actorに対応するCLI認証選択を固定し、preflight、全attempt、再preflight、postfetchで維持する。読取には同じworkspace・app・actorを `$slack-context-reader` へ渡す。変更にはローカルSlack CLIの `slack api` だけを使い、methodとargumentsを導入済みhelpと現行公式資料で確認する。通信とcredential/token解決はCLIまたは実行環境へ任せ、送信表現、引数、ログ、結果へ秘密値を残さない。許可経路、API契約、認証、安全なcredential解決を確認できなければ0 attemptで `preflight_blocked` とする。
+workspace、app、actorに対応するCLI認証選択を固定し、preflight、全attempt、再preflight、postfetchで維持する。読取には同じworkspace・app・actorを `$slack-context-reader` へ渡す。変更にはローカルSlack CLIの `slack api` だけを使い、methodとargumentsを導入済みhelpと現行公式資料で確認する。通信とcredential/token解決はCLIまたは実行環境へ任せ、送信表現、引数、ログ、結果へ秘密値を残さない。許可経路、API契約、認証、安全なcredential解決の確認に不足があれば、同じ担当が入力、非secretの設定、help、公式資料を確認し、固定した認証選択と許可範囲を保って取得・呼出し手順を訂正する。これらを確認する許可範囲の回復手段がない場合だけ、0 attemptで `preflight_blocked` とする。
 
-1. `$slack-context-reader` を適用して、target、current state、boundary、snapshot invariants、no-op条件、projection、attribution scopeをpreflightする。必要な観測、比較規則、boundary確認が不足または不一致なら `preflight_blocked` を返し、dispatchしない。readerのpaginationまたは読み取り継続はattemptに数えない。
+1. `$slack-context-reader` を適用して、target、current state、boundary、snapshot invariants、no-op条件、projection、attribution scopeをpreflightする。必要な観測や比較規則が不足する場合は、同じ担当がreaderの取得を続け、入力、help、公式資料から参照・取得・比較手順を訂正する。許可範囲の回復後も必要条件を確定できない場合、または実際のboundaryや重要前提が不一致の場合だけ `preflight_blocked` を返し、dispatchしない。readerのpaginationまたは読み取り継続はattemptに数えない。
 2. preflight後にno-opを一度判定する。許可された既存状態を観測できれば、作用の種類にかかわらず0 attemptで `no_op` を返す。作用が `no_op` でその条件が不成立・観測不能の場合、または他の作用で期待結果が既に存在してもno-opとして受け入れる許可がない場合は `preflight_blocked` とする。それ以外はattempt 1へ進む。
-3. action attemptは最大2回とし、`not_dispatched` とmutation rate limitも1回のattemptとして数える。各attemptを `not_dispatched`、`rejected_not_applied`、`possibly_applied`、`accepted_unverified` の一つに分類し、submitted representationと観測根拠を残す。
-4. `possibly_applied` または `accepted_unverified` の後は `$slack-context-reader` を適用してpostfetchする。non-applicationを回復根拠にする場合も、action-specific required scopeを完全に取得して確認する。取得済みstateは取得範囲だけで記録する。
+3. action attemptは、`not_dispatched` とmutation rate limitを含めて記録する。各attemptを `not_dispatched`、`rejected_not_applied`、`possibly_applied`、`accepted_unverified` の一つに分類し、submitted representationと観測根拠を残す。回数・時間などの実行上限は、利用者、外部サービス、実行環境が定める現在有効な条件に従う。
+4. `possibly_applied` または `accepted_unverified` の後は `$slack-context-reader` を適用してpostfetchする。読み取りの失敗はreaderの回復条件で解消し、既存attemptの結果確認を続ける。non-applicationを回復根拠にする場合も、action-specific required scopeを完全に取得して確認する。取得済みstateは取得範囲だけで記録する。
 5. attemptとpostfetchを次の優先順で評価する。
 
 | 順序 | 観測条件 | 判断 |
@@ -35,7 +35,7 @@ workspace、app、actorに対応するCLI認証選択を固定し、preflight、
 | 2 | 非適用を証明できず、必要範囲を完全取得し、response ID、actor、message/reaction ID等から今回の効果へ帰属できる。 | 正規化したprojectionが一致すれば `applied_verified`、違えば `applied_mismatch`。 |
 | 3 | 取得不足、適用可能性、または効果の帰属が未確定である。 | `outcome_unknown` とし、再送しない。 |
 
-attempt 2を行えるのは、全関連attemptの非適用、新しく確認した具体的原因、作用の意味を変えない別の修正、原因・修正の不反復、作用・target・payload・reaction・通知・actor・boundary・許可の不変、再preflight通過をすべて満たす場合だけである。attempt 1が `possibly_applied` でも、その後の完全な観測で非適用を証明できればこの条件を使える。回復条件が揃わない場合、またはattempt 2で非適用を確認した場合は `recovery_blocked` を返し、追加試行しない。
+追加attemptを行えるのは、全関連attemptの非適用、新しく確認した具体的原因、作用の意味を変えない修正、同じ原因に同じ修正を繰り返さないこと、作用・target・payload・reaction・通知・actor・boundary・許可の不変、再preflight通過、現在有効な実行上限内であることをすべて満たす場合だけである。先行attemptが `possibly_applied` でも、その後の完全な観測で非適用を証明できればこの条件を使える。原因の確認、手順の訂正、必要な観測を同じ担当が続け、回復条件を満たす限り追加attemptと事後確認を行う。調査しても意味を保つ新しい修正を得られない場合、必要な外部条件を回復できない場合、または実行上限へ達した場合は `recovery_blocked` を返し、同じ失敗を盲目的に繰り返さない。
 
 再preflightでCLI経路、API契約、認証、安全なcredential解決を再確認できない場合は、全attemptが非適用なら `recovery_blocked`、適用可能性が残るなら `outcome_unknown` とする。取得済みstate、未取得範囲、理由、再開条件と、該当するaccess・rate limit・paginationを残す。
 
@@ -47,4 +47,4 @@ attempt 2を行えるのは、全関連attemptの非適用、新しく確認し�
 成果には、各attemptとdispatch classification、recovery、attribution、取得できたobserved final state、preflightとpostfetchのmethod・time・scope・unretrievedを含める。
 
 ## 完了条件
-一作用の意味を保持し、最大二回のattemptと回復条件、preflightから終端までの観測根拠を追えることを確認する。
+一作用の意味を保持し、各attemptの回復条件と現在有効な実行上限、preflightから終端までの観測根拠を追えることを確認する。

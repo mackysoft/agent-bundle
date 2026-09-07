@@ -137,11 +137,11 @@ Git history, branches, remotes, and delivery through pull requests.
 | Skill | Purpose |
 | --- | --- |
 | `branch-create` | Create or reuse task branches while preserving detached or uncommitted work. |
-| `commit` | Create responsibility-scoped Conventional Commit messages. |
+| `commit` | Commit the selected changes with Conventional Commit messages while preserving other pending work. |
 | `pr-merge` | Merge pull requests through continuous integration and branch cleanup. |
 | `pr-submit` | Verify, push, and create or update pull requests. |
-| `push` | Commit pending work when needed and push the current branch safely. |
-| `sync-latest` | Fetch remotes and safely synchronize a worktree with the right base. |
+| `push` | Commit the task's pending changes and publish the confirmed branch while preserving unrelated pending changes. |
+| `sync-latest` | Synchronize a worktree with its upstream and base while preserving local commits and pending changes. |
 
 ### agent-harness
 
@@ -166,9 +166,9 @@ Root-task supervision and orchestration for user-operated tasks.
 | `orchestrator` | Allocate one objective's outcome responsibilities to capable subagents and manage their handoffs, dependencies, and execution states. |
 | `supervisor` | Classify independent objectives and create or continue tasks when user instructions and runtime permissions allow it. |
 
-AgentBundle distributes Supervisor and Orchestrator as Skills for host runtimes where the user-operated root task cannot be supplied as a custom agent. Supervisor routes independent objectives to new or existing tasks within the permissions set by the user and runtime. It confirms delivery before ending the allocation cycle; if assignment cannot proceed, it reports what is needed to resume. It then waits for new input.
+AgentBundle distributes Supervisor and Orchestrator as Skills for host runtimes where the user-operated root task cannot be supplied as a custom agent. Supervisor routes independent objectives to new or existing tasks within the permissions set by the user and runtime. It confirms delivery and resolves recoverable delivery failures before ending the allocation cycle. If delivery remains impossible within its authority and available capabilities, it reports what is needed to resume. It then waits for new input.
 
-Each destination task applies `$orchestrator`, which waits for required executions and receives and hands off their results before completing the objective. Unresolved dependencies are reported with the conditions needed to resume. Specialists own domain research, artifact changes, monitoring, review, and verification.
+Each destination task applies `$orchestrator`, which waits for required executions and receives and hands off their results before completing the objective. Specialists own domain research, artifact changes, monitoring, review, and verification, including the evidence gathering and local recovery needed to complete their assigned work. They report unresolved dependencies with the conditions needed to resume after using the relevant evidence and recovery options within their authority.
 
 Supervisor and Orchestrator use the current task's model, reasoning level, and permissions.
 

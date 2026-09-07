@@ -4,7 +4,7 @@
 
 以下は分析に利用できる証拠の契約である。今回の問いと分析水準に必要な対象だけを選び、列挙だけの分析に通信、全定義、全設定、資源指標を要求しない。必要な証拠の欠落と、選ばなかった対象外の観点を区別する。
 
-環境固有の記録取得と対象単位への写像は入力提供責務が所有する。入力には元記録への参照、項目の意味、親子対応、順序規則、完全性保証、取得範囲を含める。このSkillは元記録の形式または取得方法を推定しない。
+環境固有の記録形式と対象単位への写像は、記録提供元の契約から確認する。入力には元記録への参照、項目の意味、親子対応、順序規則、完全性保証、取得範囲を含める。既存の取得方法で許可された記録を読むことは分析担当が行い、未確認の形式や写像を推定して証拠にしない。
 
 親実行、起動試行、開始済み子実行、継続入力、message、input request、final return、handoff、definition、lifecycleを別の対象として扱う。locatorや表示用metadataは対象を探す手掛かりとして使う。identity、設定、委譲意図、actual action、通信の所有者、利用目的は、それぞれに対応する実行記録または契約参照を根拠とする。
 
@@ -40,7 +40,7 @@ handoff coverageは、親実行側のhandoff記録を、指定した分析範囲
 
 ### 子孫の実行記録
 
-親実行の記録sourceを深さ0、親子対応に従う子実行を深さ1以上として、提供されたsourceへ同じ分析範囲を適用する。不足するsource、親子対応、または境界は環境から補わず、影響するdescendant範囲を `unverified` とする。`complete_within_coverage` と全件数の扱いは [report schema](report-schema.md) に従う。
+親実行の記録sourceを深さ0、親子対応に従う子実行を深さ1以上として、確認したsourceへ同じ分析範囲を適用する。不足するsource、親子対応、境界は、許可範囲で既存の記録と記録契約を調べる。それでも確定できないdescendant範囲だけを `unverified` とする。`complete_within_coverage` と全件数の扱いは [report schema](report-schema.md) に従う。
 
 記録sourceの十分性はclaim、dimension、coverageごとに評価し、不足する面だけを `indeterminate` または `unverified` とする。
 
