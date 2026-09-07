@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Subagent Execution Analysis",
-  "description": "正規化済みの親子実行記録と実行時点のagent定義から、subagentの起動試行と開始済みexecutionを復元し、実行主体、適用定義、委譲から終了までの挙動、資源使用を証拠の確度とともに分析するときに使う。",
+  "description": "正規化済みの親子実行記録から、subagent の起動と継続、実行主体、適用定義を復元し、指定された範囲の実行一覧、契約に対する挙動、または資源使用を分析するときに使う。",
   "dependencies": [
     "claim-grounding",
     "referent-modeling",

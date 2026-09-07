@@ -1,10 +1,7 @@
 ## 目的
 対象 worktree と同期基準を固定し、選択した基準を対象 worktree の `HEAD` が含む状態へ更新する。競合では、履歴と権限ある意図根拠から統合結果が明確に導ける場合だけ、自身が開始した merge を解消する。
 
-## 用語
-`MergeBoundary` は競合を返した `synchronize` 結果と現在の index から固定する記録であり、対象 worktree の絶対パス、`preHeadOid`、target ref と OID、`mergeBaseOid`、全 index stage、対象 path の path / mode / OID / stage、`workingState`、進行操作を含む。
 
-`ResolutionRoot` は各競合候補を正当化する根拠の型であり、`kind`、`source`、`sourceRevisionOrOid`、`authority`、`targetPaths`、`candidateEntries`、`derivationRule`、`failureConditions` をすべて持つ。`authority` は `repository-canonical`、`accepted-change-decision`、`git-observation`、`verification-observation` のいずれかに限る。commit message や一般的な設計推測は意図根拠にしない。
 
 ## フロー
 
@@ -13,8 +10,8 @@
 
 - ブランチ上では、設定済み upstream を最初の基準にする。
 - 次の統合基準は、指定ブランチ、open PR の base、既定ブランチの順に一つ選ぶ。
-- PR base と既定ブランチは `refs/remotes/origin/<branch>` を使い、同名ローカルブランチへフォールバックしない。
-- 指定ブランチが remote 名を持つ場合は対応する `refs/remotes/<remote>/<branch>` を使い、それ以外は `refs/remotes/origin/<branch>` を使う。
+- PR baseはbase repositoryに対応するlocal remote、既定ブランチは対象repositoryに対応するremoteへ解決し、`refs/remotes/<remote>/<branch>` を使う。forkのhead remoteとbase remoteを混同しない。
+- 明示されたfully-qualified refは保持する。branch名だけの場合も対象repositoryとの対応からremoteを確定し、対応不明を同名のoriginまたはlocal branchで代用しない。
 - detached HEAD では upstream と open PR を推定せず、指定ブランチまたは既定ブランチだけを基準にする。
 
 Issue、PR、既定ブランチ、指定値の意味上の選択はこの Skill が所有する。ref の fetch、OID 解決、比較、実行方法は script が所有する。
@@ -38,29 +35,10 @@ sh "$skill_root/scripts/sync-latest-flow.sh" synchronize \
 
 helper の実行後は outcome にかかわらず、各 target ref を fetch して OID を解決し、`HEAD` との ahead/behind 関係、dirty 状態、unmerged entries、進行中の Git 操作を再観測する。全 target OID が `HEAD` に含まれ、競合がなく、作業状態が操作前から許可された範囲なら `同期完了` として結果を残す。
 
-未統合の target があり、clean な開始状態で通常の fast-forward または merge が一意に安全と確認できる場合は、同じ順序で通常の `git fetch` と `git merge --ff-only` または `git merge` を使って続行してよい。dirty 状態では `blocked / commit-required` として `$commit` を適用し、完了後に同じ順序の ref を一度だけ再評価する。merge が競合した場合は、helper の結果に依存せず、現在の index から `MergeBoundary` を固定して Phase 3 へ進む。既存の競合または他の進行操作、OID や ahead/behind を確定できない状態、未分類の異常終了では停止する。
+未統合の target があり、clean な開始状態で通常の fast-forward または merge が一意に安全と確認できる場合は、同じ順序で通常の `git fetch` と `git merge --ff-only` または `git merge` を使って続行してよい。dirty 状態では `blocked / commit-required` として `$commit` を適用し、完了後に同じ順序の ref を一度だけ再評価する。merge が競合した場合は、helper の結果に依存せず、現在のindexとmergeの対象・状態を記録してPhase 3へ進む。既存の競合または他の進行操作、OID や ahead/behind を確定できない状態、未分類の異常終了では停止する。
 
-### Phase 3: 自身が開始した merge の競合を扱う
-この Phase は、helper またはこの Skill が開始した merge の `merge-conflict` と、その時点で固定した `MergeBoundary` に一致する競合だけを扱う。開始前からの競合や他の進行操作を扱わない。
-
-候補を作れるのは、次の類型のいずれか一つで、対応する `ResolutionRoot` と候補が完全に一致する場合だけである。
-
-1. conflict group の path、親 path、mode、OID、candidate 差分が stage 2 / 3 で完全一致し、rename、directory/file 競合などがない。
-2. 正本、generator、全入力 revision、全 output manifest が固定され、候補が全 output と一致する。
-3. 変換元、変換先、対象が特定 commit または正本で一対一に特定され、候補が完全一致する。
-4. 両変更の保持が明示仕様または repository-owned の機械検査可能な不変条件から直接確認でき、候補が既知差分の完全合成である。
-
-`failureConditions` を満たす候補は採用しない。複数類型で候補が不一致なら、意図が絡む場合、根拠が不足する場合と同じく判断待ち競合とする。
-
-候補を書き込む前に、`$claim-grounding` へ `MergeBoundary`、conflict index stage、`ResolutionRoot`、正本・決定・履歴の役割、権限、対象、candidate と derivation を渡す。必須命題が確認済みで、意図、正本、candidate に未確認または競合がない場合だけ、候補を検証可能とする。
-
-検証可能な暫定 candidate は未 stage の worktree だけに置く。元の conflict 内容、unmerged index stage、merge metadata を復元可能な状態で固定する。`$verification-gate` には固定 candidate manifest、根拠化結果、対象 worktree、許容書込み、受け入れ条件を渡す。検証は Git の読取・整合確認、または repository が書込み境界を明示した検証入口だけを使う。tracked file、index、ref、merge metadata の書込みは許可しない。ただし宣言済みの generated 全 output への書込みだけは例外とする。安全な入口がなければ未検証である。
-
-candidate 前後一致、`HEAD` / ref / index stage / merge metadata の許可外不変、直接の受入観測、書込み許容範囲、根拠忠実性と類型固有の確認がすべて成功した場合だけ、stage 前に予期しない変化がないことを確認する。candidate manifest の path だけを stage し、stage 内容が candidate と一致した場合だけ merge を continue する。continue が失敗した場合は、現在状態、影響、再開条件を停止成果として返す。
-
-根拠不足、検証不能または失敗、候補不一致では自動 abort をしない。競合状態を保持した判断待ち競合として停止し、同一実行で次の merge、commit、push、同期再実行を行わない。
-
-continue が成功した場合は、Phase 2 と同じ順序の ref で `synchronize` を一度実行し、`completed` または `no-op` なら `同期完了` とする。それ以外は返された状態のまま停止成果として返す。
+### Phase 3: 自身が開始したmergeの競合を扱う
+今回のhelperまたは通常のGit操作が開始したmergeだけを、[競合解消](references/conflict-resolution.md) に従って扱う。開始前からの競合や他の進行操作は引き継がない。根拠と検証が揃わなければ競合を保持し、判断待ちと再開条件を返す。
 
 ### Phase 4: 状態を残す
 通常完了時は対象 worktree の絶対パス、基準 ref と OID、merge commit の有無、次の作業を残す。停止時は現在 `HEAD`、完了・未完了基準、base / ours / theirs OID、unmerged entries、根拠と検証結果、現在の操作状態、必要な人の判断、再開条件を停止成果として返す。

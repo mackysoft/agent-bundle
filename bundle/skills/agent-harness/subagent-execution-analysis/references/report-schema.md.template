@@ -1,6 +1,6 @@
 ## subagentの実行分析結果の形式
 
-subagentの実行分析結果はJSON、表、または構造化した文章で表現できる。表現形式にかかわらず、各項目は `evidence_refs` と、該当する場合は `claim_kind`、identity confidence、definition binding、assessment、unverified reasonを保持する。
+subagentの実行分析結果はJSON、表、または構造化した文章で表現できる。以下は選択可能な情報構造であり、今回の問いと分析水準に必要な項目だけを使う。列挙では範囲、coverage、起動試行、実行と継続の対応を示し、全定義、設定、通信、資源、assessment を要求しない。選ばなかった観点に空欄や未検証状態を作らない。表現形式にかかわらず、選んだ各項目は `evidence_refs` と、該当する場合は `claim_kind`、identity confidence、definition binding、assessment、unverified reasonを保持する。
 
 ```text
 analysis_scope
@@ -57,7 +57,7 @@ assessments[]
   execution_ref, dimension, setting | null
   contract_ref { value, claim_kind, evidence_refs, missing_reason } | null
   missing_evidence { value, claim_kind, evidence_refs, missing_reason } | null
-  communication_requirement { recipient, recipient_responsibility_contract_ref, required_affected_receiver_state, timing, absence_claim, claim_kind, evidence_refs, missing_reason } | null
+  communication_requirement { recipient, recipient_responsibility_contract_ref, required_affected_receiver_state | null, timing, absence_claim, claim_kind, evidence_refs, missing_reason } | null
   assessment, scope { behavior_action_observation_ref | communication_observation_ref | execution }
   rationale, evidence_refs, unverified_refs
 parent_lifecycle
@@ -87,9 +87,9 @@ re_evaluation_triggers[]
 
 `contract_ref` は比較契約がある場合のevidence-bearing referenceである。比較契約が適用されない場合は `contract_ref=null` と `assessment=not_applicable`、比較に必要な契約が未取得の場合は `contract_ref=null`、`missing_evidence`、`assessment=indeterminate` を記録する。
 
-行動assessmentは対応する観測参照、通信assessmentは通信観測または不在を評価する execution をscopeとする。通信の必要条件は `communication_requirement` に保持する。観測済み違反は partial coverage でも `violates` にできるが、不在の `conforms` には `complete` coverage を要する。未観測範囲が execution 全体の評価を変え得る場合は `indeterminate` とする。lifecycle stateは終了の観測であり、成果契約の成功を単独で示さない。
+行動assessmentは対応する観測参照、通信assessmentは通信観測または不在を評価する execution をscopeとする。通信の許可・必要条件は対象時点の `contract_ref` と `communication_requirement` に保持する。受け手の状態変化が契約条件でない場合、`required_affected_receiver_state` は `null` にできる。観測済み違反は partial coverage でも `violates` にできる。不在の判定には関連範囲の `complete` coverage を要し、必要な通信の欠落なら `violates`、不要・禁止の条件なら `conforms` とする。契約または記録保証が不足する場合は `indeterminate` とする。未観測範囲が execution 全体の評価を変え得る場合は `indeterminate` とする。lifecycle stateは終了の観測であり、成果契約の成功を単独で示さない。
 
-`resource_usage` は設定、行動、成果から独立したobservationである。使用量区分、経過時間、起動試行数、開始済み子実行数、再起動数、行動または操作数、報告費用、導出費用を意味単位として保持し、記録sourceが報告する指標名と値を対応付ける。未報告の指標を補わない。経過時間は計測範囲が定めた開始と終了または停止のrecord refsを入力にした `derived` とする。件数はcoverageが全件性を支える範囲だけを総数とし、それ以外は観測数として記録する。
+`resource_usage` は設定、行動、成果から独立したobservationである。指定された範囲の使用量、時間、件数、報告・導出費用を意味単位として保持し、記録sourceが報告する指標名と値を対応付ける。必要な未報告指標は `unverified` とし、要求されていない指標は省略する。経過時間は計測範囲が定めた開始と終了または停止のrecord refsを入力にした `derived` とする。件数はcoverageが全件性を支える範囲だけを総数とし、それ以外は観測数として記録する。
 
 報告された課金額は対応する課金記録を根拠に `observed` とする。使用量から計算した費用は `derived` とし、measurement、usage metricと課金区分の関係、計算式、`pricing_ref` を持つ。必要な使用量、mapping、価格基準を確認できない指標は `value=null`、`claim_kind=unverified` とする。
 

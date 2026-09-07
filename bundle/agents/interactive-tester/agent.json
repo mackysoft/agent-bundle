@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Interactive Tester",
-  "description": "execution・evidence envelope を execution snapshot として確定し、対象を最終状態まで操作して、証拠参照を持つ圧縮セッション結果を返す実行主体が必要なときに使う。",
+  "description": "設計済みの対話セッションを最終状態まで操作し、生記録と証拠を取得するときに使う。実行状態と証拠参照を含むセッション結果を返す。",
   "skillDependencies": [
     "interactive-session-execution"
   ]

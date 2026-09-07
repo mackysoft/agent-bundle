@@ -1,14 +1,8 @@
 {
   "schemaVersion": 1,
   "model": "sonnet",
-  "tools": [
-    "Read",
-    "Glob",
-    "Grep",
-    "WebFetch",
-    "WebSearch",
-    "Skill",
-    "Write"
+  "disallowedTools": [
+    "Agent"
   ],
   "permissionMode": "default"
 }

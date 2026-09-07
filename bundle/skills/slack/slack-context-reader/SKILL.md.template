@@ -18,9 +18,11 @@ Slack URLだけの場合は、URLからworkspaceと対象を正規化する。
 
 ## 取得と観測
 
-取得前にworkspace、Slack app、actorに一致するCLI認証選択を一つへ固定し、全取得で維持する。読み取りはローカルSlack CLIの `slack api` だけで行い、methodとargumentsはインストール済みCLIのhelpと現在のSlack公式資料から選ぶ。Web API通信はCLI内部の経路を使う。credentialまたはtokenの値はCLIまたは実行環境で解決する。CLI arguments、log、result、成果はnon-secretな識別子と検索・取得条件だけで構成する。認証選択が不明なら `input_incomplete`、主体を固定した後に認証を確立できなければ `access_unconfirmed`、CLI、helpまたはSlack公式資料を利用できず取得契約を確定できなければ `partial` とし、既存の結果契約に従いreason、unretrieved scope、resume conditionを返す。`direct_reference` ではworkspace、conversation、親message、thread、対象messageを正規化し、`discovery` では探索条件と候補条件を固定する。
+取得前にworkspace、app、actorに対応するCLI認証選択を固定し、全取得で維持する。ローカルSlack CLIの `slack api` だけを使い、methodとargumentsは導入済みCLIのhelpと現行のSlack公式資料で確認する。Web API通信とcredential/tokenの解決はCLIまたは実行環境へ任せ、引数、ログ、成果に秘密値を残さない。
 
-要求範囲に応じて、workspace、conversation、message、parent、threadを取得する。normal message、subtypeまたはsystem event、`thread_broadcast` を区別し、actor、app、認証主体、timestamp、編集、text、blocks、thread relation、reactionsとそのactor、mentions、broadcast、conversation type、public・private・external-shared境界、file、attachment、unfurl、linkを観測する。paginationは要求範囲を満たすか継続条件が失われるまで進める。
+認証選択が不明なら `input_incomplete`、固定した主体で認証できなければ `access_unconfirmed`、CLIや資料が使えず取得契約を確認できなければ `partial` とし、理由、未取得範囲、再開条件を返す。direct_referenceではworkspaceとconversation、親・thread・対象messageを正規化し、discoveryでは探索条件と候補条件を固定する。
+
+要求された対象と項目に応じて、message種別とthread関係、主体と時刻・編集、text/blocks、reactionと主体、mention/broadcast、conversation種別とpublic/private/external-shared境界、file/attachment/unfurl/linkを観測する。通常message、system event、thread_broadcastを混同しない。paginationは要求範囲を満たすか継続条件が失われるまで進める。
 
 各要求項目を次のいずれかへ分類し、method、時刻、target、access、paginationへ対応付ける。
 
@@ -50,7 +52,4 @@ API fieldの欠落は未取得として記録する。明示empty、method contr
 `discovery` が `complete` で候補が空の場合は、指定した探索範囲で一致がなかった観測として返す。response selection、payloadの意味同一性、permission、currentness、作用の帰属は、この成果の判断に含めない。
 
 ## 完了条件
-
-- 観測した事実をmethod、対象、取得時刻、範囲へ追跡できる。
-- 値の不在とAPI fieldの未取得を区別している。
-- 主状態、取得範囲、未取得範囲、付帯条件、再開条件が対応している。
+結果の各事実をmethod、対象、時刻、範囲へ追え、値の不在とfield未取得が分かれ、主状態・付帯条件・未取得範囲・再開条件が対応していることを確認する。

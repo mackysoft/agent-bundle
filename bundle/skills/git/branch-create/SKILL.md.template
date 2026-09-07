@@ -1,20 +1,22 @@
 ## 目的
 作業内容、Issue、指定値から規約準拠の作業ブランチを確定し、現在作業を失わず対象 worktree をそのブランチへ接続する。
 
-この Skill は、Issue、base、ブランチ名、現在作業を保持する意図を決める。対象 worktree の観測、fetch、ブランチ作成・再利用・tracking・upstream 設定、完了確認を所有する。flow script はその優先手段であり、唯一の実現手段ではない。
+Issue、base、ブランチ名、現在作業を保持する意図を決め、観測からbranch接続とupstream設定、base同期の確認までを扱う。helperと通常のGit操作は、この結果を成立させる手段として使う。
 
 ## フロー
 
 ### Phase 1: 対象と作業意図を固定する
 - ユーザーが指定した worktree、または作業開始時の worktree root の absolute POSIX physical root を対象として固定する。
-- `gh auth status` を確認する。Issue が指定されている場合は `gh issue view` で存在と状態を確認し、open でなければ停止する。
+- IssueなどGitHub情報の取得が必要な場合に `gh auth status` を確認する。指定Issueは `gh issue view` で存在と状態を確認し、openでなければ停止する。
 - base branch が指定されていれば採用し、未指定ならリポジトリの既定ブランチを採用する。base は `refs/remotes/<remote>/<branch>` 形式の remote-tracking ref として渡す。
 - 呼出元が既存 PR の固定済み head remote と head ref を渡した場合は、それを対象ブランチの upstream と publish 先の正本として優先する。base の remote は同期基準としてだけ使い、同名 branch への fallback はしない。
 - 現在の commit または未コミット差分を保持する意図がある場合は `--preserve-current` を選ぶ。既定ブランチを起点に新しい作業を始める意図なら、この flag を渡さない。
 - 作用前に、進行中の Git 操作、unmerged entries、対象ブランチを使う他 worktree、現在の symbolic ref と `HEAD` OID、対象ブランチの upstream、開始時 `HEAD` が保持対象ブランチへ含まれる条件を観測する。競合、他 worktree 使用、または upstream の不整合がある場合は停止する。
 
 ### Phase 2: ブランチ名を決める
-ブランチ種別が指定されていれば採用する。指定がなければ Issue、ユーザー指示、差分の目的から一般的な開発語彙に沿って選ぶ。
+完全なブランチ名が指定されている場合や、既存PRのhead branchへ接続する場合は、その名前をGit refとして検証して保持する。slug化やprefix追加をせずPhase 3へ進む。題材だけが示されている場合は、次の規則で新しい名前を作る。
+
+ブランチ種別は指定を優先し、なければIssue、依頼、差分の目的から選ぶ。
 
 | 変更の性質 | branch type |
 | --- | --- |
@@ -28,7 +30,7 @@
 | build、依存、リリース設定 | `build` |
 | その他の保守作業 | `chore` |
 
-判断できない場合は `chore` を使う。ブランチ名が指定されていれば slug 化して使い、未指定なら Issue、ユーザー指示、差分の目的から slug を作る。Issue がある場合は `<type>/issue-<N>-<branch_name>`、ない場合は `<type>/<branch_name>` にする。slug は ASCII 小文字、数字、ハイフンで構成し、空なら `goal` を使う。
+種別を判断できなければ `chore` とする。題材、Issue、依頼、差分の目的からASCII小文字・数字・ハイフンのslugを作り、空なら `goal` とする。Issueがあれば `<type>/issue-<N>-<slug>`、なければ `<type>/<slug>` にする。指定値が完全な名前か題材かは文脈から判断し、既存branchやPRの同一性を変えない。
 
 ### Phase 3: 対象ブランチを確立する
 この Skill の配置ディレクトリと対象 worktree は、`sh` を実行する同じ環境で `pwd -P` により absolute physical POSIX path へ解決する。Windows host の `C:\...` を Git Bash または WSL の `sh` へ直渡ししない。`skill_dir` から `script_path="$skill_dir/scripts/branch-create-flow.sh"` を得る。

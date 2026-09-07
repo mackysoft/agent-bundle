@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Slack Action Executor",
-  "description": "対象、内容、通知、実行主体、許可が確定した一つのSlack作用を実行するときに使う。入力された作用の意味を保持し、作用が適用されたか、不要だったか、停止したか、期待と不一致だったか、結果を確定できないかを観測根拠とともに返す。",
+  "description": "対象、内容、通知、実行主体、許可が確定した一つのSlack作用を履行し、適用結果と確認できた状態を観測根拠付きで返すときに使う。",
   "dependencies": [
     "slack-context-reader"
   ]

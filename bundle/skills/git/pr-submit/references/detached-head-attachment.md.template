@@ -1,0 +1,10 @@
+# detached HEADのPR対象をbranchへ接続する
+本文Phase 3でdetached HEADを確認した場合に使う。branch を作る前に現在 `HEAD` OID を固定し、その OID と一致する `headRefOid` を持つ open PR を read-only で探索する。
+
+候補が一意なら、PR 番号、URL、head branch、接続前の head OID、base、head repository、対応する local remote 名、head ref を既存 PR identity として固定し、接続前の head OID は元 head 保持の証拠として残す。head ref は `refs/remotes/<head-remote>/<head-branch>` とする。base は既存 PR の base を採用する。
+
+branch 作用前に、local remote URL が PR の head repository と一致し、head ref が存在しその OID が固定した元 head OID と一致することを read-only で確認する。remote 名、URL、head ref、OID のいずれかを安全に確定できない場合は、branch、push、PR 更新を行わず停止する。base remote の同名 branch へ fallback しない。
+
+`$branch-create` は一度だけ、既存 PR の head branch と一致する branch 名、既存 PR の base、固定済み head remote/ref、`--preserve-current` を入力として実行する。接続後は base 同期が完了していること、symbolic ref が既存 PR の head branch を指すこと、upstream が固定済み head remote/ref と同一であること、競合がないこと、元 head OID が現在 `HEAD` に含まれることを確認する。固定 OID との完全一致は要求しない。確認できた現在 `HEAD` OID を新しい作業 head として固定し、Phase 4 以後の prepare、push、PR 更新、返却へ渡す。元 head OID を含められない、競合がある、または base 同期が未完了なら停止する。
+
+候補が複数、または PR 番号、URL、head branch、head OID、base、head repository、remote 名、head ref の同一性を確定できない場合は、branch または PR を新規作成せず停止する。候補がなければ、Phase 2 の base と比較して未コミット差分または PR 対象 commit があるかを read-only で確認する。対象がなければ空 PR を作らず、`no-change` として停止する。対象がある場合だけ、`$branch-create` へ Phase 2 の base、確定した branch 名、`--preserve-current` を渡す。この依存は一度だけ実行する。`$branch-create` が branch 接続を完了した後は、最終 symbolic ref、保持対象 `HEAD`、upstream、競合なしを確認して Phase 1 へ戻る。接続できない、または事後条件を確認できない場合は、現在状態、影響、再開条件を残して停止する。

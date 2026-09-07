@@ -1,78 +1,57 @@
-## 目的
-現在作業または指定 PR を、安全にマージする。
+## 目的と作用範囲
+現在作業または指定PRについて、必要な更新、Ready化、CIとmerge queue、GitHub上の実マージ確認、許可されたremote branchの後始末まで進める。
 
-対象 PR を確定し、必要な更新、Ready 化、auto-merge 設定、CI と queue の監視、GitHub 上の実マージ確認、許可されたリモートブランチ後始末まで進める。
+PR番号・URLと、head branch・観測したhead OIDを固定して扱う。指定PRと無関係なworktreeやdetached HEADは操作しない。admin mergeまたはbypassは、ユーザーがその権限を明示した場合だけ使う。不明な作用を再実行せず、巻き戻しや履歴のforce更新を行わない。
 
-## 用語
-`privileged-merge` は、ユーザーが admin merge または bypass を明示した状態を指す。これは強い権限指定であり、明示された場合だけ `gh pr merge --admin` に使う。
+## 共通の再観測
+各作用の後と次の経路を選ぶ前に、同じPRのstate、head、checks、required checks、queue、保護ルールを確認する。
 
-`PR identity` は PR 番号と URL、`head identity` は head branch と観測した head OID を指す。後続の更新、merge、cleanup は、この二つを再観測しながら扱う。
-
-## 作用契約
-
-helper、`git`、`gh` のいずれも目的を達成する手段である。作用後は PR、head OID、checks、queue、リモート branch を再観測し、事後条件が成立して初めて完了とする。不明な作用の再実行、巻き戻し、force、明示されていない権限 bypass は行わない。
-
-指定 PR がある場合、無関係な local detached HEAD やその未コミット作業を操作しない。現在作業を更新するのは、その worktree が確定した PR の head branch に接続しており、更新が必要な場合だけである。
+| 観測 | 行動 |
+| --- | --- |
+| `MERGED` | マージ証拠と後始末へ進む。 |
+| `CLOSED` かつ未マージ | 停止する。 |
+| `OPEN` でhead OIDが変化 | 新しいOIDを固定し、checksとqueueを再評価する。 |
+| 表示済みまたはrequiredのcheckが失敗・取消・タイムアウト | 停止する。 |
+| checksが未表示 | 短く検出待ちし、再観測する。 |
+| 認証・権限・必要な状態を確認できない | 確認済み範囲、影響、再開条件を返す。 |
 
 ## フロー
 
-### Phase 1: 対象 PR を確定する
-- `gh auth status` を確認する。認証または対象 PR の参照権限を確認できなければ停止する。
-- PR 番号、URL、ブランチが指定されている場合は、その PR を `gh pr view` で取得する。`state=MERGED` なら Phase 7 へ進み、`CLOSED` かつ未マージなら停止する。`OPEN` の場合だけ以後のマージ準備へ進む。
-- 指定がない場合は、attached branch の一意な open PR を確認する。複数候補は停止する。
-- 現在 branch の PR がなく、現在作業が PR 対象なら `$pr-submit` を適用する。detached HEAD の現在作業も `$pr-submit` へ渡し、branch 確立はその Skill の責務として扱う。`no-change` は空 PR を作らない完了状態である。
-- PR を確定したら、PR 番号、URL、base、head branch、head OID、state を記録する。`privileged-merge` が明示されている場合は状態に残す。
+### 1. PRを確定して必要な更新を行う
+`gh auth status` と参照権限を確認する。指定PRは `gh pr view` で取得し、指定がなければattached branchの一意なopen PRを選ぶ。候補が複数なら停止する。現在作業にPRがなく、PR対象の変更がある場合は `$pr-submit` を適用し、detached HEADの接続も同Skillへ委ねる。`no-change` は空PRを作らない完了状態である。
 
-### Phase 2: 確定した PR だけを更新する
-確定 PR の head branch に現在 worktree が attached している場合だけ、未コミット差分または未 push commit は `$push` の通常フローで反映し、base の最新化は `$sync-latest` と必要な `$push` で反映する。同期が競合した場合はマージへ進まない。
+PRのbase、head branch/OID、state、明示された権限を記録する。現在worktreeがそのhead branchへ接続している場合だけ、未コミット差分や未push commitを `$push`、baseの最新化を `$sync-latest` と必要なpushで反映する。競合ならマージへ進まない。マージのためだけに既存PR本文を更新しない。
 
-指定 PR があるが current worktree が別 branch または detached HEAD の場合は、local state を変更せず GitHub 上の PR を再観測して次へ進む。既存 PR の本文はマージのためだけには更新しない。
+### 2. Readyとマージ方式を確認する
+共通の再観測を行い、OPENのDraftだけをReadyにする。Ready化の後も状態を確認する。
 
-更新後は `gh pr view` で同じ PR identity と head branch を確認する。`state=MERGED` なら Phase 7 へ進む。`CLOSED` かつ未マージなら停止する。`OPEN` で head OID が変化した場合は新しい OID を固定して Phase 3 から再評価する。
+方式はユーザーまたはプロジェクトの指定を優先し、repositoryで許可されていることを確認する。未指定なら許可された方式をmerge、squash、rebaseの順で選ぶ。明示方式が使えなければ勝手に変えず、理由を返す。
 
-### Phase 3: Ready と判定材料を再観測する
-最初に state を再観測する。`state=MERGED` なら Phase 7 へ進み、`CLOSED` かつ未マージなら停止する。`OPEN` の Draft PR だけを Ready にする。失敗、認証不足、権限不足、または Ready 化後に PR を確認できない場合は停止する。
+merge queueが必要な場合は、方式を指定しない公式CLIのqueue経路を選ぶ。checks待ちはauto-merge、条件成立後はqueueへの登録となる。queueのbypassにもユーザーの明示が必要である。
 
-PR の state、head OID、checks、required checks、merge queue、保護ルールを再観測する。表示済みまたは required の check に失敗、取消、タイムアウトがあれば停止する。checks が未表示なら短く検出待ちして再観測する。
-
-head OID が Phase 1 または Phase 2 で固定した値と変化した場合は、その OID を固定し、checks と queue を Phase 3 から再評価する。
-
-### Phase 4: マージ経路を選ぶ
-
-| 状態 | 行動 |
-| --- | --- |
-| `state=MERGED` | Phase 7 でマージ証拠を確認して cleanup を評価する。 |
-| `CLOSED` かつ未マージ | 停止する。 |
-| `privileged-merge` が明示されている | Phase 6 の `--admin` 付き直接マージへ進む。 |
-| 通常のマージ条件を満たす | Phase 6 の直接マージへ進む。 |
-| checks、queue、保護ルールの完了待ち | Phase 5 で auto-merge を設定する。 |
-| 失敗、取消、タイムアウト、認証不足、権限不足 | 停止する。 |
-
-### Phase 5: auto-merge を設定して監視する
-固定した head OID に対して、まず次を実行する。
+### 3. マージを要求して完了まで観測する
+固定したhead OIDに対し、PR URLを明示して次を使う。
 
 ```sh
-gh pr merge <number> --auto --merge --match-head-commit <headRefOid>
+gh pr merge <PR-URL> --match-head-commit <head-oid> <選択したフラグ>
 ```
 
-merge queue が方式指定を受け付けない場合だけ、`--merge` を外して同じ head OID に対して設定する。auto-merge 設定は中間状態であり、完了ではない。
+queue以外では選択した `--merge`、`--squash`、`--rebase` の一つを付け、通常条件の完了待ちなら `--auto` を付ける。直接マージが成立する場合はautoを付けない。明示されたadmin/bypassの範囲だけ `--admin` を使う。保護ルールによる拒否を、未許可のbypassへ切り替えない。
 
-設定後は Phase 3 と同じ観測を繰り返す。head OID が変化した場合は、新しい OID を固定して Phase 3 へ戻る。`OPEN` のままなら checks と queue を監視し、失敗、取消、タイムアウト、認証不足、権限不足、または `CLOSED` 未マージなら停止する。`MERGED` の観測だけが Phase 7 へ進む条件である。
+要求後は共通の再観測を繰り返す。auto-merge設定やqueue登録、コマンド成功は中間状態であり、`MERGED` を観測するまで完了としない。通信断や不明結果でも同じPRを再取得し、既にMERGEDなら再要求しない。OPENで残る作用を一意に確認できる場合だけ経路を再選択する。
 
-### Phase 6: 直接マージを要求して監視する
-固定した head OID に対して、次を選ぶ。
+### 4. マージ証拠と後始末を確認する
+`gh pr view` で `state=MERGED`、`mergedAt`、`mergeCommit` を確認してマージ完了とする。
 
-| 状態 | コマンド |
-| --- | --- |
-| `privileged-merge` が明示されている | `gh pr merge <number> --merge --admin --match-head-commit <headRefOid>` |
-| `privileged-merge` が明示されていない | `gh pr merge <number> --merge --match-head-commit <headRefOid>` |
+後始末はこの確認後、許可されたhead branchだけを扱う。head repositoryに対応するremoteと一意な実効push URLを確認し、その公開先のbranch OIDが最後に固定したhead OIDと一致する場合だけ、次の条件付き削除を使う。
 
-保護ルール起因で失敗した場合も、`privileged-merge` の明示がなければ停止する。コマンドの成功、通信断、または結果不明の後は、同じ PR identity を `gh pr view` で再観測する。`state=MERGED` なら再 merge せず Phase 7 へ進む。`CLOSED` かつ未マージなら停止する。`OPEN` の場合だけ、checks、queue、state を Phase 3 と同じ条件で確認し、head OID が変化した場合は Phase 3 へ戻り、変化がなければ Phase 4 で経路を再選択する。check 失敗または取消、認証不足、権限不足は停止する。
+```sh
+git push --no-follow-tags --recurse-submodules=no \
+  --force-with-lease=refs/heads/<head-branch>:<expected-head-oid> \
+  <head-remote> :refs/heads/<head-branch>
+```
 
-### Phase 7: GitHub 上のマージを確認して cleanup する
-`gh pr view` で `state=MERGED`、`mergedAt`、`mergeCommit` を確認する。いずれかを確認できなければマージ完了として扱わない。
+このleaseは削除時点のOID比較条件であり、履歴をforce更新する許可ではない。確認後にbranchが進んだ場合は削除を成立させない。削除先と不在を事後観測する。fork、remote、権限、OID、削除結果を確定できない場合はbranchを保持し、マージ完了とcleanup未実行・未確認を分けて返す。
 
-cleanup はこの確認後だけ行う。head repository と remote を対応付けられ、remote branch の OID が最後に固定した head OID と一致する場合だけ、その branch を通常の `git push <remote> :refs/heads/<head-branch>` で削除してよい。削除直前または確認時に remote OID が別値なら削除せず、その状態を残す。fork、remote、権限、OID を安全に確定できない場合も削除せず停止ではなく cleanup 未実行として残す。
-
-### Phase 8: 状態を残す
-PR 番号と URL、base、head branch と各再評価時の OID、checks と queue の最終観測、マージ経路、`privileged-merge` 指定の有無、auto-merge 設定結果、`MERGED`、`mergedAt`、merge commit、cleanup の実行または未実行理由、停止理由を残す。
+### 5. 結果を返す
+PR、base、headと各再評価時のOID、checksとqueue、選択方式と権限、auto-merge、マージ証拠、cleanupの結果、残る状態と再開条件を返す。

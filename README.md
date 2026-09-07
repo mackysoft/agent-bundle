@@ -105,8 +105,8 @@ Cross-domain grounding, change framing, terminology, and writing.
 | --- | --- |
 | `challenge` | Critically question concrete choices in plans and artifacts when evidence shows a weak rationale, mismatch, unnecessary indirection, duplication, or brittleness; return all independent, meaningful questions. |
 | `change-framing` | Reconstruct change purpose, authority, contract changes, permissions, acceptance conditions, implementation constraints, and unresolved decisions. |
-| `claim-grounding` | Ground claims in sources, evidence composition, adoption status, scope, and relationships. |
-| `referent-modeling` | Ground terms and abstractions in concrete referents, roles, and relationships before naming. |
+| `claim-grounding` | Resolve a claim's evidence, adoption status, information validity, and usable scope when these cannot be established directly. |
+| `referent-modeling` | Map expressions to their referents in context, preserving meaningful distinctions for downstream use and any needed naming or classification. |
 | `writing` | Write, revise, review, summarize, and localize text while preserving meaning and ownership boundaries. |
 
 ### development
@@ -123,11 +123,11 @@ Software implementation, testing, review, documentation, issue planning, and int
 | `issue-planner` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | Write, create, update, or review structured GitHub Issue bodies. |
 | `review-triage` | Triage review comments against code, specifications, and evidence. |
-| `test-authoring` | After an authoritative basis confirms that the implementation change for the same target scope is complete or unnecessary, implement and maintain permitted tests that continuously detect concrete external-contract violations in an identified target implementation. |
-| `test-oracle-assessment` | Read-only assess important existing or candidate test judgments against the current external contract, independent expectations and observations, and evidence of detecting concrete violations after the scoped implementation change is complete or unnecessary. |
+| `test-authoring` | Once the scoped implementation is complete or confirmed to need no changes, create and maintain authorized tests that detect current external-contract violations from the consumer boundary. |
+| `test-oracle-assessment` | Once the scoped implementation is complete or confirmed to need no changes, assess important test judgments for contract alignment, independence of expectations and observations, and evidence of detecting violations, without editing or running tests. |
 | `ultra-review` | Define and converge review planning, independent review outcomes, triage, responsibility-owned fixes, verification, and re-review; return semantic requirements and resume conditions when a required outcome is missing. |
 | `unity-authoring-rules` | Apply Unity-specific implementation and review rules with the C# rules. |
-| `verification-gate` | Judge a completed scoped change from existing evidence and only the minimum additional checks needed to decide its acceptance conditions. |
+| `verification-gate` | Determine acceptance from existing evidence and only the necessary existing checks once the scoped implementation is complete or confirmed to need no changes. |
 | `xml-doc-writer` | Write contract-focused XML documentation comments. |
 
 ### git
@@ -150,11 +150,11 @@ Authoring, isolated behavior validation, execution reconstruction, and deviation
 | Skill | Purpose |
 | --- | --- |
 | `behavior-deviation-analysis` | Attribute behavior deviations to evidence-backed causes, repair owners, and revalidation scope. |
-| `custom-agent-authoring` | Create or update custom agent contracts, definitions, dependencies, host bindings, and the behavior checks needed for the change. |
+| `custom-agent-authoring` | Create, update, or review custom agent definitions and host bindings with the required behavior checks; reviews preserve the target and shared artifacts. |
 | `custom-agent-behavior-validation` | Use one independent executor to check the custom agent behaviors required for the current change, adding runtime trace or resource measurements only when required. |
-| `skill-authoring` | Create or update agent Skills and directly check the behavior needed for the change. |
+| `skill-authoring` | Create, update, or review Skills with behavior checks appropriate to the change; reviews preserve the target and shared artifacts. |
 | `skill-behavior-validation` | Check the Skill behaviors required for the current change with the smallest sufficient set of independent usage scenarios. |
-| `subagent-execution-analysis` | Reconstruct subagent executions, lifecycle, configuration, actions, and resource usage from runtime evidence. |
+| `subagent-execution-analysis` | Inventory subagent executions, check requested behavior against their contracts, and analyze resource usage when needed. |
 
 ### orchestration
 
@@ -164,11 +164,13 @@ Root-task supervision and orchestration for user-operated tasks.
 | --- | --- |
 | `artifact-handoff` | Transfer temporary artifacts between agents by reference and expose task-scoped reuse only when it avoids duplicate work. |
 | `orchestrator` | Allocate one objective's outcome responsibilities to capable subagents and manage their handoffs, dependencies, and execution states. |
-| `supervisor` | Classify received work into independent objectives and create, update, or split user-operable tasks that apply the orchestrator Skill. |
+| `supervisor` | Classify independent objectives and create or continue tasks when user instructions and runtime permissions allow it. |
 
-AgentBundle distributes Supervisor and Orchestrator as Skills for host runtimes where the user-operated root task cannot be supplied as a custom agent. Supervisor performs task-level orchestration: it separates received work by objective and completion boundary, decides whether to create, update, or split tasks, and applies `$orchestrator` in each new task. Orchestrator performs within-task orchestration: it decomposes one objective into outcome responsibilities, selects capable subagents, and manages their handoffs, dependencies, and execution states. Both roots remain on the coordination plane and assign domain research, artifact changes, target monitoring, review, and verification to responsible subagents. After an allocation cycle completes, they wait for new input instead of monitoring assigned work.
+AgentBundle distributes Supervisor and Orchestrator as Skills for host runtimes where the user-operated root task cannot be supplied as a custom agent. Supervisor routes independent objectives to new or existing tasks within the permissions set by the user and runtime. It confirms delivery before ending the allocation cycle; if assignment cannot proceed, it reports what is needed to resume. It then waits for new input.
 
-Supervisor and Orchestrator use the current task's model, reasoning level, and permissions as their coordination capacity. Leaf custom agents use the settings defined by their host bindings and defer unspecified settings to the host runtime unless the user explicitly requests an override.
+Each destination task applies `$orchestrator`, which waits for required executions and receives and hands off their results before completing the objective. Unresolved dependencies are reported with the conditions needed to resume. Specialists own domain research, artifact changes, monitoring, review, and verification.
+
+Supervisor and Orchestrator use the current task's model, reasoning level, and permissions.
 
 ### game-planning
 
@@ -190,7 +192,7 @@ Context acquisition, request completion, and authorized external effects.
 | --- | --- |
 | `slack-action-executor` | Establish one fully specified effect, safely recover from confirmed non-application, and classify its observed result. |
 | `slack-context-reader` | Read a bounded conversation or discovery scope with traceable coverage, omissions, and access state. |
-| `slack-interaction` | Read references first, then resolve whether the request ends in context, intent confirmation, a draft, or one authorized effect. |
+| `slack-interaction` | Resolve Slack requests into context, intent confirmation, a draft, or one authorized effect, using current observations where needed. |
 
 ## Custom agents
 
@@ -218,14 +220,16 @@ Custom agents use one flat catalog namespace:
 | --- | --- | --- |
 | `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
 | `challenger` | Returns non-blocking, evidence-backed challenges to questionable concrete choices in plans and artifacts. | `challenge` |
-| `evidence-organizer` | Organizes an execution-and-evidence envelope and saved session results into a generic, traceable evidence package without interpretation. | `claim-grounding` |
-| `implementer` | Implements artifacts from a confirmed implementation contract and returns the implementation result, its correspondence to the authoritative current external contract, the chosen internal realization, and local check results. | `code-authoring-rules`, `writing` |
-| `interactive-tester` | Executes an interactive execution-and-evidence envelope through its final state, saves evidence, and returns the scoped session result. | `interactive-session-execution` |
-| `reviewer` | Independently evaluates defects and risks in candidate work, including writing and content placement. | `review-triage`, `writing` |
-| `test-implementer` | After an authoritative basis confirms that the implementation change for the same target scope is complete or unnecessary, implements and maintains permitted tests that continuously detect concrete external-contract violations in an identified target implementation. | `test-authoring` |
-| `verifier` | Judges a completed scoped change from existing evidence and only the minimum additional checks needed to decide its acceptance conditions. | `verification-gate` |
+| `evidence-organizer` | Organizes collected execution records and evidence into a package with traceable sources, chronology, and requirement coverage, without domain interpretation. | `claim-grounding` |
+| `implementer` | Creates or changes artifacts from a confirmed implementation contract and reports local check results. Automated test artifacts belong to Test Implementer. | `code-authoring-rules`, `writing` |
+| `interactive-tester` | Runs a designed interactive session through its final state, saves raw evidence, and reports the session result. | `interactive-session-execution` |
+| `reviewer` | Independently evaluates defects and risks in candidate work, or triages existing review findings against the relevant evidence and scope. | `review-triage`, `writing` |
+| `test-implementer` | Once the scoped implementation is complete or confirmed to need no changes, creates and maintains authorized tests that detect current external-contract violations from the consumer boundary. | `test-authoring` |
+| `verifier` | Determines acceptance from existing evidence and only the necessary existing checks once the scoped implementation is complete or confirmed to need no changes. | `verification-gate` |
 | `researcher` | Finds and grounds the facts needed for a downstream decision, reports checked scope, and keeps missing evidence unconfirmed. | `claim-grounding` |
 | `operator` | Performs a fully specified closed action, including waiting for a long-running or external execution, and reports its terminal result or configured stop state. | None |
+
+Custom agents use their host binding settings and defer unspecified values to the host runtime unless the user explicitly requests an override. For Codex, the design and judgment roles `architect`, `challenger`, `reviewer`, and `verifier` use `gpt-6-astra` with `max` reasoning effort.
 
 Agent bindings materialize as host-specific files while `AGENT.md` remains host-independent. The package intentionally does not install or maintain host-shared configuration files.
 

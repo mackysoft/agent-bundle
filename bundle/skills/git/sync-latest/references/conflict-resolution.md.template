@@ -1,0 +1,21 @@
+# 自身が開始したmergeの競合を扱う
+この参照は、helperまたはこのSkillが開始したmergeと、その時点で記録した対象・状態に一致する競合だけを扱う。開始前からの競合や他の進行操作を扱わない。
+
+候補を作れるのは、次の類型のいずれか一つで、対応する権限ある根拠と候補が一致する場合だけである。
+
+1. conflict group の path、親 path、mode、OID、candidate 差分が stage 2 / 3 で完全一致し、rename、directory/file 競合などがない。
+2. 正本、generator、全入力 revision、全 output manifest が固定され、候補が全 output と一致する。
+3. 変換元、変換先、対象が特定 commit または正本で一対一に特定され、候補が完全一致する。
+4. 両変更の保持が明示仕様または repository-owned の機械検査可能な不変条件から直接確認でき、候補が既知差分の完全合成である。
+
+根拠が示す失敗条件に該当する候補は採用しない。複数類型で候補が不一致なら、意図が絡む場合、根拠が不足する場合と同じく判断待ち競合とする。
+
+候補を書き込む前に、対象worktree、merge前のHEAD、target ref/OID、merge base、全index stageとpath・mode・OID、working state、進行操作を記録する。候補ごとに、正本・採用決定・Git観測・検証観測の役割と権限、元の版、対象path、候補内容、導出規則、失敗条件を対応付ける。固定したフィールド名は要求しない。commit messageや一般的な設計推測を意図根拠にせず、命題と根拠の対応を直接確定できない場合は `$claim-grounding` を適用する。意図・正本・候補に未確認や競合がない場合だけ検証へ進む。
+
+検証可能な暫定 candidate は未 stage の worktree だけに置く。元の conflict 内容、unmerged index stage、merge metadata を復元可能な状態で固定する。候補の対象範囲と編集完了を確認し、`$verification-gate` へ固定した候補内容、根拠、対象worktree、許容書込み、受入条件を渡す。検証は Git の読取・整合確認、または repository が書込み境界を明示した検証入口だけを使う。tracked file、index、ref、merge metadata の書込みは許可しない。ただし宣言済みの generated 全 output への書込みだけは例外とする。安全な入口がなければ未検証である。
+
+候補の前後一致、`HEAD` / ref / index stage / merge metadata の許可外不変、直接の受入観測、書込み許容範囲、根拠忠実性と類型固有の確認がすべて成功した場合だけ、stage前に予期しない変化がないことを確認する。固定した候補のpathだけをstageし、内容が候補と一致した場合だけmergeをcontinueする。continueが失敗した場合は、現在状態、影響、再開条件を返す。
+
+根拠不足、検証不能または失敗、候補不一致では自動 abort をしない。競合状態を保持した判断待ち競合として停止し、同一実行で次の merge、commit、push、同期再実行を行わない。
+
+continue が成功した場合は、本文Phase 2と同じ順序のref で `synchronize` を一度実行し、`completed` または `no-op` なら `同期完了` とする。それ以外は返された状態のまま停止成果として返す。
