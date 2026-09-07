@@ -30,8 +30,8 @@
 
 | 条件 | 参照 |
 | --- | --- |
-| 提案、決定、質問、回答、例示、訂正、撤回、採否、置換が混在する | [references/discourse-status.md](references/discourse-status.md) |
-| 値や真偽が独立して変化する情報、観測値、導出値、予測、スナップショット、外部の正本を扱う | [references/information-validity.md](references/information-validity.md) |
+| 会話や文書上の採否を判断する必要がある | [references/discourse-status.md](references/discourse-status.md) |
+| 情報を指定用途で使える根拠、適用範囲、再評価条件を判断する必要がある | [references/information-validity.md](references/information-validity.md) |
 | 大量または分割した入力、多対多の根拠、複雑な命題間の関係、監査用の追跡が必要である | [references/detailed-ledger.md](references/detailed-ledger.md) |
 
 複数の条件に該当する場合は、同じ命題へ必要な判断軸を追加し、それぞれの状態を独立して保持する。
@@ -56,7 +56,7 @@
 - 要約や引用は、確認できる原発言または正本へ結び付ける。原資料の確認が必要な範囲は確認事項へ残す。
 
 ### Phase 3: 必要な判断軸を適用する
-「参照」の条件に従って採用状態、情報状態、必要な詳細台帳を選ぶ。状態と下流判断を再現するために使った判断属性、複数根拠の組み合わせ、必要な命題間の関係を保持する。通常形式でも詳細台帳でも、採用状態と情報状態は独立して判断する。
+「参照」の条件に従って採用状態、情報状態、必要な詳細台帳を選ぶ。状態と下流判断を再現するために必要な判断属性、複数根拠の組み合わせ、命題間の関係を保持する。通常形式でも詳細台帳でも、採用状態と情報状態は独立して判断する。
 
 ### Phase 4: 関係と不確実性を整理する
 
