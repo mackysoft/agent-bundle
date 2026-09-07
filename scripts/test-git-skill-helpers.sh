@@ -8,6 +8,13 @@ fixture_root=$(mktemp -d "${temp_root%/}/git-skill-flows.XXXXXX")
 trap 'rm -rf "$fixture_root"' EXIT HUP INT TERM
 fixture_root=$(CDPATH= cd "$fixture_root" && pwd -P)
 
+# Fixtures own their Git configuration and communicate only with local remotes.
+export GIT_CONFIG_NOSYSTEM=1
+export GIT_CONFIG_GLOBAL=/dev/null
+export GIT_CONFIG_COUNT=0
+export GIT_ALLOW_PROTOCOL=file
+unset GIT_CONFIG_PARAMETERS
+
 test_number=0
 last_case=
 last_output=
@@ -46,7 +53,9 @@ assert_envelope() {
             || fail "$last_case: JSON envelope is missing $field"
     done
     assert_json_string outcome "$expected_outcome"
-    assert_json_string reason "$expected_reason"
+    if [ -n "$expected_reason" ]; then
+        assert_json_string reason "$expected_reason"
+    fi
 }
 
 run_flow_with_result() {
@@ -189,13 +198,198 @@ core_commit_oid=$(git -C "$core_repository" rev-parse HEAD)
 assert_equal "$last_output" "{\"outcome\":\"completed\",\"reason\":\"committed\",\"result\":{\"commitOid\":\"$core_commit_oid\"}}" 'commit result'
 assert_clean "$core_repository"
 
+# Local publishing defaults must not expand a request for one branch.
+git -C "$core_repository" tag -am 'unrequested release' unrequested-release
+git -C "$core_repository" branch unrequested-branch
+git -C "$core_repository" config push.followTags true
+git -C "$core_repository" config remote.origin.push refs/heads/unrequested-branch:refs/heads/unrequested-branch
 run_flow 'push publishes the current branch and sets upstream' "$push_flow" completed published \
     publish-current --worktree "$core_repository"
 assert_remote_ref_oid "$core_remote" refs/heads/feature "$core_commit_oid"
+assert_remote_ref_oid "$core_remote" refs/heads/unrequested-branch ''
+assert_equal "$(git ls-remote --tags "$core_remote" refs/tags/unrequested-release)" '' 'unrequested remote tag'
 assert_equal "$(git -C "$core_repository" config --get branch.feature.remote)" origin 'feature upstream remote'
 assert_equal "$(git -C "$core_repository" config --get branch.feature.merge)" refs/heads/feature 'feature upstream ref'
 run_flow 'push rerun is a no-op after publication' "$push_flow" no-op no-commits-to-push \
     publish-current --worktree "$core_repository"
+
+# A narrow clone can publish a new branch without widening what it fetches.
+single_branch_repository="$fixture_root/single-branch"
+git clone -q --single-branch --branch main "$core_remote" "$single_branch_repository"
+git -C "$single_branch_repository" config user.name 'Git Skill Flow Test'
+git -C "$single_branch_repository" config user.email 'git-skill-flow-test@example.invalid'
+git -C "$single_branch_repository" checkout -qb single-topic
+commit_file "$single_branch_repository" topic.txt topic 'add topic'
+single_branch_oid=$(git -C "$single_branch_repository" rev-parse HEAD)
+single_branch_fetch=$(git -C "$single_branch_repository" config --get-all remote.origin.fetch)
+run_flow 'push establishes upstream for a new branch from a single-branch clone' "$push_flow" completed published \
+    publish-current --worktree "$single_branch_repository"
+assert_remote_ref_oid "$core_remote" refs/heads/single-topic "$single_branch_oid"
+assert_equal "$(git -C "$single_branch_repository" config --get branch.single-topic.remote)" origin 'narrow clone upstream remote'
+assert_equal "$(git -C "$single_branch_repository" config --get branch.single-topic.merge)" refs/heads/single-topic 'narrow clone upstream ref'
+assert_equal "$(git -C "$single_branch_repository" config --get-all remote.origin.fetch)" "$single_branch_fetch" 'narrow clone fetch scope'
+assert_equal "$(git -C "$single_branch_repository" rev-parse HEAD)" "$single_branch_oid" 'narrow clone HEAD'
+assert_clean "$single_branch_repository"
+run_flow 'push rerun from a single-branch clone observes the published branch' "$push_flow" no-op no-commits-to-push \
+    publish-current --worktree "$single_branch_repository"
+
+# Fetch and publish endpoints can differ through either native Git mechanism.
+for endpoint_setting in pushurl pushInsteadOf; do
+    endpoint_repository="$fixture_root/endpoint-$endpoint_setting"
+    endpoint_fetch="$fixture_root/endpoint-$endpoint_setting-fetch.git"
+    endpoint_push="$fixture_root/endpoint-$endpoint_setting-push.git"
+    create_repository "$endpoint_repository" "$endpoint_fetch"
+    git clone -q --bare "$endpoint_fetch" "$endpoint_push"
+    commit_file "$endpoint_repository" published.txt published 'publish to a separate endpoint'
+    endpoint_oid=$(git -C "$endpoint_repository" rev-parse HEAD)
+    git -C "$endpoint_repository" push -q origin main
+    case "$endpoint_setting" in
+        pushurl) git -C "$endpoint_repository" config remote.origin.pushurl "$endpoint_push" ;;
+        pushInsteadOf) git -C "$endpoint_repository" config "url.$endpoint_push.pushInsteadOf" "$endpoint_fetch" ;;
+    esac
+    run_flow "push uses the effective $endpoint_setting destination when fetch is already current" "$push_flow" completed published \
+        publish-current --worktree "$endpoint_repository"
+    assert_remote_ref_oid "$endpoint_push" refs/heads/main "$endpoint_oid"
+    assert_remote_ref_oid "$endpoint_fetch" refs/heads/main "$endpoint_oid"
+done
+
+# The same effective endpoint controls the fast-forward check, including commits
+# that are absent from both the fetch remote and the local object database.
+endpoint_writer="$fixture_root/endpoint-writer"
+advance_remote_main "$endpoint_writer" "$endpoint_push" remote.txt remote
+endpoint_remote_oid=$(remote_ref_oid "$endpoint_push" refs/heads/main)
+run_flow 'push requires sync with the effective push endpoint when it has advanced' "$push_flow" blocked sync-required \
+    publish-current --worktree "$endpoint_repository"
+assert_remote_ref_oid "$endpoint_push" refs/heads/main "$endpoint_remote_oid"
+assert_remote_ref_oid "$endpoint_fetch" refs/heads/main "$endpoint_oid"
+assert_equal "$(git -C "$endpoint_repository" rev-parse HEAD)" "$endpoint_oid" 'endpoint sync-required HEAD'
+
+multiple_repository="$fixture_root/multiple-endpoints"
+multiple_first="$fixture_root/multiple-first.git"
+multiple_second="$fixture_root/multiple-second.git"
+create_repository "$multiple_repository" "$multiple_first"
+git clone -q --bare "$multiple_first" "$multiple_second"
+multiple_before=$(git -C "$multiple_repository" rev-parse HEAD)
+commit_file "$multiple_repository" pending.txt pending 'pending publication'
+multiple_head=$(git -C "$multiple_repository" rev-parse HEAD)
+git -C "$multiple_repository" config --add remote.origin.pushurl "$multiple_first"
+git -C "$multiple_repository" config --add remote.origin.pushurl "$multiple_second"
+run_flow 'push stops before writing to multiple configured destinations' "$push_flow" blocked '' \
+    publish-current --worktree "$multiple_repository"
+assert_remote_ref_oid "$multiple_first" refs/heads/main "$multiple_before"
+assert_remote_ref_oid "$multiple_second" refs/heads/main "$multiple_before"
+assert_equal "$(git -C "$multiple_repository" rev-parse HEAD)" "$multiple_head" 'multiple destination HEAD'
+
+# A parent publication does not publish an unpushed submodule commit, even when
+# the repository normally requests recursive publication.
+submodule_repository="$fixture_root/submodule-parent"
+submodule_parent_remote="$fixture_root/submodule-parent.git"
+submodule_seed="$fixture_root/submodule-seed"
+submodule_remote="$fixture_root/submodule.git"
+create_repository "$submodule_repository" "$submodule_parent_remote"
+create_repository "$submodule_seed" "$submodule_remote"
+submodule_before=$(remote_ref_oid "$submodule_remote" refs/heads/main)
+git -C "$submodule_repository" submodule add -q "$submodule_remote" library
+git -C "$submodule_repository/library" config user.name 'Git Skill Flow Test'
+git -C "$submodule_repository/library" config user.email 'git-skill-flow-test@example.invalid'
+commit_file "$submodule_repository/library" unpublished.txt unpublished 'unpublished library change'
+git -C "$submodule_repository" add .gitmodules library
+git -C "$submodule_repository" commit -qm 'reference unpublished library commit'
+submodule_parent_oid=$(git -C "$submodule_repository" rev-parse HEAD)
+git -C "$submodule_repository" config push.recurseSubmodules on-demand
+run_flow 'push publishes only the parent branch despite recursive submodule defaults' "$push_flow" completed published \
+    publish-current --worktree "$submodule_repository"
+assert_remote_ref_oid "$submodule_parent_remote" refs/heads/main "$submodule_parent_oid"
+assert_remote_ref_oid "$submodule_remote" refs/heads/main "$submodule_before"
+assert_clean "$submodule_repository"
+
+# These faults occur at the Git process boundary. Real Git still performs the
+# publication; assertions inspect repository effects, not push arguments.
+git_fault_bin="$fixture_root/git-fault-bin"
+mkdir "$git_fault_bin"
+git_fault_real_git=$(command -v git)
+git_fault_original_path=$PATH
+cat > "$git_fault_bin/git" <<'EOF'
+#!/bin/sh
+set -eu
+for argument in "$@"; do
+    case "$argument" in
+        push)
+            printf '%s\n' push >> "$GIT_FLOW_ATTEMPTS"
+            if [ "$GIT_FLOW_FAULT" = advance-head ]; then
+                "$GIT_FLOW_REAL_GIT" commit --allow-empty -qm 'concurrent local commit'
+            fi
+            "$GIT_FLOW_REAL_GIT" "$@"
+            if [ "$GIT_FLOW_FAULT" = lose-response ]; then
+                mv "$GIT_FLOW_REMOTE" "$GIT_FLOW_REMOTE.unavailable"
+                exit 1
+            fi
+            exit 0
+            ;;
+    esac
+done
+exec "$GIT_FLOW_REAL_GIT" "$@"
+EOF
+chmod +x "$git_fault_bin/git"
+
+source_change_repository="$fixture_root/source-change"
+source_change_remote="$fixture_root/source-change.git"
+source_change_attempts="$fixture_root/source-change-attempts"
+create_repository "$source_change_repository" "$source_change_remote"
+commit_file "$source_change_repository" reviewed.txt reviewed 'reviewed publication'
+source_confirmed_oid=$(git -C "$source_change_repository" rev-parse HEAD)
+PATH="$git_fault_bin:$PATH" GIT_FLOW_REAL_GIT="$git_fault_real_git" \
+    GIT_FLOW_FAULT=advance-head GIT_FLOW_ATTEMPTS="$source_change_attempts" \
+    run_flow 'push retains the confirmed commit when HEAD advances at the send boundary' "$push_flow" unknown-after-attempt '' \
+        publish-current --worktree "$source_change_repository"
+# POSIX shells can retain assignments made before a function call.
+PATH=$git_fault_original_path
+unset GIT_FLOW_REAL_GIT GIT_FLOW_FAULT GIT_FLOW_ATTEMPTS
+assert_remote_ref_oid "$source_change_remote" refs/heads/main "$source_confirmed_oid"
+[ "$(git -C "$source_change_repository" rev-parse HEAD)" != "$source_confirmed_oid" ] \
+    || fail "$last_case: the concurrent local commit was not preserved"
+assert_equal "$(wc -l < "$source_change_attempts" | tr -d ' ')" 1 'publication attempts after HEAD changed'
+assert_clean "$source_change_repository"
+
+upstream_change_repository="$fixture_root/upstream-change"
+upstream_change_remote="$fixture_root/upstream-change.git"
+create_repository "$upstream_change_repository" "$upstream_change_remote"
+commit_file "$upstream_change_repository" reviewed.txt reviewed 'reviewed publication'
+upstream_confirmed_oid=$(git -C "$upstream_change_repository" rev-parse HEAD)
+cat > "$upstream_change_repository/.git/hooks/pre-push" <<'EOF'
+#!/bin/sh
+git config branch.main.merge refs/heads/changed-upstream
+EOF
+chmod +x "$upstream_change_repository/.git/hooks/pre-push"
+run_flow 'push preserves a hook upstream change without reporting a stable publication' "$push_flow" unknown-after-attempt '' \
+    publish-current --worktree "$upstream_change_repository"
+assert_remote_ref_oid "$upstream_change_remote" refs/heads/main "$upstream_confirmed_oid"
+assert_remote_ref_oid "$upstream_change_remote" refs/heads/changed-upstream ''
+assert_equal "$(git -C "$upstream_change_repository" config --get branch.main.merge)" refs/heads/changed-upstream 'hook upstream change'
+assert_equal "$(git -C "$upstream_change_repository" rev-parse HEAD)" "$upstream_confirmed_oid" 'upstream change HEAD'
+
+unknown_repository="$fixture_root/unknown-publication"
+unknown_remote="$fixture_root/unknown-publication.git"
+unknown_attempts="$fixture_root/unknown-attempts"
+create_repository "$unknown_repository" "$unknown_remote"
+commit_file "$unknown_repository" published.txt published 'publication with a lost response'
+unknown_oid=$(git -C "$unknown_repository" rev-parse HEAD)
+PATH="$git_fault_bin:$PATH" GIT_FLOW_REAL_GIT="$git_fault_real_git" \
+    GIT_FLOW_FAULT=lose-response GIT_FLOW_ATTEMPTS="$unknown_attempts" GIT_FLOW_REMOTE="$unknown_remote" \
+    run_flow 'push preserves an unknown result without resending after a lost response' "$push_flow" unknown-after-attempt '' \
+        publish-current --worktree "$unknown_repository"
+PATH=$git_fault_original_path
+unset GIT_FLOW_REAL_GIT GIT_FLOW_FAULT GIT_FLOW_ATTEMPTS GIT_FLOW_REMOTE
+assert_remote_ref_oid "$unknown_remote.unavailable" refs/heads/main "$unknown_oid"
+assert_equal "$(wc -l < "$unknown_attempts" | tr -d ' ')" 1 'publication attempts after a lost response'
+mv "$unknown_remote.unavailable" "$unknown_remote"
+PATH="$git_fault_bin:$PATH" GIT_FLOW_REAL_GIT="$git_fault_real_git" \
+    GIT_FLOW_FAULT=lose-response GIT_FLOW_ATTEMPTS="$unknown_attempts" GIT_FLOW_REMOTE="$unknown_remote" \
+    run_flow 'push observes an applied publication after communication recovers without resending' "$push_flow" no-op no-commits-to-push \
+        publish-current --worktree "$unknown_repository"
+PATH=$git_fault_original_path
+unset GIT_FLOW_REAL_GIT GIT_FLOW_FAULT GIT_FLOW_ATTEMPTS GIT_FLOW_REMOTE
+assert_equal "$(wc -l < "$unknown_attempts" | tr -d ' ')" 1 'publication attempts after communication recovers'
 
 # An initial publish must not overwrite an existing same-name remote branch.
 # It can establish upstream only when that branch is already included in HEAD.
