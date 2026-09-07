@@ -4,7 +4,7 @@
 Issue と PR の意味、base、GitHub 権限、検証、PR 本文、ローカル Git 準備の進行を扱う。helper と依存 Skill は、その進行を成立させる手段として使う。
 
 ## 既存PRを更新する不変条件
-既存PRを固定した経路では、PR番号・URL、head branch/repository、対応するhead remote/ref、base、接続前のhead OIDを保持する。同期・準備・公開の後に、同じbranchとupstream、元head OIDの包含、競合なし、必要なbaseの統合を確認し、現在HEADを新しい作業headとして記録する。元OIDとの完全一致は要求しない。base同期先とhead公開先を分け、同名branchで代替しない。
+既存PRを固定した経路では、PR番号・URL、head branch/repository、対応するhead remote/ref、base、接続前のhead OIDを保持する。同期・準備・公開の後に、symbolic HEADが同じhead branchを、upstreamが固定済みhead remote/refを指し、元head OIDの包含、競合なし、必要なbaseの統合が成立することを確認する。現在HEADを新しい作業headとして記録し、元OIDとの完全一致は要求しない。base同期先とhead公開先を分け、同名branchで代替しない。
 
 ## フロー
 
@@ -49,28 +49,26 @@ helper の起動不能、異常終了、または壊れた outcome の後は、w
 `$push` には、Phase 2 で決めた base に対応する remote-tracking fully-qualified ref を `--require-integrated-ref` として渡す。固定済みの既存 PR identity がある場合は、base 同期 remote とは独立に、固定済み head remote/ref と新しい作業 head も `$push` の入力として渡し、その remote/ref だけを upstream と publish 先にする。`completed` または `no-op` なら Phase 8 へ進む。`blocked/sync-required` なら `$sync-latest`、Phase 4 の `prepare`、Phase 6 の検証の順に戻る。それ以外は、返された状態、影響、再開条件を停止成果として返す。
 
 ### Phase 8: PR タイトルと本文を書く
-差分、コミット履歴、検証結果、Issue 本文から PR タイトルと本文を作る。
+差分、コミット履歴、検証結果、Issue本文から、`$writing` に従ってPRタイトルと本文を同じ言語で書く。タイトルにIssue番号、scope、`type(scope):` 風のprefixを付ける場合も、prefix後のタイトル本文は本文言語、固有名詞、識別子、既存PRの表記に合わせる。
 
-PR タイトルと本文の文章前提は `$writing` に従う。PR タイトルと本文は同じ言語で書く。PR タイトルに Issue 番号、scope、`type(scope):` 風の prefix を付ける場合も、prefix 後のタイトル本文は本文言語、固有名詞、識別子、既存 PR の表記に合わせる。
-
-本文は `##` 見出しと短い箇条書きを基本にし、基本順は `Summary`、`Scope`、`Verification` とする。任意セクションは必要な場合だけ次の順に置く。本文の見出しは本文の言語に合わせて翻訳しない。`Closes #<N>` のような GitHub の構文は原文のまま置く。
+本文は `##` 見出しと短い箇条書きを基本に、次の表の順に置く。見出しは翻訳せず、`Closes #<N>` などのGitHub構文も原文を保つ。
 
 | 見出し | 必須 | 内容 |
 | --- | --- | --- |
 | `Summary` | 必須 | 変更の要点。レビュー前に把握すべき結論を短く書く。 |
-| `Changelog` | 任意 | 利用判断に使う変更説明が必要な場合に置く。項目は `$changelog` で作り、見出しはこの Skill で置く。 |
+| `Changelog` | 任意 | 利用判断に必要な変更説明。`$changelog` の埋め込み用エントリを使う。 |
 | `Scope` | 必須 | 変更した範囲、生成物、影響する機能や文書を列挙する。 |
 | `Verification` | 必須 | 実行した検証、確認できた結果、実行できなかった検証を書く。 |
 | `References` | 任意 | レビュー時に確認すべき資料、仕様、外部 URL、リポジトリ内の相対パスを書く。ローカル環境の絶対パスは書かない。 |
 
-`Changelog` の本文は `$changelog` の埋め込み用エントリとして作る。`## Changelog` はこの Skill で置き、`$changelog` 側では重複させない。カテゴリ見出しが必要な場合は、`## Changelog` の下に `### Added` のような1段下の見出しを置く。空の任意セクションは置かない。長い補足やログを本文に含める必要がある場合だけ `<details>` を使う。
+`## Changelog` はこのSkillで一度だけ置き、カテゴリが必要なら `### Added` のように1段下の見出しを使う。任意セクションは必要な場合だけ置き、空欄は作らない。長い補足やログが必要な場合だけ `<details>` を使う。
 
 ### Phase 9: PR を作成または更新する
 既存PRを固定した場合は、不変条件と公開済みの作業headを再観測し、そのPR番号・URLを更新する。この経路で `gh pr create` は実行しない。
 
 既存 PR identity を固定していない場合は、同じブランチの open PR があるならその PR を更新し、open PR がない場合だけ `gh pr create` で作成する。
 
-Issue があり、受け入れ条件が未完了または未確認なら Draft PR にする。Issue があり、受け入れ条件が完了している場合は通常 PR にする。Issue がない場合は、検証が成功していれば通常 PR にする。
+Issueの受け入れ条件が未完了または未確認ならDraft PRにする。受け入れ条件が完了している場合、またはIssueがなく検証が成功した場合は通常PRにする。
 
 `gh pr create` または更新が異常終了した後も、固定済みの既存 PR identity、または同じ branch、base、head OID の一意な open PR を再観測できれば重複作成せず、その PR を更新結果として扱う。PR の存在または残作用を一意に確定できない場合は停止する。PR の作成または更新後は `gh pr view` で PR 番号、URL、head branch、head OID、head repository、base、状態を再観測する。既存PRを固定した場合は不変条件も確認する。作成または更新の helper や `gh` の出力だけで完了としない。
 

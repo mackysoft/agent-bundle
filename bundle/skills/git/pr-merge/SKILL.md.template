@@ -18,12 +18,12 @@ PR番号・URLと、head branch・観測したhead OIDを固定して扱う。�
 ## フロー
 
 ### 1. PRを確定して必要な更新を行う
-`gh auth status` と参照権限を確認する。指定PRは `gh pr view` で取得し、指定がなければattached branchの一意なopen PRを選ぶ。候補が複数なら停止する。現在作業にPRがなく、PR対象の変更がある場合は `$pr-submit` を適用し、detached HEADの接続も同Skillへ委ねる。`no-change` は空PRを作らない完了状態である。
+`gh auth status` と参照権限を確認する。指定PRは `gh pr view` で取得し、指定がなければattached branchの一意なopen PRを選ぶ。候補が複数なら停止する。現在作業にPRがなく、PR対象の変更がある場合は `$pr-submit` を適用し、detached HEADの接続も同Skillへ委ねる。`no-change` は空PRを作らない完了状態である。取得したPRには共通の再観測を適用し、OPENだけを準備する。
 
 PRのbase、head branch/OID、state、明示された権限を記録する。現在worktreeがそのhead branchへ接続している場合だけ、未コミット差分や未push commitを `$push`、baseの最新化を `$sync-latest` と必要なpushで反映する。競合ならマージへ進まない。マージのためだけに既存PR本文を更新しない。
 
 ### 2. Readyとマージ方式を確認する
-共通の再観測を行い、OPENのDraftだけをReadyにする。Ready化の後も状態を確認する。
+共通の再観測を行い、OPENのDraftだけをReadyにする。Ready化の失敗、またはReadyの成立を確認できない場合は停止する。
 
 方式はユーザーまたはプロジェクトの指定を優先し、repositoryで許可されていることを確認する。未指定なら許可された方式をmerge、squash、rebaseの順で選ぶ。明示方式が使えなければ勝手に変えず、理由を返す。
 

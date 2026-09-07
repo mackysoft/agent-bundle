@@ -5,6 +5,6 @@
 
 branch 作用前に、local remote URL が PR の head repository と一致し、head ref が存在しその OID が固定した元 head OID と一致することを read-only で確認する。remote 名、URL、head ref、OID のいずれかを安全に確定できない場合は、branch、push、PR 更新を行わず停止する。base remote の同名 branch へ fallback しない。
 
-`$branch-create` は一度だけ、既存 PR の head branch と一致する branch 名、既存 PR の base、固定済み head remote/ref、`--preserve-current` を入力として実行する。接続後は base 同期が完了していること、symbolic ref が既存 PR の head branch を指すこと、upstream が固定済み head remote/ref と同一であること、競合がないこと、元 head OID が現在 `HEAD` に含まれることを確認する。固定 OID との完全一致は要求しない。確認できた現在 `HEAD` OID を新しい作業 head として固定し、Phase 4 以後の prepare、push、PR 更新、返却へ渡す。元 head OID を含められない、競合がある、または base 同期が未完了なら停止する。
+`$branch-create` は一度だけ、既存PRと同じhead branch名、base、固定済みhead remote/ref、`--preserve-current` を入力として実行する。接続後は本文の「既存PRを更新する不変条件」を確認し、成立した現在HEADを新しい作業headとしてPhase 4以後のprepare、push、PR更新、返却へ渡す。不変条件が成立しなければ停止する。
 
 候補が複数、または PR 番号、URL、head branch、head OID、base、head repository、remote 名、head ref の同一性を確定できない場合は、branch または PR を新規作成せず停止する。候補がなければ、Phase 2 の base と比較して未コミット差分または PR 対象 commit があるかを read-only で確認する。対象がなければ空 PR を作らず、`no-change` として停止する。対象がある場合だけ、`$branch-create` へ Phase 2 の base、確定した branch 名、`--preserve-current` を渡す。この依存は一度だけ実行する。`$branch-create` が branch 接続を完了した後は、最終 symbolic ref、保持対象 `HEAD`、upstream、競合なしを確認して Phase 1 へ戻る。接続できない、または事後条件を確認できない場合は、現在状態、影響、再開条件を残して停止する。

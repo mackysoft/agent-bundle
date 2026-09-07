@@ -1,7 +1,7 @@
 ## 目的
 作業内容、Issue、指定値から規約準拠の作業ブランチを確定し、現在作業を失わず対象 worktree をそのブランチへ接続する。
 
-Issue、base、ブランチ名、現在作業を保持する意図を決め、観測からbranch接続とupstream設定、base同期の確認までを扱う。helperと通常のGit操作は、この結果を成立させる手段として使う。
+Issue、base、ブランチ名、作業保持の意図を決め、branch接続、upstream設定、base同期を確認する。helperと通常のGit操作は、その手段として使う。
 
 ## フロー
 
@@ -35,7 +35,7 @@ Issue、base、ブランチ名、現在作業を保持する意図を決め、�
 ### Phase 3: 対象ブランチを確立する
 この Skill の配置ディレクトリと対象 worktree は、`sh` を実行する同じ環境で `pwd -P` により absolute physical POSIX path へ解決する。Windows host の `C:\...` を Git Bash または WSL の `sh` へ直渡ししない。`skill_dir` から `script_path="$skill_dir/scripts/branch-create-flow.sh"` を得る。
 
-次だけを入力にして実行する。
+固定済みhead remote/refがある場合は、helperで同じupstreamと公開先を安全に設定できることを確認してから使う。対応できなければ通常のGit操作へ切り替える。helperには次の入力だけを渡す。
 
 ```sh
 sh "$script_path" ensure \
@@ -45,9 +45,9 @@ sh "$script_path" ensure \
   [--preserve-current]
 ```
 
-script の実行後は、outcome にかかわらず Phase 1 と同じ安全条件を再観測する。固定済み head remote/ref がある場合は、helper がその remote/ref を安全に upstream と publish 先へ反映できると確認できる場合だけ使う。反映できない場合は helper を完了条件にせず、通常の `git` 操作へ切り替える。最終状態は、対象 worktree が対象 branch ref を symbolic `HEAD` とし、保持対象 `HEAD` を失わず、対象ブランチの upstream が固定済み head remote/ref、または指定がなければ整合した通常 upstream を指し、unmerged entries と進行中の操作がない状態である。
+実行結果にかかわらずPhase 1の安全条件を再観測する。対象worktreeのsymbolic `HEAD`が対象branch refを指し、保持対象HEADを含み、upstreamが固定済みhead remote/ref、または指定がなければ整合した通常upstreamを指し、競合・進行操作がなければ接続完了とする。
 
-この事後条件が成立していれば `completed` または `no-op` として次へ進む。未成立でも残る branch 操作が一意で安全な場合は、通常の `git fetch`、`git switch`、`git branch`、`git branch --set-upstream-to` を使って同じ事後条件へ到達してよい。固定済み head remote/ref の URL、ref、OID を確認できない、開始時 `HEAD` を含められない、他 worktree が対象 branch を使用する、upstream が競合する、または次の作用を一意に決められない場合は、再試行、巻き戻し、force をせず停止する。
+接続済みなら次へ進む。未成立でも残る操作が一意で安全なら、`git fetch`、`git switch`、`git branch`、`git branch --set-upstream-to` で同じ事後条件を成立させてよい。固定先のURL・ref・OIDを確認できない、開始HEADを含められない、他worktreeが対象branchを使用する、upstreamが競合する、または次の作用が不明なら、再試行・巻き戻し・forceをせず停止する。
 
 ### Phase 4: base と同期する
 対象ブランチが確立した後で、Phase 1 の base remote-tracking ref を指定ブランチとして `$sync-latest` へ渡す。

@@ -22,7 +22,7 @@ Slack URLだけの場合は、URLからworkspaceと対象を正規化する。
 
 認証選択が不明なら `input_incomplete`、固定した主体で認証できなければ `access_unconfirmed`、CLIや資料が使えず取得契約を確認できなければ `partial` とし、理由、未取得範囲、再開条件を返す。direct_referenceではworkspaceとconversation、親・thread・対象messageを正規化し、discoveryでは探索条件と候補条件を固定する。
 
-要求された対象と項目に応じて、message種別とthread関係、主体と時刻・編集、text/blocks、reactionと主体、mention/broadcast、conversation種別とpublic/private/external-shared境界、file/attachment/unfurl/linkを観測する。通常message、system event、thread_broadcastを混同しない。paginationは要求範囲を満たすか継続条件が失われるまで進める。
+要求された対象と項目に応じて、message種別とthread関係、actor・app・認証主体、時刻・編集、text/blocks、reactionとactor、mention/broadcast、conversation種別とpublic/private/external-shared境界、file/attachment/unfurl/linkを観測する。通常message、subtypeまたはsystem event、thread_broadcastを区別し、paginationは要求範囲を満たすか継続条件が失われるまで進める。
 
 各要求項目を次のいずれかへ分類し、method、時刻、target、access、paginationへ対応付ける。
 

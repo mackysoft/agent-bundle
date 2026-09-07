@@ -35,7 +35,7 @@
 6. 現在導入されているdefinition
 7. locatorまたは表示用metadata
 
-実行主体のidentityは `confirmed`、`supported`、`inferred`、`unresolved` のいずれかで示す。agent originは `custom`、`built_in`、`unknown` を区別し、根拠が不足する場合は `unknown` とする。identity、agent origin、definition bindingの確度は別々に評価する。definition bindingはcomponentまたはartifactごとに `exact`、`time_correlated`、`current_only`、`unresolved` のいずれかで示す。
+同定が必要な場合は [同定基準](references/execution-evidence.md#identityとdefinition-binding) を使い、実行主体の identity、agent origin、component または artifact ごとの definition binding の確度を別々に示す。
 
 locatorや表示用metadataは、identity、設定、委譲意図、実際の行動、資源使用の直接根拠にしない。executionへ結び付く使用量、課金、計測端点の観測を資源使用の根拠とし、判定に必要だが観測できない情報は `unverified` とする。現在のdefinitionは過去の実行時点のdefinitionと断定せず、時点に結び付く根拠がない場合は `current_only` とする。
 

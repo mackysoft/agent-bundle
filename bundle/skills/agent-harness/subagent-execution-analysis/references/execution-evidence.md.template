@@ -22,7 +22,9 @@
 
 親側の起動記録と子実行のidentity記録が同じ親実行、子実行、実行主体を示す場合にidentityを `confirmed` とする。片側の記録だけがあり競合がない場合は `supported` とする。記録がexecutionを一意に同定できない、または競合する場合は `unresolved` とする。locatorまたは表示用metadataだけから対応付ける場合は `inferred` 以下とし、対応を確定しない。
 
-agent originはidentity confidenceと独立したobservationとする。originを確認できない場合は `unknown` とする。現在のdefinitionは比較候補として `current_only` にできるが、executionへ適用された証拠にはしない。
+agent originは `custom`、`built_in`、`unknown` を区別し、identity confidenceと独立したobservationとする。originを確認できない場合は `unknown` とする。
+
+definition binding は、execution に結び付いた snapshot または digest があれば `exact`、実行時点に対応する definition だけを確認できれば `time_correlated`、現在の導入済み definition だけなら `current_only`、結合できなければ `unresolved` とする。`current_only` は比較候補であり、過去の execution へ適用された証拠にはしない。
 
 ### handoff coverage
 
