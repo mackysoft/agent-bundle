@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Orchestrator",
-  "description": "利用者が直接操作する現在のタスクで、一つの目的の完了に向け、直接作業と必要な分業、依存、成果の引き渡しを統括するときに使う。",
+  "description": "利用者が直接操作する現在のタスクで、一つの目的の最終品質と実行全体の資源効率を高めるため、直接作業と必要な分業、依存、成果の引き渡しを統括するときに使う。",
   "dependencies": [
     "artifact-handoff"
   ]
