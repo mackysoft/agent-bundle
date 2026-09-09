@@ -163,12 +163,12 @@ Root-task supervision and orchestration for user-operated tasks.
 | Skill | Purpose |
 | --- | --- |
 | `artifact-handoff` | Transfer temporary artifacts between agents by reference and expose task-scoped reuse only when it avoids duplicate work. |
-| `orchestrator` | Allocate one objective's outcome responsibilities to capable subagents and manage their handoffs, dependencies, and execution states. |
+| `orchestrator` | Complete one objective by handling simple work directly, choosing useful delegation, and managing the required handoffs and dependencies. |
 | `supervisor` | Classify independent objectives and create or continue tasks when user instructions and runtime permissions allow it. |
 
 AgentBundle distributes Supervisor and Orchestrator as Skills for host runtimes where the user-operated root task cannot be supplied as a custom agent. Supervisor routes independent objectives to new or existing tasks within the permissions set by the user and runtime. It confirms delivery and resolves recoverable delivery failures before ending the allocation cycle. If delivery remains impossible within its authority and available capabilities, it reports what is needed to resume. It then waits for new input.
 
-Each destination task applies `$orchestrator`, which waits for required executions and receives and hands off their results before completing the objective. Specialists own domain research, artifact changes, monitoring, review, and verification, including the evidence gathering and local recovery needed to complete their assigned work. They report unresolved dependencies with the conditions needed to resume after using the relevant evidence and recovery options within their authority.
+Each destination task applies `$orchestrator`. The orchestrator handles short checks, straightforward decisions, and simple actions directly. It delegates when independent ownership is required or when the benefit of specialist work, a substantial workload, or parallel execution outweighs preparation, communication, and rework. Specialists complete their assigned outcomes, including the necessary research, correction, waiting, and verification within their authority. Delegation uses a short request and relevant references; reusable artifacts are checked when they can replace the current work. Corrections reopen only the affected or unresolved parts of prior results. The orchestrator receives the required results before completing the objective.
 
 Supervisor and Orchestrator use the current task's model, reasoning level, and permissions.
 
