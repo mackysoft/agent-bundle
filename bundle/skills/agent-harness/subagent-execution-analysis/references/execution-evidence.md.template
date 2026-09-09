@@ -2,7 +2,9 @@
 
 ### 入力の正規化契約
 
-環境固有の記録取得と対象単位への写像は入力提供責務が所有する。入力には元記録への参照、項目の意味、親子対応、順序規則、完全性保証、取得範囲を含める。このSkillは元記録の形式または取得方法を推定しない。
+以下は分析に利用できる証拠の契約である。今回の問いと分析水準に必要な対象だけを選び、列挙だけの分析に通信、全定義、全設定、資源指標を要求しない。必要な証拠の欠落と、選ばなかった対象外の観点を区別する。
+
+環境固有の記録形式と対象単位への写像は、記録提供元の契約から確認する。入力には元記録への参照、項目の意味、親子対応、順序規則、完全性保証、取得範囲を含める。既存の取得方法で許可された記録を読むことは分析担当が行い、未確認の形式や写像を推定して証拠にしない。
 
 親実行、起動試行、開始済み子実行、継続入力、message、input request、final return、handoff、definition、lifecycleを別の対象として扱う。locatorや表示用metadataは対象を探す手掛かりとして使う。identity、設定、委譲意図、actual action、通信の所有者、利用目的は、それぞれに対応する実行記録または契約参照を根拠とする。
 
@@ -12,7 +14,7 @@
 | 委譲と継続入力 | 実行に対応付く委譲内容、対象範囲、制約、許可、必要な成果。 | 実際の行動、未観測の委譲内容。 |
 | 設定と行動 | executionに対応付く実効設定、行動、作用、成果物または外部状態の観測。 | definition default、許可された全作用、内部推論。 |
 | definition | execution-bound snapshot、digest、scope、時点と対応する定義。 | そのdefinitionがexecutionへ適用されたこと。 |
-| 通信 | 送受信実行、channel、時点または順序、kind、内容または成果参照、受信後の状態変化、受け手の責務、source 完全性。 | 本文だけから推定した状態変化、用途、不存在。 |
+| 通信 | 送受信実行、channel、時点または順序、kind、内容または成果参照、適用通信契約、必要な場合の受信後の状態変化と受け手の責務、source 完全性。 | 本文だけから推定した状態変化、用途、不存在。 |
 | handoffとlifecycle | 親実行が所有する成果の受領・後続利用、親子実行の継続・停止・終了。 | 子実行成果の契約適合、または子実行定義がhandoffを所有すること。 |
 | 資源使用 | executionまたは計測範囲へ対応する使用量、計測端点、課金記録。 | sourceが報告しない指標、executionへ対応付けられない費用。 |
 
@@ -20,7 +22,9 @@
 
 親側の起動記録と子実行のidentity記録が同じ親実行、子実行、実行主体を示す場合にidentityを `confirmed` とする。片側の記録だけがあり競合がない場合は `supported` とする。記録がexecutionを一意に同定できない、または競合する場合は `unresolved` とする。locatorまたは表示用metadataだけから対応付ける場合は `inferred` 以下とし、対応を確定しない。
 
-agent originはidentity confidenceと独立したobservationとする。originを確認できない場合は `unknown` とする。現在のdefinitionは比較候補として `current_only` にできるが、executionへ適用された証拠にはしない。
+agent originは `custom`、`built_in`、`unknown` を区別し、identity confidenceと独立したobservationとする。originを確認できない場合は `unknown` とする。
+
+definition binding は、execution に結び付いた snapshot または digest があれば `exact`、実行時点に対応する definition だけを確認できれば `time_correlated`、現在の導入済み definition だけなら `current_only`、結合できなければ `unresolved` とする。`current_only` は比較候補であり、過去の execution へ適用された証拠にはしない。
 
 ### handoff coverage
 
@@ -28,7 +32,7 @@ handoff coverageは、親実行側のhandoff記録を、指定した分析範囲
 
 ### communication coverage
 
-通信sourceは、表の観測項目と取得範囲、完全性保証を示す。受け手への効果は直接観測または責務契約を根拠とし、根拠がなければ `unverified` とする。coverage は、範囲内の完全性を確認できれば `complete`、記録の欠落または対応付け不能があれば `partial`、完全性の根拠がなければ `unverified` とする。通信の所有者、用途、存在または不在は、対応するsourceとcoverageから判断する。
+通信sourceは、表の観測項目と取得範囲、完全性保証を示す。受け手への効果を契約が必要とする場合は、直接観測または責務契約へ対応付け、根拠がなければ `unverified` とする。coverage は、範囲内の完全性を確認できれば `complete`、記録の欠落または対応付け不能があれば `partial`、完全性の根拠がなければ `unverified` とする。通信の所有者、用途、存在または不在は、対応する source と coverage から判断する。許可・要求の有無は対象時点の契約から確定し、不在は完全な関連記録と組み合わせて適合または違反を判断する。契約や完全性が不足すれば不在の判定はできない。
 
 ### 分析範囲と順序
 
@@ -36,7 +40,7 @@ handoff coverageは、親実行側のhandoff記録を、指定した分析範囲
 
 ### 子孫の実行記録
 
-親実行の記録sourceを深さ0、親子対応に従う子実行を深さ1以上として、提供されたsourceへ同じ分析範囲を適用する。不足するsource、親子対応、または境界は環境から補わず、影響するdescendant範囲を `unverified` とする。`complete_within_coverage` と全件数の扱いは [report schema](report-schema.md) に従う。
+親実行の記録sourceを深さ0、親子対応に従う子実行を深さ1以上として、確認したsourceへ同じ分析範囲を適用する。不足するsource、親子対応、境界は、許可範囲で既存の記録と記録契約を調べる。それでも確定できないdescendant範囲だけを `unverified` とする。`complete_within_coverage` と全件数の扱いは [report schema](report-schema.md) に従う。
 
 記録sourceの十分性はclaim、dimension、coverageごとに評価し、不足する面だけを `indeterminate` または `unverified` とする。
 
@@ -49,6 +53,8 @@ definition default、起動時または親実行からの指定、effective conf
 行動または作用の記録が不完全な場合、確認できたobservationには限定したassessmentを付けられる。execution全体のaction coverageとassessmentは別にし、未観測範囲が結果を変え得る場合は全体を `indeterminate` とする。
 
 ### 資源使用
+
+資源分析を求められた範囲と指標に適用する。要求されたが source が提供しない指標は `unverified` とし、要求されていない指標は省略する。
 
 使用量はexecutionまたは計測範囲へ対応するrecordだけを直接観測として使う。指標はsourceの名称、値、単位、関係を保持し、経過時間は定めた端点から導出する。課金額は課金記録を直接観測とし、使用量から算出する場合はusage metricと課金区分のmapping、時点付き価格基準を別の根拠として保持する。
 

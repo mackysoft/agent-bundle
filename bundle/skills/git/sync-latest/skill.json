@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Sync Latest",
-  "description": "作業開始前、push 前、PR 作成前、PR 更新前、PR マージ前、non-fast-forward 解消など、対象 worktree の最新性が前提になる場面で、origin と upstream が属する remote から最新状態を取得し、ブランチまたは detached HEAD を適切な基準へ安全に同期する。",
+  "description": "作業前や公開前に、対象worktreeを現在のupstreamと選んだbaseへ安全に同期するときに使う。必要なremoteの最新状態を取得し、branchまたはdetached HEADの現在作業を保つ。",
   "dependencies": [
     "claim-grounding",
     "commit",

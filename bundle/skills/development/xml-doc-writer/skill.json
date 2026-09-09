@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "XML Doc Writer",
-  "description": "公開API、internal API、または重要な非公開APIのXMLドキュメントコメントを作成、更新するときに使う。入力制約、戻り値保証、例外条件、非同期完了条件を実装と整合する呼び出し契約として明文化する。",
+  "description": "公開API、internal API、重要な非公開APIのXMLドキュメントコメントを作成・更新し、利用側が依存する呼び出し契約を実装と整合させるときに使う。",
   "dependencies": [
     "writing"
   ]

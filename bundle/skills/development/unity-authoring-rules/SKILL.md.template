@@ -1,15 +1,7 @@
-## 目的
-Unity プロジェクトの実装、修正、レビューで適用する Unity 固有のルールを定める。
-Unity の実行モデル、シリアライズ、UnityEngine.Object の寿命、生成物、Asset、Scene、Prefab、ScriptableObject、asmdef の制約を確認する。
+## 目的と適用関係
+Unityプロジェクトのコード、Editor拡張、Asset、Scene、Prefab、テスト、構成を、Unity固有の実行モデル、シリアライズ、寿命、永続化、責務境界に適合させる。
 
-## 優先順位
-1. プロジェクト固有の明示規約を優先する。
-2. Unity 固有の制約と C# 一般の設計判断が衝突する場合は、Unity 固有の制約を満たす。
-3. 既存コードが責務境界や依存境界を崩している場合は、現状を正当化せず、変更範囲で改善できる境界を選ぶ。
-
-## C# 一般ルールとの関係
-Unity 固有の制約がない通常の C# クラス、ドメインロジック、変換、判定、テスト対象コードには、$csharp-authoring-rules も適用する。
-Unity の実行モデル、シリアライズ、Inspector、Scene、Prefab、Asset、Editor API、Unity のライフサイクルに関わる判断では、Unity 固有の制約を満たしたうえで C# としての責務境界を保つ。
+プロジェクト固有の明示規則を優先し、対応Unity版を確認する。C#コードには `$csharp-authoring-rules` とその共通規則を適用し、Unity固有の制約と衝突する場合はUnityの制約を満たしたうえで責務境界を保つ。既存の弱い境界は追認せず、変更範囲で改善する。
 
 ## ルール
 
@@ -106,12 +98,11 @@ Domain Reload 無効時に前回の Play Mode の状態が残っても正しく�
 static イベントの購読は、購読元と解除元を対応させる。
 
 ### async と Unity メインスレッド
-Unity API、Scene、Asset、Prefab、GameObject、Component、Transform に触れる処理は、Unity メインスレッドで実行する。
-バックグラウンドスレッドや async 処理では、Unity オブジェクトを直接読まない、作らない、破棄しない、Scene を変更しない。
-async、Coroutine、Job System の選択では、Unity オブジェクトに触る境界、フレームをまたぐ責務、停止条件を確認する。
-Play Mode 終了、Scene の unload、GameObject の destroy、Component の disable で非同期処理が停止または解除されるか確認する。
-Play Mode 終了で停止する処理は、`Application.exitCancellationToken` と結びつける。
-コンポーネント、Scene、サービスの寿命で止める処理は、その寿命に対応するキャンセル契約を用意する。
+Unity APIが要求する実行スレッドを守る。`async` 構文とバックグラウンド実行を区別し、メインスレッドと対象の寿命が成立していれば非同期処理内でもUnityオブジェクトを操作できる。バックグラウンドではスレッドセーフでないUnity APIを呼ばず、必要な操作の前にメインスレッドへ戻る。
+
+async、Coroutine、Job Systemは、Unityオブジェクトへの操作境界、フレームをまたぐ責務、停止条件から選ぶ。await後の実行スレッドは、対象Unity版とAPIの継続契約から確認し、Awaitable等の切替手段も対応版で使う。
+
+Play Mode終了で止める処理は、利用可能な版では `Application.exitCancellationToken` と結び付ける。Sceneのunload、GameObjectのdestroy、Componentのdisable、サービスの終了で止める処理も、それぞれの寿命に対応する停止・解除・キャンセルを扱う。終了後も動く処理や、破棄されたオブジェクトへのアクセスを残さない。
 
 ### 割り当て
 毎フレーム呼ばれる処理で不要な割り当てを増やさない。

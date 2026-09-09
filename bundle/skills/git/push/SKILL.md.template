@@ -1,38 +1,37 @@
 ## 目的
-現在ブランチを、安全な同期状態だけでリモートへ反映する。
+現在ブランチの必要な変更を責務ごとのcommitとして保持し、安全な同期状態で適切なupstreamへ公開する。
 
 ## フロー
 
-### Phase 1: 同期済みの基準を固定する
-`$sync-latest` を適用する。`completed` または `no-op` の場合だけ Phase 2 へ進む。
+### Phase 1: 今回の変更、同期基準、公開対象を確定する
+会話、依頼、履歴、staged / unstaged diff、未追跡ファイルから今回の作業を特定する。必要な今回分だけを `$commit` で責務ごとの commit にし、対象外の index と worktree を保持する。無関係な文書の編集や生成物の残差を含めて全体を clean にすることは、push の前提ではない。
 
-`blocked / commit-required` では `$commit` を適用し、完了後に同じ同期対象で `$sync-latest` を一度だけ再適用する。再実行が `completed` または `no-op` の場合だけ Phase 2 へ進む。その他の結果は、状態、影響、再開条件を停止成果として返す。
+detached HEAD なら、現在 commit を保持して、明示された PR / ref または作業文脈に対応する branch へ接続する。通常の Git 操作で既存 branch の再利用または新規作成を行い、対象外の作業、既存の公開先、他 worktree を保護する。branch の対応は履歴と設定から調べ、detached という状態だけで公開準備を止めない。
 
-呼出元が既存 PR の固定済み head remote と head ref を渡した場合は、base 同期 remote と独立に、その remote/ref を publish 先として固定する。upstream、remote URL、remote-tracking ref、現在 `HEAD` の包含関係がその固定値と整合しなければ停止し、base remote の同名 branch へ fallback しない。
+`$sync-latest` を適用し、選んだ基準を `HEAD` が含む `同期完了` を確認する。依存 Skill の意味上の結果を使い、その helper 固有の JSON 状態名を要求しない。同期が必要な準備や競合解消を残した場合は、同じ担当が調査、解消、検証、再評価まで行う。公開に必要な条件と、独立して続けられる準備を区別する。
 
-### Phase 2: 現在ブランチを publish する
-実行する `sh` 環境で、この Skill の配置ディレクトリと対象 worktree を `pwd -P` により絶対 physical POSIX path として固定する。Windows host の `C:\...` をそのまま `sh` に渡さない。
+公開先は現在 branch の有効な upstream を使い、未設定なら origin の同名 branch とする。既存 PR の固定 head remote/ref が入力にある場合は、それを優先し、base 同期 remote と分ける。repository、upstream、ref、`HEAD` の対応に不整合があれば履歴と設定を調べ、依頼で確定できる範囲を補正する。対応を導けない公開先へ送信せず、base 側の同名 branch へ代替しない。
+
+実効push URLはGitの `remote get-url --push --all` で確認する。書換え後の公開先、remote branch、確認済みHEAD OIDを固定し、事前・事後観測もその公開先で行う。複数の公開先を一作用として一意に扱えない場合は、いずれへも送らず停止する。URLの表記差だけで同じrepositoryを別物としない。
+
+### Phase 2: 確認済みcommitを公開する
+Skill配置とworktreeは、実行するsh環境で `pwd -P` により絶対physical POSIX pathへ解決する。Windowsの `C:\...` をshへ直渡ししない。
 
 ```sh
 skill_root=$(CDPATH= cd "<skill-directory-visible-to-sh>" && pwd -P)
 worktree=$(CDPATH= cd "<worktree-directory-visible-to-sh>" && pwd -P)
-```
-
-次を実行する。
-
-```sh
 sh "$skill_root/scripts/push-flow.sh" publish-current \
   --worktree "$worktree" \
-  --require-integrated-ref "<Phase 1 で確定した remote-tracking-ref>"
+  --require-integrated-ref "<Phase 1で確定したremote-tracking-ref>"
 ```
 
-Phase 1 で同期基準を複数選んだ場合は、同じ順序で `--require-integrated-ref` を繰り返す。基準を値として確定できない場合は、この引数を渡さない。
+同期基準が複数なら同じ順で `--require-integrated-ref` を繰り返す。基準を値として確定できない場合は省略する。固定PRの公開先をhelperが実現できない場合は、同じ契約を満たす通常のGit操作を使う。
 
-script の実行後は outcome にかかわらず、現在が attached branch であること、worktree が clean であること、各統合必須 ref が `HEAD` に含まれること、push 先が fast-forward であることを再観測する。固定済み head remote/ref がある場合は、helper がその publish 先を安全に実現できると確認できる場合だけ使い、できない場合は native の明示 refspec へ切り替える。通信失敗または不明な結果の後に remote branch OID が期待する `HEAD` OID と一致していれば、再 push しない。
+作用前に、対象 branch と `HEAD`、今回分の commit 済み内容、対象外の作業の保持、進行操作・競合なし、全必須基準の包含、公開先との fast-forward 関係を確認する。送信元は確認済みの OID、送信先は一つの branch ref に固定し、`--no-follow-tags --recurse-submodules=no` を使う。タグ、他 ref、submodule を追加で公開せず、force や hook の迂回を使わない。
 
-未成立で残る作用が一意なら、明示 refspec の通常の `git push <remote> <local-ref>:<remote-ref>` を使って続行してよい。固定済み head remote/ref がある場合はその remote/ref だけを refspec と upstream に使う。force を使わず、non-fast-forward、detached HEAD、dirty worktree、未統合基準、固定済み head remote/ref の URL・OID・対応の不一致、または push 先を一意に確定できない場合は停止する。`blocked / commit-required` では `$commit`、`blocked / sync-required` では `$sync-latest` を一度だけ適用してから再観測する。
+helper の結果にかかわらず状態を再観測する。未成立の作用が一意に分かる場合は、`git push --no-follow-tags --recurse-submodules=no <remote> <confirmed-oid>:<remote-branch-ref>` でも続行できる。通信失敗や不明結果の後に公開先 OID が期待値と一致すれば再送しない。入力不足や一時失敗は補正し、今回分の未 commit、未統合、non-fast-forward、競合は Phase 1 の準備、履歴を保持する同期、解消と検証を経て再評価する。対象外の残差だけなら固定 OID の公開を進める。調査しても対象・公開先・所有を確定できない、または新たな仕様判断や権限が必要な場合だけ、依存する送信を保留する。
 
-publish 後は upstream 設定と remote branch OID を再観測し、両方が現在の branch と `HEAD`、固定済み head remote/ref があればその値に一致するときだけ完了とする。
+公開後は実効 push 先を再確認し、remote branch OID、対象 branch と `HEAD`、対象外の作業の保持、必須基準の包含、upstream を観測する。初回は対象 branch の upstream も成立させる。すべてが固定した対象に対応するときだけ `completed`、既に成立していて公開作用が不要なら `no-op` とする。作用後に状態を確定できない場合は、適用された可能性と確認できた範囲を保持して返す。
 
-### Phase 3: 状態を残す
-同期結果、作成した commit、publish 先と明示 refspec、upstream と remote OID の事後観測、helper または native 操作、再試行の有無、停止理由を残す。
+### Phase 3: 結果を残す
+同期とcommit、公開先と明示refspec、upstreamとremote OIDの事後観測、使用したhelperまたは通常操作、再試行、残る状態と再開条件を返す。

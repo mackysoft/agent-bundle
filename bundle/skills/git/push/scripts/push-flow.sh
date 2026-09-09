@@ -98,8 +98,6 @@ collect_upstream() {
 observe_publish_state() {
     resolve_head
     detect_operation || return 1
-    status_text=$(git status --porcelain --untracked-files=all --ignore-submodules=none 2>/dev/null) || return 1
-    if [ -n "$status_text" ]; then has_changes=true; else has_changes=false; fi
     unmerged_text=$(git ls-files -u 2>/dev/null) || return 1
     if [ -n "$unmerged_text" ]; then has_unmerged=true; else has_unmerged=false; fi
     if remote_exists origin; then origin_configured=true; else origin_configured=false; fi
@@ -107,16 +105,45 @@ observe_publish_state() {
 }
 
 remote_head_oid() {
-    remote_name=$1
+    remote_endpoint=$1
     remote_ref=$2
     remote_oid=
-    remote_line=$(git ls-remote --heads "$remote_name" "$remote_ref" 2>/dev/null) || return 1
+    remote_line=$(git ls-remote --heads "$remote_endpoint" "$remote_ref" 2>/dev/null) || return 1
     [ -z "$remote_line" ] && return 0
     set -- $remote_line
     [ "$#" -eq 2 ] || return 1
     is_oid "$1" || return 1
     [ "$2" = "$remote_ref" ] || return 1
     remote_oid=$1
+}
+
+resolve_publish_endpoint() {
+    publish_urls=$(git remote get-url --push --all "$publish_remote" 2>/dev/null) || return 1
+    publish_url=
+    endpoint_count=0
+    while IFS= read -r endpoint; do
+        case "$endpoint" in ''|-*) return 1 ;; esac
+        endpoint_count=$((endpoint_count + 1))
+        publish_url=$endpoint
+    done <<EOF
+$publish_urls
+EOF
+    [ "$endpoint_count" -eq 1 ]
+}
+
+publish_snapshot_unchanged() {
+    [ "$head_state" = attached ] \
+        && [ "$head_ref" = "$source_ref" ] \
+        && [ "$head_oid" = "$source_oid" ] \
+        && [ "$operation_state" = none ] \
+        && [ "$has_unmerged" = false ] || return 1
+    if [ "$initial_push" = true ]; then
+        [ "$upstream_configured" = false ]
+    else
+        [ "$upstream_valid" = true ] \
+            && [ "$upstream_remote" = "$publish_remote" ] \
+            && [ "$upstream_ref" = "$published_ref" ]
+    fi
 }
 
 parse_required_ref() {
@@ -196,7 +223,6 @@ block_if_unsafe() {
     if [ "$has_unmerged" = true ]; then emit_current blocked unmerged; fi
     if [ "$head_state" = detached ]; then emit_current blocked detached-head; fi
     if [ "$head_state" = unborn ]; then emit_current blocked unborn-head; fi
-    if [ "$has_changes" = true ]; then emit_current blocked commit-required; fi
 }
 
 select_publish_target() {
@@ -256,25 +282,44 @@ case "$select_status" in
     *) emit_current blocked origin-not-configured ;;
 esac
 source_oid=$head_oid
+source_ref=$head_ref
+resolve_publish_endpoint || emit_current blocked publish-endpoint-not-unique
+selected_publish_url=$publish_url
 check_required_refs_integrated
 
 fetch_remote "$publish_remote" || emit_current blocked remote-unavailable
-remote_head_oid "$publish_remote" "$published_ref" || emit_current blocked remote-unavailable
-if [ "$initial_push" = false ] && [ "$remote_oid" = "$source_oid" ]; then emit_current no-op no-commits-to-push; fi
+remote_head_oid "$selected_publish_url" "$published_ref" || emit_current blocked remote-unavailable
+if [ -n "$remote_oid" ] && ! git cat-file -e "$remote_oid^{commit}" 2>/dev/null; then
+    git fetch --no-tags "$selected_publish_url" "$published_ref" >/dev/null 2>&1 \
+        || emit_current blocked comparison-unavailable
+fi
 if [ -n "$remote_oid" ] \
     && ! git merge-base --is-ancestor "$remote_oid" "$source_oid" >/dev/null 2>&1; then
     emit_current blocked sync-required
 fi
 
-if [ "$initial_push" = true ]; then
-    if push_output=$(git push -u origin "$head_ref:$head_ref" 2>&1); then push_status=0; else push_status=$?; fi
-else
-    if push_output=$(git push "$publish_remote" "$head_ref:$published_ref" 2>&1); then push_status=0; else push_status=$?; fi
-fi
+observe_publish_state || emit_current blocked state-unavailable
+publish_snapshot_unchanged || emit_current blocked source-state-changed
+resolve_publish_endpoint && [ "$publish_url" = "$selected_publish_url" ] \
+    || emit_current blocked publish-endpoint-changed
+if [ "$initial_push" = false ] && [ "$remote_oid" = "$source_oid" ]; then emit_current no-op no-commits-to-push; fi
+
+# Publish the inspected commit and one branch; local defaults must not add effects.
+if push_output=$(git push --no-follow-tags --recurse-submodules=no "$publish_remote" "$source_oid:$published_ref" 2>&1); then push_status=0; else push_status=$?; fi
 observe_publish_state || { emit unknown-after-attempt postcondition-unavailable; exit 0; }
-remote_head_oid "$publish_remote" "$published_ref" || emit_current unknown-after-attempt postcondition-unavailable
+remote_head_oid "$selected_publish_url" "$published_ref" || emit_current unknown-after-attempt postcondition-unavailable
+resolve_publish_endpoint && [ "$publish_url" = "$selected_publish_url" ] \
+    || emit_current unknown-after-attempt publish-endpoint-changed
+publish_snapshot_unchanged || emit_current unknown-after-attempt source-state-changed
 if [ "$push_status" -eq 0 ] && [ "$remote_oid" = "$source_oid" ]; then
-    if [ "$initial_push" = true ] && { [ "$upstream_configured" = false ] || [ "$upstream_valid" = false ] || [ "$upstream_remote" != origin ] || [ "$upstream_ref" != "$head_ref" ]; }; then
+    if [ "$initial_push" = true ]; then
+        # The verified upstream need not have a local remote-tracking ref.
+        git config --local "branch.${source_ref#refs/heads/}.remote" "$publish_remote" >/dev/null 2>&1 \
+            && git config --local "branch.${source_ref#refs/heads/}.merge" "$published_ref" >/dev/null 2>&1 \
+            || emit_current unknown-after-attempt upstream-postcondition-failed
+        collect_upstream
+    fi
+    if [ "$upstream_configured" = false ] || [ "$upstream_valid" = false ] || [ "$upstream_remote" != "$publish_remote" ] || [ "$upstream_ref" != "$published_ref" ]; then
         emit_current unknown-after-attempt upstream-postcondition-failed
     fi
     emit_current completed published
@@ -282,8 +327,8 @@ fi
 if [ "$push_status" -ne 0 ]; then
     case "$push_output" in
         *non-fast-forward*|*'fetch first'*|*'[rejected]'*)
-            if fetch_remote "$publish_remote" \
-                && remote_head_oid "$publish_remote" "$published_ref" \
+            if git fetch --no-tags "$selected_publish_url" "$published_ref" >/dev/null 2>&1 \
+                && remote_head_oid "$selected_publish_url" "$published_ref" \
                 && [ -n "$remote_oid" ] \
                 && ! git merge-base --is-ancestor "$remote_oid" "$source_oid" >/dev/null 2>&1; then
                 emit_current blocked sync-required

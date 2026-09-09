@@ -8,6 +8,13 @@ fixture_root=$(mktemp -d "${temp_root%/}/git-skill-flows.XXXXXX")
 trap 'rm -rf "$fixture_root"' EXIT HUP INT TERM
 fixture_root=$(CDPATH= cd "$fixture_root" && pwd -P)
 
+# Fixtures own their Git configuration and communicate only with local remotes.
+export GIT_CONFIG_NOSYSTEM=1
+export GIT_CONFIG_GLOBAL=/dev/null
+export GIT_CONFIG_COUNT=0
+export GIT_ALLOW_PROTOCOL=file
+unset GIT_CONFIG_PARAMETERS
+
 test_number=0
 last_case=
 last_output=
@@ -46,7 +53,9 @@ assert_envelope() {
             || fail "$last_case: JSON envelope is missing $field"
     done
     assert_json_string outcome "$expected_outcome"
-    assert_json_string reason "$expected_reason"
+    if [ -n "$expected_reason" ]; then
+        assert_json_string reason "$expected_reason"
+    fi
 }
 
 run_flow_with_result() {
@@ -189,13 +198,206 @@ core_commit_oid=$(git -C "$core_repository" rev-parse HEAD)
 assert_equal "$last_output" "{\"outcome\":\"completed\",\"reason\":\"committed\",\"result\":{\"commitOid\":\"$core_commit_oid\"}}" 'commit result'
 assert_clean "$core_repository"
 
+# Local publishing defaults must not expand a request for one branch.
+git -C "$core_repository" tag -am 'unrequested release' unrequested-release
+git -C "$core_repository" branch unrequested-branch
+git -C "$core_repository" config push.followTags true
+git -C "$core_repository" config remote.origin.push refs/heads/unrequested-branch:refs/heads/unrequested-branch
 run_flow 'push publishes the current branch and sets upstream' "$push_flow" completed published \
     publish-current --worktree "$core_repository"
 assert_remote_ref_oid "$core_remote" refs/heads/feature "$core_commit_oid"
+assert_remote_ref_oid "$core_remote" refs/heads/unrequested-branch ''
+assert_equal "$(git ls-remote --tags "$core_remote" refs/tags/unrequested-release)" '' 'unrequested remote tag'
 assert_equal "$(git -C "$core_repository" config --get branch.feature.remote)" origin 'feature upstream remote'
 assert_equal "$(git -C "$core_repository" config --get branch.feature.merge)" refs/heads/feature 'feature upstream ref'
 run_flow 'push rerun is a no-op after publication' "$push_flow" no-op no-commits-to-push \
     publish-current --worktree "$core_repository"
+
+# A narrow clone can publish a new branch without widening what it fetches.
+single_branch_repository="$fixture_root/single-branch"
+git clone -q --single-branch --branch main "$core_remote" "$single_branch_repository"
+git -C "$single_branch_repository" config user.name 'Git Skill Flow Test'
+git -C "$single_branch_repository" config user.email 'git-skill-flow-test@example.invalid'
+git -C "$single_branch_repository" checkout -qb single-topic
+commit_file "$single_branch_repository" topic.txt topic 'add topic'
+single_branch_oid=$(git -C "$single_branch_repository" rev-parse HEAD)
+single_branch_fetch=$(git -C "$single_branch_repository" config --get-all remote.origin.fetch)
+run_flow 'push establishes upstream for a new branch from a single-branch clone' "$push_flow" completed published \
+    publish-current --worktree "$single_branch_repository"
+assert_remote_ref_oid "$core_remote" refs/heads/single-topic "$single_branch_oid"
+assert_equal "$(git -C "$single_branch_repository" config --get branch.single-topic.remote)" origin 'narrow clone upstream remote'
+assert_equal "$(git -C "$single_branch_repository" config --get branch.single-topic.merge)" refs/heads/single-topic 'narrow clone upstream ref'
+assert_equal "$(git -C "$single_branch_repository" config --get-all remote.origin.fetch)" "$single_branch_fetch" 'narrow clone fetch scope'
+assert_equal "$(git -C "$single_branch_repository" rev-parse HEAD)" "$single_branch_oid" 'narrow clone HEAD'
+assert_clean "$single_branch_repository"
+run_flow 'push rerun from a single-branch clone observes the published branch' "$push_flow" no-op no-commits-to-push \
+    publish-current --worktree "$single_branch_repository"
+
+# Fetch and publish endpoints can differ through either native Git mechanism.
+for endpoint_setting in pushurl pushInsteadOf; do
+    endpoint_repository="$fixture_root/endpoint-$endpoint_setting"
+    endpoint_fetch="$fixture_root/endpoint-$endpoint_setting-fetch.git"
+    endpoint_push="$fixture_root/endpoint-$endpoint_setting-push.git"
+    create_repository "$endpoint_repository" "$endpoint_fetch"
+    git clone -q --bare "$endpoint_fetch" "$endpoint_push"
+    commit_file "$endpoint_repository" published.txt published 'publish to a separate endpoint'
+    endpoint_oid=$(git -C "$endpoint_repository" rev-parse HEAD)
+    git -C "$endpoint_repository" push -q origin main
+    case "$endpoint_setting" in
+        pushurl) git -C "$endpoint_repository" config remote.origin.pushurl "$endpoint_push" ;;
+        pushInsteadOf) git -C "$endpoint_repository" config "url.$endpoint_push.pushInsteadOf" "$endpoint_fetch" ;;
+    esac
+    run_flow "push uses the effective $endpoint_setting destination when fetch is already current" "$push_flow" completed published \
+        publish-current --worktree "$endpoint_repository"
+    assert_remote_ref_oid "$endpoint_push" refs/heads/main "$endpoint_oid"
+    assert_remote_ref_oid "$endpoint_fetch" refs/heads/main "$endpoint_oid"
+done
+
+# The same effective endpoint controls the fast-forward check, including commits
+# that are absent from both the fetch remote and the local object database.
+endpoint_writer="$fixture_root/endpoint-writer"
+advance_remote_main "$endpoint_writer" "$endpoint_push" remote.txt remote
+endpoint_remote_oid=$(remote_ref_oid "$endpoint_push" refs/heads/main)
+run_flow 'push requires sync with the effective push endpoint when it has advanced' "$push_flow" blocked sync-required \
+    publish-current --worktree "$endpoint_repository"
+assert_remote_ref_oid "$endpoint_push" refs/heads/main "$endpoint_remote_oid"
+assert_remote_ref_oid "$endpoint_fetch" refs/heads/main "$endpoint_oid"
+assert_equal "$(git -C "$endpoint_repository" rev-parse HEAD)" "$endpoint_oid" 'endpoint sync-required HEAD'
+
+multiple_repository="$fixture_root/multiple-endpoints"
+multiple_first="$fixture_root/multiple-first.git"
+multiple_second="$fixture_root/multiple-second.git"
+create_repository "$multiple_repository" "$multiple_first"
+git clone -q --bare "$multiple_first" "$multiple_second"
+multiple_before=$(git -C "$multiple_repository" rev-parse HEAD)
+commit_file "$multiple_repository" pending.txt pending 'pending publication'
+multiple_head=$(git -C "$multiple_repository" rev-parse HEAD)
+git -C "$multiple_repository" config --add remote.origin.pushurl "$multiple_first"
+git -C "$multiple_repository" config --add remote.origin.pushurl "$multiple_second"
+run_flow 'push stops before writing to multiple configured destinations' "$push_flow" blocked '' \
+    publish-current --worktree "$multiple_repository"
+assert_remote_ref_oid "$multiple_first" refs/heads/main "$multiple_before"
+assert_remote_ref_oid "$multiple_second" refs/heads/main "$multiple_before"
+assert_equal "$(git -C "$multiple_repository" rev-parse HEAD)" "$multiple_head" 'multiple destination HEAD'
+
+# A parent publication does not publish an unpushed submodule commit, even when
+# the repository normally requests recursive publication.
+submodule_repository="$fixture_root/submodule-parent"
+submodule_parent_remote="$fixture_root/submodule-parent.git"
+submodule_seed="$fixture_root/submodule-seed"
+submodule_remote="$fixture_root/submodule.git"
+create_repository "$submodule_repository" "$submodule_parent_remote"
+create_repository "$submodule_seed" "$submodule_remote"
+submodule_before=$(remote_ref_oid "$submodule_remote" refs/heads/main)
+git -C "$submodule_repository" submodule add -q "$submodule_remote" library
+git -C "$submodule_repository/library" config user.name 'Git Skill Flow Test'
+git -C "$submodule_repository/library" config user.email 'git-skill-flow-test@example.invalid'
+commit_file "$submodule_repository/library" unpublished.txt unpublished 'unpublished library change'
+git -C "$submodule_repository" add .gitmodules library
+git -C "$submodule_repository" commit -qm 'reference unpublished library commit'
+submodule_parent_oid=$(git -C "$submodule_repository" rev-parse HEAD)
+git -C "$submodule_repository" config push.recurseSubmodules on-demand
+run_flow 'push publishes only the parent branch despite recursive submodule defaults' "$push_flow" completed published \
+    publish-current --worktree "$submodule_repository"
+assert_remote_ref_oid "$submodule_parent_remote" refs/heads/main "$submodule_parent_oid"
+assert_remote_ref_oid "$submodule_remote" refs/heads/main "$submodule_before"
+assert_clean "$submodule_repository"
+
+# These faults occur at the Git process boundary. Real Git still performs the
+# publication; assertions inspect repository effects, not push arguments.
+git_fault_bin="$fixture_root/git-fault-bin"
+mkdir "$git_fault_bin"
+git_fault_real_git=$(command -v git)
+git_fault_original_path=$PATH
+cat > "$git_fault_bin/git" <<'EOF'
+#!/bin/sh
+set -eu
+for argument in "$@"; do
+    case "$argument" in
+        fetch)
+            if [ "$GIT_FLOW_FAULT" = switch-after-fetch ]; then
+                "$GIT_FLOW_REAL_GIT" "$@"
+                "$GIT_FLOW_REAL_GIT" -C "$GIT_FLOW_REPOSITORY" checkout -qb concurrent-work
+                "$GIT_FLOW_REAL_GIT" -C "$GIT_FLOW_REPOSITORY" commit --allow-empty -qm 'concurrent work'
+                exit 0
+            fi
+            ;;
+        push)
+            printf '%s\n' push >> "$GIT_FLOW_ATTEMPTS"
+            if [ "$GIT_FLOW_FAULT" = advance-head ]; then
+                "$GIT_FLOW_REAL_GIT" commit --allow-empty -qm 'concurrent local commit'
+            fi
+            "$GIT_FLOW_REAL_GIT" "$@"
+            if [ "$GIT_FLOW_FAULT" = lose-response ]; then
+                mv "$GIT_FLOW_REMOTE" "$GIT_FLOW_REMOTE.unavailable"
+                exit 1
+            fi
+            exit 0
+            ;;
+    esac
+done
+exec "$GIT_FLOW_REAL_GIT" "$@"
+EOF
+chmod +x "$git_fault_bin/git"
+
+source_change_repository="$fixture_root/source-change"
+source_change_remote="$fixture_root/source-change.git"
+source_change_attempts="$fixture_root/source-change-attempts"
+create_repository "$source_change_repository" "$source_change_remote"
+commit_file "$source_change_repository" reviewed.txt reviewed 'reviewed publication'
+source_confirmed_oid=$(git -C "$source_change_repository" rev-parse HEAD)
+PATH="$git_fault_bin:$PATH" GIT_FLOW_REAL_GIT="$git_fault_real_git" \
+    GIT_FLOW_FAULT=advance-head GIT_FLOW_ATTEMPTS="$source_change_attempts" \
+    run_flow 'push retains the confirmed commit when HEAD advances at the send boundary' "$push_flow" unknown-after-attempt '' \
+        publish-current --worktree "$source_change_repository"
+# POSIX shells can retain assignments made before a function call.
+PATH=$git_fault_original_path
+unset GIT_FLOW_REAL_GIT GIT_FLOW_FAULT GIT_FLOW_ATTEMPTS
+assert_remote_ref_oid "$source_change_remote" refs/heads/main "$source_confirmed_oid"
+[ "$(git -C "$source_change_repository" rev-parse HEAD)" != "$source_confirmed_oid" ] \
+    || fail "$last_case: the concurrent local commit was not preserved"
+assert_equal "$(wc -l < "$source_change_attempts" | tr -d ' ')" 1 'publication attempts after HEAD changed'
+assert_clean "$source_change_repository"
+
+upstream_change_repository="$fixture_root/upstream-change"
+upstream_change_remote="$fixture_root/upstream-change.git"
+create_repository "$upstream_change_repository" "$upstream_change_remote"
+commit_file "$upstream_change_repository" reviewed.txt reviewed 'reviewed publication'
+upstream_confirmed_oid=$(git -C "$upstream_change_repository" rev-parse HEAD)
+cat > "$upstream_change_repository/.git/hooks/pre-push" <<'EOF'
+#!/bin/sh
+git config branch.main.merge refs/heads/changed-upstream
+EOF
+chmod +x "$upstream_change_repository/.git/hooks/pre-push"
+run_flow 'push preserves a hook upstream change without reporting a stable publication' "$push_flow" unknown-after-attempt '' \
+    publish-current --worktree "$upstream_change_repository"
+assert_remote_ref_oid "$upstream_change_remote" refs/heads/main "$upstream_confirmed_oid"
+assert_remote_ref_oid "$upstream_change_remote" refs/heads/changed-upstream ''
+assert_equal "$(git -C "$upstream_change_repository" config --get branch.main.merge)" refs/heads/changed-upstream 'hook upstream change'
+assert_equal "$(git -C "$upstream_change_repository" rev-parse HEAD)" "$upstream_confirmed_oid" 'upstream change HEAD'
+
+unknown_repository="$fixture_root/unknown-publication"
+unknown_remote="$fixture_root/unknown-publication.git"
+unknown_attempts="$fixture_root/unknown-attempts"
+create_repository "$unknown_repository" "$unknown_remote"
+commit_file "$unknown_repository" published.txt published 'publication with a lost response'
+unknown_oid=$(git -C "$unknown_repository" rev-parse HEAD)
+PATH="$git_fault_bin:$PATH" GIT_FLOW_REAL_GIT="$git_fault_real_git" \
+    GIT_FLOW_FAULT=lose-response GIT_FLOW_ATTEMPTS="$unknown_attempts" GIT_FLOW_REMOTE="$unknown_remote" \
+    run_flow 'push preserves an unknown result without resending after a lost response' "$push_flow" unknown-after-attempt '' \
+        publish-current --worktree "$unknown_repository"
+PATH=$git_fault_original_path
+unset GIT_FLOW_REAL_GIT GIT_FLOW_FAULT GIT_FLOW_ATTEMPTS GIT_FLOW_REMOTE
+assert_remote_ref_oid "$unknown_remote.unavailable" refs/heads/main "$unknown_oid"
+assert_equal "$(wc -l < "$unknown_attempts" | tr -d ' ')" 1 'publication attempts after a lost response'
+mv "$unknown_remote.unavailable" "$unknown_remote"
+PATH="$git_fault_bin:$PATH" GIT_FLOW_REAL_GIT="$git_fault_real_git" \
+    GIT_FLOW_FAULT=lose-response GIT_FLOW_ATTEMPTS="$unknown_attempts" GIT_FLOW_REMOTE="$unknown_remote" \
+    run_flow 'push observes an applied publication after communication recovers without resending' "$push_flow" no-op no-commits-to-push \
+        publish-current --worktree "$unknown_repository"
+PATH=$git_fault_original_path
+unset GIT_FLOW_REAL_GIT GIT_FLOW_FAULT GIT_FLOW_ATTEMPTS GIT_FLOW_REMOTE
+assert_equal "$(wc -l < "$unknown_attempts" | tr -d ' ')" 1 'publication attempts after communication recovers'
 
 # An initial publish must not overwrite an existing same-name remote branch.
 # It can establish upstream only when that branch is already included in HEAD.
@@ -276,8 +478,8 @@ assert_remote_ref_oid "$push_gate_remote" refs/heads/push-gate "$push_gate_remot
 run_flow 'pr-submit prepares a changed branch for PR work' "$pr_submit_flow" completed ready \
     prepare --worktree "$core_repository" --base-ref refs/remotes/origin/main
 
-# PR preparation never advances a dirty or base-behind worktree itself.  Once
-# the two prerequisites are satisfied, it reports the worktree as ready.
+# PR preparation checks the committed branch. Pending content is preserved;
+# an unintegrated base still requires synchronization before PR work.
 pr_gate_repository="$fixture_root/pr-submit-gates"
 pr_gate_remote="$fixture_root/pr-submit-gates-origin.git"
 pr_gate_updater="$fixture_root/pr-submit-gates-updater"
@@ -286,9 +488,10 @@ git -C "$pr_gate_repository" checkout -qb pr-gate
 commit_file "$pr_gate_repository" feature.txt feature 'add feature'
 printf '%s\n' dirty >> "$pr_gate_repository/feature.txt"
 pr_gate_dirty_head=$(git -C "$pr_gate_repository" rev-parse HEAD)
-run_flow 'pr-submit requires a commit before preparing a dirty worktree' "$pr_submit_flow" blocked commit-required \
+run_flow 'pr-submit prepares the committed branch while preserving pending content' "$pr_submit_flow" completed ready \
     prepare --worktree "$pr_gate_repository" --base-ref refs/remotes/origin/main
 assert_equal "$(git -C "$pr_gate_repository" rev-parse HEAD)" "$pr_gate_dirty_head" 'dirty worktree HEAD'
+assert_equal "$(cat "$pr_gate_repository/feature.txt")" "$(printf 'feature\ndirty')" 'pending file content'
 git -C "$pr_gate_repository" checkout -- feature.txt
 
 advance_remote_main "$pr_gate_updater" "$pr_gate_remote" remote.txt remote
@@ -348,4 +551,218 @@ git -C "$conflict_repository" rev-parse -q --verify MERGE_HEAD >/dev/null \
 [ -n "$(git -C "$conflict_repository" ls-files -u)" ] \
     || fail "$last_case: pr-submit changed the unmerged index"
 
-printf '%s\n' 'Git Skill flow tests passed.'
+# Pending work belongs to the caller. Compare its staged and working contents
+# separately so a successful flow cannot hide staging or discarding it.
+remember_pending_work() {
+    pending_index=$(git -C "$1" ls-files --stage -- other.txt)
+    pending_worktree=$(git -C "$1" hash-object other.txt)
+    pending_untracked=$(git -C "$1" hash-object untracked.txt)
+    pending_status=$(git -C "$1" status --porcelain -- other.txt untracked.txt)
+}
+
+assert_pending_work() {
+    assert_equal "$(git -C "$1" ls-files --stage -- other.txt)" "$pending_index" 'unselected index content'
+    assert_equal "$(git -C "$1" hash-object other.txt)" "$pending_worktree" 'unselected working content'
+    assert_equal "$(git -C "$1" hash-object untracked.txt)" "$pending_untracked" 'untracked content'
+    assert_equal "$(git -C "$1" status --porcelain -- other.txt untracked.txt)" "$pending_status" 'pending work status'
+}
+
+scoped_repository="$fixture_root/scoped-work"
+scoped_remote="$fixture_root/scoped-work-origin.git"
+create_repository "$scoped_repository" "$scoped_remote"
+commit_file "$scoped_repository" other.txt original 'add independent work'
+commit_file "$scoped_repository" remove.txt obsolete 'add obsolete task file'
+git -C "$scoped_repository" push -q origin main
+git -C "$scoped_repository" checkout -q --detach
+printf '%s\n' staged > "$scoped_repository/other.txt"
+git -C "$scoped_repository" add other.txt
+printf '%s\n' unstaged >> "$scoped_repository/other.txt"
+printf '%s\n' untracked > "$scoped_repository/untracked.txt"
+remember_pending_work "$scoped_repository"
+
+printf '%s\n' task > "$scoped_repository/README.md"
+printf '%s\n' new > "$scoped_repository/selected [draft].txt"
+rm "$scoped_repository/remove.txt"
+scoped_parent=$(git -C "$scoped_repository" rev-parse HEAD)
+result_is_expected=true
+run_flow_with_stdin 'commit creates a detached task commit without consuming other staged work' "$commit_flow" completed committed 'feat: update selected task files' \
+    create --worktree "$scoped_repository" --path README.md --path 'selected [draft].txt' --path remove.txt
+result_is_expected=false
+scoped_task_oid=$(git -C "$scoped_repository" rev-parse HEAD)
+assert_equal "$(git -C "$scoped_repository" rev-parse HEAD^)" "$scoped_parent" 'task commit parent'
+assert_equal "$(git -C "$scoped_repository" show HEAD:README.md)" task 'committed task content'
+assert_equal "$(git -C "$scoped_repository" show 'HEAD:selected [draft].txt')" new 'literal new path content'
+if git -C "$scoped_repository" cat-file -e HEAD:remove.txt 2>/dev/null; then
+    fail "$last_case: selected deletion was not committed"
+fi
+assert_equal "$(git -C "$scoped_repository" diff-tree --no-commit-id --name-only -r HEAD)" "$(printf 'README.md\nremove.txt\nselected [draft].txt')" 'committed path set'
+assert_equal "$(git -C "$scoped_repository" symbolic-ref -q HEAD || true)" '' 'detached state'
+assert_pending_work "$scoped_repository"
+
+run_flow 'branch-create attaches detached task history without requiring a base' "$branch_create_flow" completed created \
+    ensure --worktree "$scoped_repository" --branch-ref refs/heads/scoped-task --preserve-current
+assert_equal "$(git -C "$scoped_repository" rev-parse HEAD)" "$scoped_task_oid" 'preserved detached task commit'
+assert_equal "$(git -C "$scoped_repository" symbolic-ref -q HEAD)" refs/heads/scoped-task 'attached task branch'
+assert_pending_work "$scoped_repository"
+
+# Reusing a valid local branch does not require a reachable base remote and
+# does not rewrite an already configured local upstream.
+git -C "$scoped_repository" config branch.scoped-task.remote .
+git -C "$scoped_repository" config branch.scoped-task.merge refs/heads/main
+git -C "$scoped_repository" remote set-url origin "$fixture_root/unavailable-origin.git"
+run_flow 'branch-create reuses the attached branch offline and preserves its upstream' "$branch_create_flow" no-op already-attached \
+    ensure --worktree "$scoped_repository" --branch-ref refs/heads/scoped-task --base-ref refs/remotes/origin/missing
+assert_equal "$(git -C "$scoped_repository" config branch.scoped-task.remote)" . 'existing upstream remote'
+assert_equal "$(git -C "$scoped_repository" config branch.scoped-task.merge)" refs/heads/main 'existing upstream branch'
+assert_pending_work "$scoped_repository"
+git -C "$scoped_repository" remote set-url origin "$scoped_remote"
+git -C "$scoped_repository" branch --unset-upstream
+
+run_flow_with_stdin 'commit ignores unrelated staged changes when selected paths are unchanged' "$commit_flow" no-op no-selected-changes 'feat: already committed' \
+    create --worktree "$scoped_repository" --path README.md
+assert_equal "$(git -C "$scoped_repository" rev-parse HEAD)" "$scoped_task_oid" 'no-op commit HEAD'
+assert_pending_work "$scoped_repository"
+
+printf '%s\n' retry > "$scoped_repository/README.md"
+mkdir -p "$scoped_repository/.git/hooks"
+printf '#!/bin/sh\nexit 1\n' > "$scoped_repository/.git/hooks/pre-commit"
+chmod +x "$scoped_repository/.git/hooks/pre-commit"
+run_flow_with_stdin 'commit preserves pending work after a rejected commit attempt' "$commit_flow" unknown-after-attempt commit-failed 'fix: retry task commit' \
+    create --worktree "$scoped_repository" --path README.md
+assert_equal "$(git -C "$scoped_repository" rev-parse HEAD)" "$scoped_task_oid" 'rejected commit HEAD'
+assert_pending_work "$scoped_repository"
+rm "$scoped_repository/.git/hooks/pre-commit"
+result_is_expected=true
+run_flow_with_stdin 'commit completes after its rejection is corrected' "$commit_flow" completed committed 'fix: retry task commit' \
+    create --worktree "$scoped_repository" --path README.md
+result_is_expected=false
+scoped_published_oid=$(git -C "$scoped_repository" rev-parse HEAD)
+assert_equal "$(git -C "$scoped_repository" rev-parse HEAD^)" "$scoped_task_oid" 'retry commit parent'
+assert_pending_work "$scoped_repository"
+
+run_flow 'push publishes the confirmed commit while preserving pending work' "$push_flow" completed published \
+    publish-current --worktree "$scoped_repository" --require-integrated-ref refs/remotes/origin/main
+assert_remote_ref_oid "$scoped_remote" refs/heads/scoped-task "$scoped_published_oid"
+assert_equal "$(git --git-dir="$scoped_remote" show refs/heads/scoped-task:other.txt)" original 'published unrelated content'
+assert_pending_work "$scoped_repository"
+run_flow 'push rerun remains a no-op with pending work' "$push_flow" no-op no-commits-to-push \
+    publish-current --worktree "$scoped_repository"
+assert_pending_work "$scoped_repository"
+run_flow 'pr-submit prepares a published branch with unrelated staged and untracked work' "$pr_submit_flow" completed ready \
+    prepare --worktree "$scoped_repository" --base-ref refs/remotes/origin/main
+assert_pending_work "$scoped_repository"
+
+# Git can preserve nonoverlapping pending work during a fast-forward. A real
+# merge with staged work must leave it intact for the caller to preserve before
+# retrying; it must not use configured autostash to erase staging distinctions.
+pending_sync_repository="$fixture_root/pending-sync"
+pending_sync_remote="$fixture_root/pending-sync-origin.git"
+pending_sync_updater="$fixture_root/pending-sync-updater"
+create_repository "$pending_sync_repository" "$pending_sync_remote"
+commit_file "$pending_sync_repository" other.txt original 'add independent work'
+git -C "$pending_sync_repository" push -q origin main
+printf '%s\n' staged > "$pending_sync_repository/other.txt"
+git -C "$pending_sync_repository" add other.txt
+printf '%s\n' unstaged >> "$pending_sync_repository/other.txt"
+printf '%s\n' untracked > "$pending_sync_repository/untracked.txt"
+remember_pending_work "$pending_sync_repository"
+git -C "$pending_sync_repository" config merge.autostash true
+advance_remote_main "$pending_sync_updater" "$pending_sync_remote" remote.txt remote
+run_flow 'sync-latest fast-forwards while preserving staged and unstaged work separately' "$sync_latest_flow" completed synchronized \
+    synchronize --worktree "$pending_sync_repository" --target-ref refs/remotes/origin/main
+assert_equal "$(git -C "$pending_sync_repository" rev-parse HEAD)" "$(remote_ref_oid "$pending_sync_remote" refs/heads/main)" 'fast-forward HEAD'
+assert_pending_work "$pending_sync_repository"
+
+# Commit only local.txt in the fixture, then advance the same remote branch.
+printf '%s\n' local > "$pending_sync_repository/local.txt"
+git -C "$pending_sync_repository" add local.txt
+git -C "$pending_sync_repository" commit -qm 'local main work' --only -- local.txt
+pending_sync_local_oid=$(git -C "$pending_sync_repository" rev-parse HEAD)
+commit_file "$pending_sync_updater" remote.txt advanced 'advance same branch'
+git -C "$pending_sync_updater" push -q origin main
+pending_sync_remote_oid=$(remote_ref_oid "$pending_sync_remote" refs/heads/main)
+run_flow 'sync-latest preserves staged work when a merge cannot start' "$sync_latest_flow" blocked merge-not-applied \
+    synchronize --worktree "$pending_sync_repository" --target-ref refs/remotes/origin/main
+assert_equal "$(git -C "$pending_sync_repository" rev-parse HEAD)" "$pending_sync_local_oid" 'unapplied merge HEAD'
+assert_equal "$(git -C "$pending_sync_repository" stash list)" '' 'unrequested stash'
+assert_pending_work "$pending_sync_repository"
+
+# The fixture owner now removes the staging obstruction while retaining the
+# file's working content. The same synchronization can then complete.
+git -C "$pending_sync_repository" reset -q HEAD -- other.txt
+remember_pending_work "$pending_sync_repository"
+run_flow 'sync-latest merges a diverged same-name branch after the obstruction is removed' "$sync_latest_flow" completed synchronized \
+    synchronize --worktree "$pending_sync_repository" --target-ref refs/remotes/origin/main
+git -C "$pending_sync_repository" merge-base --is-ancestor "$pending_sync_local_oid" HEAD \
+    || fail "$last_case: local history was lost"
+git -C "$pending_sync_repository" merge-base --is-ancestor "$pending_sync_remote_oid" HEAD \
+    || fail "$last_case: fetched history was not integrated"
+assert_equal "$(git -C "$pending_sync_repository" show HEAD:local.txt)" local 'merged local content'
+assert_equal "$(git -C "$pending_sync_repository" show HEAD:remote.txt)" advanced 'merged remote content'
+assert_equal "$(git -C "$pending_sync_repository" show HEAD:other.txt)" original 'uncommitted work excluded from merge'
+assert_pending_work "$pending_sync_repository"
+
+overlap_repository="$fixture_root/pending-overlap"
+overlap_remote="$fixture_root/pending-overlap-origin.git"
+overlap_updater="$fixture_root/pending-overlap-updater"
+create_repository "$overlap_repository" "$overlap_remote"
+printf '%s\n' pending > "$overlap_repository/README.md"
+overlap_head=$(git -C "$overlap_repository" rev-parse HEAD)
+overlap_index=$(git -C "$overlap_repository" ls-files --stage)
+advance_remote_main "$overlap_updater" "$overlap_remote" README.md remote
+run_flow 'sync-latest leaves overlapping pending content intact when fast-forward cannot apply' "$sync_latest_flow" blocked fast-forward-not-applied \
+    synchronize --worktree "$overlap_repository" --target-ref refs/remotes/origin/main
+assert_equal "$(git -C "$overlap_repository" rev-parse HEAD)" "$overlap_head" 'overlap HEAD'
+assert_equal "$(git -C "$overlap_repository" ls-files --stage)" "$overlap_index" 'overlap index'
+assert_equal "$(cat "$overlap_repository/README.md")" pending 'overlapping pending content'
+
+# Once its owner resolves an operation, the helper must resume from that
+# observable state rather than treating the earlier conflict as a task stop.
+printf '%s\n' 'local and remote' > "$conflict_repository/README.md"
+git -C "$conflict_repository" add README.md
+git -C "$conflict_repository" commit -qm 'resolve README contributions'
+resolved_head=$(git -C "$conflict_repository" rev-parse HEAD)
+run_flow 'sync-latest resumes after the caller resolves the recorded conflict' "$sync_latest_flow" no-op already-synchronized \
+    synchronize --worktree "$conflict_repository" --target-ref refs/remotes/origin/main
+assert_equal "$(git -C "$conflict_repository" rev-parse HEAD)" "$resolved_head" 'resolved HEAD'
+git -C "$conflict_repository" merge-base --is-ancestor "$conflict_head_oid" HEAD \
+    || fail "$last_case: conflict resolution lost local history"
+git -C "$conflict_repository" merge-base --is-ancestor "$conflict_target_oid" HEAD \
+    || fail "$last_case: conflict resolution lost remote history"
+
+# The repository being acted on must remain the one observed before fetching.
+# Concurrent work is retained, but it must not silently become the new target.
+for concurrent_flow in branch sync; do
+    concurrent_repository="$fixture_root/concurrent-$concurrent_flow"
+    concurrent_remote="$fixture_root/concurrent-$concurrent_flow-origin.git"
+    concurrent_updater="$fixture_root/concurrent-$concurrent_flow-updater"
+    create_repository "$concurrent_repository" "$concurrent_remote"
+    concurrent_original_oid=$(git -C "$concurrent_repository" rev-parse HEAD)
+    advance_remote_main "$concurrent_updater" "$concurrent_remote" remote.txt remote
+    concurrent_target_oid=$(remote_ref_oid "$concurrent_remote" refs/heads/main)
+    if [ "$concurrent_flow" = branch ]; then
+        PATH="$git_fault_bin:$PATH" GIT_FLOW_REAL_GIT="$git_fault_real_git" \
+            GIT_FLOW_FAULT=switch-after-fetch GIT_FLOW_REPOSITORY="$concurrent_repository" \
+            run_flow 'branch-create preserves a concurrent source change without creating the requested branch' "$branch_create_flow" blocked source-state-changed \
+                ensure --worktree "$concurrent_repository" --branch-ref refs/heads/requested-work --base-ref refs/remotes/origin/main
+    else
+        PATH="$git_fault_bin:$PATH" GIT_FLOW_REAL_GIT="$git_fault_real_git" \
+            GIT_FLOW_FAULT=switch-after-fetch GIT_FLOW_REPOSITORY="$concurrent_repository" \
+            run_flow 'sync-latest does not integrate into a branch changed during fetch' "$sync_latest_flow" blocked source-state-changed \
+                synchronize --worktree "$concurrent_repository" --target-ref refs/remotes/origin/main
+    fi
+    PATH=$git_fault_original_path
+    unset GIT_FLOW_REAL_GIT GIT_FLOW_FAULT GIT_FLOW_REPOSITORY
+    assert_equal "$(git -C "$concurrent_repository" symbolic-ref -q HEAD)" refs/heads/concurrent-work 'concurrent branch'
+    assert_equal "$(git -C "$concurrent_repository" rev-parse HEAD^)" "$concurrent_original_oid" 'concurrent commit parent'
+    assert_equal "$(git -C "$concurrent_repository" rev-parse main)" "$concurrent_original_oid" 'original branch'
+    if git -C "$concurrent_repository" rev-parse --verify refs/heads/requested-work >/dev/null 2>&1; then
+        fail "$last_case: created a branch after the source changed"
+    fi
+    if git -C "$concurrent_repository" merge-base --is-ancestor "$concurrent_target_oid" HEAD; then
+        fail "$last_case: integrated the target into concurrent work"
+    fi
+    assert_clean "$concurrent_repository"
+done
+
+printf 'Git Skill flow tests passed (%s cases).\n' "$test_number"

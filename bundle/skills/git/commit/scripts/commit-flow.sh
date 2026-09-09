@@ -11,6 +11,7 @@ worktree=
 path_list=
 path_count=0
 pre_head_oid=
+pre_head_ref=
 commit_oid=
 newline='
 '
@@ -76,16 +77,8 @@ detect_operation() {
 observe_commit_state() {
     resolve_head
     detect_operation || return 1
-    status_text=$(git status --porcelain --untracked-files=all --ignore-submodules=none 2>/dev/null) || return 1
-    if [ -n "$status_text" ]; then has_changes=true; else has_changes=false; fi
     unmerged_text=$(git ls-files -u 2>/dev/null) || return 1
     if [ -n "$unmerged_text" ]; then has_unmerged=true; else has_unmerged=false; fi
-    git diff --cached --quiet --no-ext-diff -- >/dev/null 2>&1
-    case "$?" in
-        0) has_staged_changes=false ;;
-        1) has_staged_changes=true ;;
-        *) return 1 ;;
-    esac
 }
 
 emit_current() {
@@ -106,18 +99,46 @@ block_if_unsafe() {
         *) emit_current blocked operation-in-progress ;;
     esac
     if [ "$has_unmerged" = true ]; then emit_current blocked unmerged; fi
-    if [ -z "$head_ref" ] || [ "$head_state" = detached ]; then emit_current blocked detached-head; fi
+    if [ "$head_state" = unborn ] && [ -z "$head_ref" ]; then emit_current blocked state-unavailable; fi
 }
 
-stage_selected_paths() {
-    (
-        while IFS= read -r selected_path; do
-            [ -n "$selected_path" ] || continue
-            printf ':(literal)%s\0' "$selected_path"
-        done <<EOF
+unselected_index() {
+    set -- .
+    while IFS= read -r selected_path; do
+        [ -n "$selected_path" ] || continue
+        set -- "$@" ":(exclude,literal)$selected_path"
+    done <<EOF
 $path_list
 EOF
-    ) | git add -A --pathspec-from-file=- --pathspec-file-nul >/dev/null 2>&1
+    git ls-files --stage -- "$@" 2>/dev/null
+}
+
+commit_excludes_other_paths() {
+    set -- .
+    while IFS= read -r selected_path; do
+        [ -n "$selected_path" ] || continue
+        set -- "$@" ":(exclude,literal)$selected_path"
+    done <<EOF
+$path_list
+EOF
+    git diff-tree --root --quiet --no-ext-diff --no-renames -r "$head_oid" -- "$@" >/dev/null 2>&1
+}
+
+commit_matches_selection() {
+    [ "$head_ref" = "$pre_head_ref" ] && is_oid "$head_oid" && [ "$head_oid" != "$pre_head_oid" ] \
+        && [ "$operation_state" = none ] && [ "$has_unmerged" = false ] || return 1
+    parents=$(git rev-list --parents -n 1 "$head_oid" 2>/dev/null) || return 1
+    if [ -n "$pre_head_oid" ]; then
+        [ "$parents" = "$head_oid $pre_head_oid" ] || return 1
+    else
+        [ "$parents" = "$head_oid" ] || return 1
+    fi
+    current_unselected_index=$(unselected_index) || return 1
+    [ "$current_unselected_index" = "$initial_unselected_index" ] || return 1
+    current_selected_index=$(git ls-files --stage -- "$@" 2>/dev/null) || return 1
+    [ "$current_selected_index" = "$selected_index" ] || return 1
+    commit_excludes_other_paths \
+        && git diff --cached --quiet --no-ext-diff "$head_oid" -- "$@" >/dev/null 2>&1
 }
 
 if ! command -v git >/dev/null 2>&1; then
@@ -156,22 +177,41 @@ repository_root=$(CDPATH= cd "$repository_root" 2>/dev/null && pwd -P) || { emit
 
 observe_commit_state || { emit blocked state-unavailable null; exit 0; }
 pre_head_oid=$head_oid
+pre_head_ref=$head_ref
 block_if_unsafe
-if [ "$has_staged_changes" = true ]; then emit_current blocked pre-staged-changes; fi
+initial_unselected_index=$(unselected_index) || emit_current blocked state-unavailable
 
-if ! stage_selected_paths; then
+set --
+while IFS= read -r selected_path; do
+    [ -n "$selected_path" ] || continue
+    set -- "$@" ":(literal)$selected_path"
+done <<EOF
+$path_list
+EOF
+
+if ! git add -A -- "$@" >/dev/null 2>&1; then
     observe_commit_state || { emit unknown-after-attempt stage-failed null; exit 0; }
     emit_current unknown-after-attempt stage-failed
 fi
 observe_commit_state || { emit unknown-after-attempt state-unavailable-after-stage null; exit 0; }
-pre_head_oid=$head_oid
-block_if_unsafe
-if [ "$has_staged_changes" = false ]; then emit_current no-op no-selected-changes; fi
+[ "$head_ref" = "$pre_head_ref" ] && [ "$head_oid" = "$pre_head_oid" ] \
+    && [ "$operation_state" = none ] && [ "$has_unmerged" = false ] \
+    || emit_current unknown-after-attempt source-state-changed
+current_unselected_index=$(unselected_index) || emit_current unknown-after-attempt state-unavailable-after-stage
+[ "$current_unselected_index" = "$initial_unselected_index" ] \
+    || emit_current unknown-after-attempt unselected-index-changed
+git diff --cached --quiet --no-ext-diff -- "$@" >/dev/null 2>&1
+case "$?" in
+    0) emit_current no-op no-selected-changes ;;
+    1) ;;
+    *) emit_current unknown-after-attempt selected-state-unavailable ;;
+esac
+selected_index=$(git ls-files --stage -- "$@" 2>/dev/null) || emit_current unknown-after-attempt selected-state-unavailable
 
-if git commit -F - >/dev/null 2>&1; then commit_status=0; else commit_status=$?; fi
+# --only builds the commit from these paths without consuming other staged work.
+if git commit --only -F - -- "$@" >/dev/null 2>&1; then commit_status=0; else commit_status=$?; fi
 observe_commit_state || { emit unknown-after-attempt postcondition-unavailable null; exit 0; }
-if [ "$commit_status" -eq 0 ] && is_oid "$head_oid" && [ "$head_oid" != "$pre_head_oid" ] \
-    && [ "$operation_state" = none ] && [ "$has_unmerged" = false ]; then
+if commit_matches_selection "$@"; then
     commit_oid=$head_oid
     emit_current completed committed
 fi

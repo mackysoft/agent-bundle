@@ -60,14 +60,16 @@ parse_refs() {
     refs/heads/*) branch_short=${branch_ref#refs/heads/} ;;
     *) return 1 ;;
   esac
+  [ -n "$branch_short" ] && validate_ref "$branch_ref" || return 1
+  [ -n "$base_ref" ] || return 0
   case "$base_ref" in
     refs/remotes/*/*) base_tail=${base_ref#refs/remotes/} ;;
     *) return 1 ;;
   esac
   base_remote=${base_tail%%/*}
   base_short=${base_tail#*/}
-  [ -n "$branch_short" ] && [ -n "$base_remote" ] && [ -n "$base_short" ] || return 1
-  validate_ref "$branch_ref" && validate_ref "$base_ref" || return 1
+  [ -n "$base_remote" ] && [ -n "$base_short" ] || return 1
+  validate_ref "$base_ref" || return 1
   remote_branch_ref="refs/remotes/$base_remote/$branch_short"
   validate_ref "$remote_branch_ref"
 }
@@ -99,18 +101,6 @@ observe_current() {
   fi
 
   current_head_ref=$(gitc symbolic-ref -q HEAD) || current_head_ref=
-  gitc status --porcelain=v2 -z --untracked-files=normal >/dev/null || return 1
-  change_bytes=$(gitc status --porcelain=v2 -z --untracked-files=normal | wc -c) || return 1
-  change_bytes=$(printf '%s' "$change_bytes" | tr -d '[:space:]')
-  case "$change_bytes" in
-    ''|*[!0123456789]*) return 1 ;;
-  esac
-  if [ "$change_bytes" -gt 0 ]; then
-    has_changes=true
-  else
-    has_changes=false
-  fi
-
   gitc ls-files -u >/dev/null || return 1
   if gitc ls-files -u | IFS= read -r unused_line; then
     has_unmerged=true
@@ -186,14 +176,18 @@ read_branch_upstream() {
     return 0
   fi
   case "$branch_remote" in
-    .|*' '*|*'\n'*|*'\r'*) upstream_state=invalid; return 0 ;;
+    *' '*|*'\n'*|*'\r'*) upstream_state=invalid; return 0 ;;
   esac
   case "$branch_merge" in
     refs/heads/*) upstream_short=${branch_merge#refs/heads/} ;;
     *) upstream_state=invalid; return 0 ;;
   esac
   [ -n "$upstream_short" ] || { upstream_state=invalid; return 0; }
-  upstream_ref="refs/remotes/$branch_remote/$upstream_short"
+  if [ "$branch_remote" = . ]; then
+    upstream_ref=$branch_merge
+  else
+    upstream_ref="refs/remotes/$branch_remote/$upstream_short"
+  fi
   if ! validate_ref "$upstream_ref"; then
     upstream_state=invalid
     upstream_ref=
@@ -224,7 +218,8 @@ unknown_after_attempt() {
 verify_postcondition() {
   observe_current || return 1
   [ "$current_head_ref" = "$branch_ref" ] || return 1
-  [ -n "$current_head_oid" ] || return 1
+  [ "$current_head_oid" = "$start_oid" ] || return 1
+  [ "$has_operation" = false ] && [ "$has_unmerged" = false ] || return 1
   read_branch_upstream || return 1
   [ "$upstream_state" != invalid ] || return 1
   if [ -n "$expected_upstream_ref" ]; then
@@ -246,17 +241,17 @@ ensure_ready_state() {
   if [ "$branch_in_other_worktree" = true ]; then
     return 12
   fi
-  if [ "$branch_is_current" = false ] && [ "$has_changes" = true ] && [ "$preserve_current" = false ]; then
-    return 13
-  fi
   if [ "$local_branch_exists" = true ]; then
     read_branch_upstream || return 2
     [ "$upstream_state" != invalid ] || return 14
-    if [ "$upstream_state" = configured ] && [ "$upstream_ref" != "$remote_branch_ref" ]; then
-      return 14
-    fi
   fi
   return 0
+}
+
+source_unchanged() {
+  observe_current || return 1
+  [ "$current_head_oid" = "$initial_head_oid" ] && [ "$current_head_ref" = "$initial_head_ref" ] \
+    && [ "$has_operation" = false ] && [ "$has_unmerged" = false ]
 }
 
 mode=${1-}
@@ -300,7 +295,7 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-if [ -z "$worktree_input" ] || [ -z "$branch_ref" ] || [ -z "$base_ref" ]; then
+if [ -z "$worktree_input" ] || [ -z "$branch_ref" ]; then
   emit input-invalid invalid-arguments '{}'
   exit 0
 fi
@@ -352,7 +347,6 @@ parse_refs || {
 
 current_head_oid=
 current_head_ref=
-has_changes=false
 has_unmerged=false
 has_operation=false
 local_branch_exists=false
@@ -361,7 +355,6 @@ branch_is_current=false
 branch_in_other_worktree=false
 upstream_ref=
 upstream_state=none
-base_oid=
 remote_branch_oid=
 expected_upstream_ref=
 
@@ -373,78 +366,21 @@ case "$ready_rc" in
   10) blocked operation-in-progress ;;
   11) blocked unmerged ;;
   12) blocked branch-in-other-worktree ;;
-  13) blocked dirty-worktree-requires-preserve-current ;;
   14) blocked upstream-inconsistent ;;
   *) blocked state-unavailable ;;
 esac
-
-if ! gitc remote get-url "$base_remote" >/dev/null; then
-  blocked base-remote-not-configured
-fi
-
-if ! gitc fetch "$base_remote" --prune >/dev/null; then
-  unknown_after_attempt fetch-failed
-fi
-
-# Fetch may have taken time; this is the final state check immediately before
-# selecting and performing a branch-changing operation.
-ensure_ready_state
-ready_rc=$?
-case "$ready_rc" in
-  0) ;;
-  10) blocked operation-in-progress ;;
-  11) blocked unmerged ;;
-  12) blocked branch-in-other-worktree ;;
-  13) blocked dirty-worktree-requires-preserve-current ;;
-  14) blocked upstream-inconsistent ;;
-  *) blocked state-unavailable ;;
-esac
-
-resolve_required_ref "$base_ref"
-base_rc=$?
-if [ "$base_rc" -ne 0 ]; then
-  blocked base-ref-not-found
-fi
-base_oid=$resolved_oid
-
-resolve_optional_ref "$remote_branch_ref"
-remote_rc=$?
-case "$remote_rc" in
-  0) remote_branch_oid=$resolved_oid ;;
-  1) remote_branch_oid= ;;
-  *) blocked state-unavailable ;;
-esac
+initial_head_oid=$current_head_oid
+initial_head_ref=$current_head_ref
 
 if [ "$local_branch_exists" = true ]; then
-  if [ -n "$remote_branch_oid" ]; then
-    if [ "$upstream_state" = none ]; then
-      expected_upstream_ref=$remote_branch_ref
-      needs_upstream=true
-    elif [ "$upstream_ref" = "$remote_branch_ref" ]; then
-      expected_upstream_ref=$remote_branch_ref
-      needs_upstream=false
-    else
-      blocked upstream-inconsistent
-    fi
-  elif [ "$upstream_state" = none ]; then
-    expected_upstream_ref=
-    needs_upstream=false
-  else
-    blocked upstream-inconsistent
-  fi
+  start_oid=$local_branch_oid
+  expected_upstream_ref=$upstream_ref
 
   if [ "$branch_is_current" = true ]; then
-    if [ "$needs_upstream" = false ]; then
-      emit_result no-op already-attached
-      exit 0
-    fi
-    if ! gitc branch --set-upstream-to="$remote_branch_ref" "$branch_short" >/dev/null; then
-      unknown_after_attempt set-upstream-failed
-    fi
     if ! verify_postcondition; then
-      unknown_after_attempt postcondition-failed
+      blocked source-state-changed
     fi
-    emit_result completed upstream-set
+    emit_result no-op already-attached
     exit 0
   fi
 
@@ -457,58 +393,65 @@ if [ "$local_branch_exists" = true ]; then
     fi
   fi
 
-  if ! gitc switch "$branch_short" >/dev/null; then
+  source_unchanged || blocked source-state-changed
+  resolve_required_ref "$branch_ref" || blocked branch-ref-unresolved
+  [ "$resolved_oid" = "$start_oid" ] || blocked branch-state-changed
+  if ! gitc switch --no-guess --no-overwrite-ignore --no-recurse-submodules "$branch_short" >/dev/null; then
     unknown_after_attempt switch-failed
   fi
-  if [ "$needs_upstream" = true ]; then
-    if ! gitc branch --set-upstream-to="$remote_branch_ref" "$branch_short" >/dev/null; then
-      unknown_after_attempt set-upstream-failed
-    fi
-  fi
   if ! verify_postcondition; then
     unknown_after_attempt postcondition-failed
   fi
-  if [ "$needs_upstream" = true ]; then
-    emit_result completed reused-and-upstream-set
-  else
-    emit_result completed reused
-  fi
-  exit 0
-fi
-
-if [ -n "$remote_branch_oid" ]; then
-  if [ "$preserve_current" = true ]; then
-    if [ -z "$current_head_oid" ]; then
-      blocked preserve-current-requires-head
-    fi
-    if ! contains_current_head "$remote_branch_oid"; then
-      blocked preservation-not-contained
-    fi
-  fi
-  expected_upstream_ref=$remote_branch_ref
-  if ! gitc switch --track -c "$branch_short" "$remote_branch_ref" >/dev/null; then
-    unknown_after_attempt track-failed
-  fi
-  if ! verify_postcondition; then
-    unknown_after_attempt postcondition-failed
-  fi
-  emit_result completed tracked
+  emit_result completed reused
   exit 0
 fi
 
 if [ "$preserve_current" = true ]; then
-  if [ -z "$current_head_oid" ]; then
+  if [ -z "$initial_head_oid" ]; then
     blocked preserve-current-requires-head
   fi
-  start_oid=$current_head_oid
+  start_oid=$initial_head_oid
 else
-  start_oid=$base_oid
+  if [ -z "$base_ref" ]; then
+    emit input-invalid base-required-for-new-branch
+    exit 0
+  fi
+  if ! gitc remote get-url "$base_remote" >/dev/null; then
+    blocked base-remote-not-configured
+  fi
+  if ! gitc fetch "$base_remote" --prune >/dev/null; then
+    unknown_after_attempt fetch-failed
+  fi
+  source_unchanged || blocked source-state-changed
+  resolve_optional_ref "$remote_branch_ref"
+  remote_rc=$?
+  case "$remote_rc" in
+    0) remote_branch_oid=$resolved_oid ;;
+    1) remote_branch_oid= ;;
+    *) blocked state-unavailable ;;
+  esac
+  if [ -n "$remote_branch_oid" ]; then
+    start_oid=$remote_branch_oid
+    expected_upstream_ref=$remote_branch_ref
+  else
+    resolve_required_ref "$base_ref" || blocked base-ref-not-found
+    start_oid=$resolved_oid
+  fi
 fi
-expected_upstream_ref=
-if ! gitc switch -c "$branch_short" "$start_oid" >/dev/null; then
+source_unchanged || blocked source-state-changed
+if ! gitc switch --no-track --no-overwrite-ignore --no-recurse-submodules -c "$branch_short" "$start_oid" >/dev/null; then
   unknown_after_attempt create-failed
+fi
+if [ -n "$expected_upstream_ref" ]; then
+  if ! gitc branch --set-upstream-to="$expected_upstream_ref" "$branch_short" >/dev/null; then
+    unknown_after_attempt set-upstream-failed
+  fi
 fi
 if ! verify_postcondition; then
   unknown_after_attempt postcondition-failed
 fi
-emit_result completed created
+if [ -n "$expected_upstream_ref" ]; then
+  emit_result completed tracked
+else
+  emit_result completed created
+fi
