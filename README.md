@@ -152,7 +152,7 @@ Authoring, isolated behavior validation, execution reconstruction, and deviation
 | `behavior-deviation-analysis` | Attribute behavior deviations to evidence-backed causes, repair owners, and revalidation scope. |
 | `custom-agent-authoring` | Create, update, or review custom agent definitions and host bindings with the required behavior checks; reviews preserve the target and shared artifacts. |
 | `custom-agent-behavior-validation` | Use one independent executor to check the custom agent behaviors required for the current change, adding runtime trace or resource measurements only when required. |
-| `skill-authoring` | Create, update, or review Skills with behavior checks appropriate to the change; reviews preserve the target and shared artifacts. |
+| `skill-authoring` | Create or update Skills, or review when an existing Skill applies and which responsibilities and rules it owns. |
 | `skill-behavior-validation` | Check the Skill behaviors required for the current change with the smallest sufficient set of independent usage scenarios. |
 | `subagent-execution-analysis` | Inventory subagent executions, check requested behavior against their contracts, and analyze resource usage when needed. |
 

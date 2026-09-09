@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Skill Authoring",
-  "description": "エージェントSkillを新規作成、更新、レビューし、自然な依頼から適切に選択され、成立済みの入力から意図した判断、作業、完了状態へ到達できる作業契約を成立させる、またはその適合性と必要な差分を示すときに使う。",
+  "description": "エージェントSkillを新規作成・更新するとき、または既存Skillの適用条件と作業上の責務・規則をレビューするときに使う。",
   "dependencies": [
     "behavior-deviation-analysis",
     "claim-grounding",
