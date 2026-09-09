@@ -231,7 +231,9 @@ Custom agents use one flat catalog namespace:
 | `researcher` | Finds and grounds the facts needed for a downstream decision, reports checked scope, and keeps missing evidence unconfirmed. | `claim-grounding` |
 | `operator` | Performs a fully specified closed action, including waiting for a long-running or external execution, and reports its terminal result or configured stop state. | None |
 
-Custom agents use their host binding settings and defer unspecified values to the host runtime unless the user explicitly requests an override. For Codex, the design and judgment roles `architect`, `challenger`, `reviewer`, and `verifier` use `gpt-6-astra` with `max` reasoning effort.
+Custom agents use their host binding settings and defer unspecified values to the host runtime unless the user explicitly requests an override. For Codex, `architect` uses `gpt-6-astra` with `xhigh` reasoning effort, `challenger` and `reviewer` use `gpt-5.6-terra` with `high`, and `verifier` uses `gpt-5.6-luna` with `max`.
+
+Model and reasoning changes compare the current and proposed settings on representative work with the same acceptance criteria. The comparison includes output quality, token rates, total cost or credit use, and time to completion, including retries, corrections, and coordination. A higher-cost default needs evidence that the quality gain or reduced rework justifies the additional cost; the role name alone is not enough. Explicit user settings take precedence.
 
 Agent bindings materialize as host-specific files while `AGENT.md` remains host-independent. The package intentionally does not install or maintain host-shared configuration files.
 
