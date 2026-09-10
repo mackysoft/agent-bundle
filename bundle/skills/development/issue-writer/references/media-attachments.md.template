@@ -1,0 +1,18 @@
+# メディアの添付
+
+## 添付指定
+
+`gh issue create` と単一 Issue の `gh issue edit` は、`--body-file` とファイルごとの `--attach` を組み合わせられる。
+
+```sh
+gh issue edit <Issue> --body-file /tmp/issue-body.md \
+  --attach /tmp/screenshot.png --attach /tmp/walkthrough.mp4
+```
+
+本文の `![説明](/tmp/screenshot.png)` と同じファイルを添付すると、参照先がアップロード先 URL に変換され、代替テキストは保持される。独立した段落の `![](/tmp/walkthrough.mp4)` は参照全体が URL に置き換わり、動画プレイヤーとして表示される。本文に参照のない添付は末尾へ指定順に追加される。
+
+## 更新と終了状態
+
+アップロード済みの添付は本文中の URL で参照できる。`--attach` への再指定は、そのファイルの新たなアップロードになる。
+
+添付の一部が失敗した場合も、成功分を含む Issue が作成・更新され、Issue の URL が標準出力へ出たうえで非ゼロ終了することがある。
