@@ -65,6 +65,8 @@ Phase 4 の観測で必要と確定した commit と、Phase 2 の base に対�
 
 `## Changelog` はこのSkillで一度だけ置き、カテゴリが必要なら `### Added` のように1段下の見出しを使う。任意セクションは必要な場合だけ置き、空欄は作らない。長い補足やログが必要な場合だけ `<details>` を使う。
 
+変更内容や検証結果を画像・動画で示す場合は、[メディアの添付](references/media-attachments.md) を参照して本文と添付を準備する。
+
 ### Phase 9: PR を作成または更新する
 Issue の受け入れ条件が未完了または未確認なら Draft PR にする。受け入れ条件が完了している場合、または Issue がなく検証が成功した場合は通常 PR にする。作用前に、Phase 8 で確定したタイトルと本文、必要な Draft 状態、base、公開済みの作業 head を今回成立させる内容として記録する。
 
@@ -76,5 +78,7 @@ Issue の受け入れ条件が未完了または未確認なら Draft PR にす�
 
 コマンドの成功・失敗によらず、`gh pr view` で PR 番号、URL、head branch、head OID、head repository、base、状態、タイトル、本文、Draft 状態を再観測する。既存 PR の不変条件と今回成立させる内容を照合し、すべてが成立した場合だけ作成・更新完了とする。同じ PR が存在することや helper / `gh` の成功出力だけで完了としない。差があれば未反映か他の更新かを調べ、今回の範囲で必要と確認できた残る更新だけを同じ担当が補正・実行し、再照合する。取得結果が不明な間は、未反映と決めつけて作用を重ねない。
 
+添付も公開内容の照合対象に含め、成功分を保持して未反映分だけを補う。必要な添付がすべて反映されたことを完了条件に含める。
+
 ### Phase 10: 状態を残す
-PR 番号、URL、head branch、head repository、head remote/ref、元 head OID、新しい作業 head、base branch、検証結果、依存 Skill の結果、Draft 状態、Issue 連携、helper または native 操作、停止理由を残す。
+PR 番号、URL、head branch、head repository、head remote/ref、元 head OID、新しい作業 head、base branch、検証結果、依存 Skill の結果、Draft 状態、Issue 連携、添付の反映結果と未反映分、helper または native 操作、停止理由を残す。
