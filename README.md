@@ -111,7 +111,7 @@ Cross-domain grounding, change framing, terminology, and writing.
 
 ### development
 
-Software implementation, testing, review, documentation, issue planning, and interactive application testing.
+Software design, implementation, testing, review, documentation, issue planning, and interactive application testing.
 
 | Skill | Purpose |
 | --- | --- |
@@ -123,6 +123,7 @@ Software implementation, testing, review, documentation, issue planning, and int
 | `issue-planner` | Split tasks and specifications into single or parent-child GitHub Issue structures. |
 | `issue-writer` | Write, create, update, or review structured GitHub Issue bodies. |
 | `review-triage` | Triage review comments against code, specifications, and evidence. |
+| `software-design` | Explore and refine software design, APIs, and interactions from how they should be used. |
 | `test-authoring` | Once the scoped implementation is complete or confirmed to need no changes, create and maintain authorized tests that detect current external-contract violations from the consumer boundary. |
 | `test-oracle-assessment` | Once the scoped implementation is complete or confirmed to need no changes, assess important test judgments for contract alignment, independence of expectations and observations, and evidence of detecting violations, without editing or running tests. |
 | `ultra-review` | Define and converge review planning, independent review outcomes, triage, responsibility-owned fixes, verification, and re-review; return semantic requirements and resume conditions when a required outcome is missing. |
@@ -220,7 +221,7 @@ Custom agents use one flat catalog namespace:
 
 | Agent | Purpose | Direct skill dependencies |
 | --- | --- | --- |
-| `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling` |
+| `architect` | Creates implementation-ready design decisions and contracts. | `claim-grounding`, `referent-modeling`, `software-design` |
 | `challenger` | Returns non-blocking, evidence-backed challenges to questionable concrete choices in plans and artifacts. | `challenge` |
 | `evidence-organizer` | Organizes collected execution records and evidence into a package with traceable sources, chronology, and requirement coverage, without domain interpretation. | `claim-grounding` |
 | `implementer` | Creates or changes artifacts from a confirmed implementation contract and reports local check results. Automated test artifacts belong to Test Implementer. | `code-authoring-rules`, `writing` |

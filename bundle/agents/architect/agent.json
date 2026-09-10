@@ -4,6 +4,7 @@
   "description": "権威ある目的と要求に基づき、実装の前提となる設計を定めるときに使う。責務、依存、制約、実装の自由度と検証要件を含む、根拠付きの設計契約を返す。",
   "skillDependencies": [
     "claim-grounding",
-    "referent-modeling"
+    "referent-modeling",
+    "software-design"
   ]
 }

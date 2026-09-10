@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Software Design",
+  "description": "ソフトウェアの設計を検討・具体化・見直すときや、API・操作面・利用方法を設計するときに使う。利用側に必要な契約と、それを実現する構造が整合した設計を成立させる。",
+  "dependencies": [
+    "change-framing",
+    "referent-modeling"
+  ]
+}
