@@ -5,6 +5,7 @@
   "dependencies": [
     "change-framing",
     "referent-modeling",
+    "software-design",
     "writing"
   ]
 }
