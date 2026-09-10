@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Agent Benchmarking",
+  "description": "Skill、custom agent、model、reasoning effort の差を、固定したsuiteと直接証拠に基づく反復実験として比較し、統計、グラフ、結論を持つBenchmark Report Packageへまとめる。change-regressionまたはmodel-effort-comparisonの実験を凍結し、raw evidenceの取込、比較、報告を行うときに使う。",
+  "dependencies": [
+    "claim-grounding",
+    "referent-modeling",
+    "skill-behavior-validation",
+    "custom-agent-behavior-validation",
+    "subagent-execution-analysis",
+    "test-oracle-assessment",
+    "writing"
+  ]
+}

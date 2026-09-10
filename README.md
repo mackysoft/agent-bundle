@@ -150,6 +150,7 @@ Authoring, isolated behavior validation, execution reconstruction, and deviation
 
 | Skill | Purpose |
 | --- | --- |
+| `agent-benchmarking` | Compare Skill, custom-agent, model, and reasoning-effort variants from fixed suites and direct evidence, producing a quantitative benchmark report package. |
 | `behavior-deviation-analysis` | Attribute behavior deviations to evidence-backed causes, repair owners, and revalidation scope. |
 | `custom-agent-authoring` | Create, update, or review custom agent definitions and host bindings with the required behavior checks; reviews preserve the target and shared artifacts. |
 | `custom-agent-behavior-validation` | Use one independent executor to check the custom agent behaviors required for the current change, adding runtime trace or resource measurements only when required. |

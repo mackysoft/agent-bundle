@@ -65,6 +65,7 @@ if [ "$restore" = true ]; then
 fi
 
 bash scripts/verify-bundle.sh
+bash scripts/verify-agent-benchmarking.sh
 sh scripts/test-git-skill-helpers.sh
 bash scripts/code-quality.sh --no-restore --solution "$solution" verify
 dotnet build "$solution" --configuration "$configuration" --no-restore

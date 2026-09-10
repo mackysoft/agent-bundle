@@ -1,0 +1,21 @@
+## Codex JSONL evidence
+
+Codex JSONLはraw evidenceの正本である。Benchmark recordとBenchmark Report PackageへJSONL本文を複製しない。各source referenceは次を持つ。
+
+| 項目 | 内容 |
+| --- | --- |
+| `absolute_path` | 取得時点の絶対path。Reportには含めない。 |
+| `sha256` | 対象ファイル全体のSHA-256。 |
+| `event_locator` | event ID、native sequence、byte offset、または範囲を一意に指定するlocator。 |
+| `coverage` | 対象task、thread、session、時間範囲、端点、取得済みevent範囲、既知の欠落。 |
+| `accessed_at` | 取込時刻。 |
+
+event timestampが同じ、精度が不足する、または順序が競合する場合は、同じsourceのnative sequenceまたはevent IDを優先する。順序を確定できない場合、turn順序、follow-up、elapsed timeなど、その順序に依存する命題を `unverified` とする。
+
+同一task、thread、sessionの識別は、直接記録されたidentifierとevent locatorを使う。path、title、summary、出力内容の類似性は、thread継続またはpersistenceの代替根拠にしない。same-thread follow-upはそのthreadへ直接結び付くfollow-up eventで確認し、新しいthreadのspawnは別Attemptとして残す。
+
+`coverage=complete` は、sourceの完全性保証が指定範囲の全eventを覆い、対象task、thread、session、turnを対応付けられる場合だけ使う。既知の欠落がある場合は `partial`、完全性を判定できない場合は `unverified` とする。`partial` または `unverified` のsourceから、全turn、全Attempt、全token、全actionを断定しない。
+
+Reportにはabsolute path、JSONL本文、private prompt、gold、oracleを含めない。Reportはsourceの種類、SHA-256、opaque evidence ID、coverage状態、欠測理由だけを公開可能な情報として示せる。
+
+JSONLのevent locatorが存在するだけでは、Runのmodel、実効設定、measurement、境界監査、Gradeを証明しない。controllerまたは検証・実行分析producerが、それらのRun claimをsource digestとevent locatorへ結び付けたexecution evidence artifactを生成し、Benchmark recordはartifactの絶対path、SHA-256、producer identity、producer versionまたはdigest、claim digestを照合する。Gradeも同様にoracleまたはgrader producerのGrade evidence artifactへ束縛する。producer artifactが自己申告か独立した実行主体の成果かという信頼境界はDefinitionで固定し、Reportのgraderとevidence coverageへ示す。

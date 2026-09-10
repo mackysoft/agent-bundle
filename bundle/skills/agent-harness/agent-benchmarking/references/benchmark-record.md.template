@@ -1,0 +1,101 @@
+## Benchmark record
+
+この参照は、Benchmark Report Packageを作るためのDefinition、Case、Variant、Run、Attempt、Grade、Comparisonの意味契約を定める。実case、gold、private prompt、private oracleは含めない。suiteの機械可読なfield、列挙値、required項目、相互参照は `scripts/schemas/benchmark-suite.schema.json` を正本とし、それ以外のrecordはこの意味契約に従う。
+
+```text
+record
+  schema_version, benchmark_definition, imports[], runs[], grades[]
+  state, record_digest, validation
+benchmark_definition
+  definition_id, selection_locked, use_kind, experiment_purpose
+  hypothesis, primary_metric { metric_id, favorable_direction, practical_minimum_difference }
+  suite { id, version, repository, git_sha, digest, validation_artifact_path, validation_artifact_digest }
+  candidate_boundary, controller_boundary, oracle_boundary
+  cases[] { case_key, independence_group }
+  configurations[] { variant_id, component_digests[], model, reasoning_effort, effective_configuration }
+  reference_variant_id, fixed_factors
+  replicate_count, pairing_rule, seed, execution_order
+  budget, stop_conditions, hard_gates
+  grader { kind, version_or_digest, rubric_ref, gold_ref, blind_state, calibration, adjudication, producer, evidence_refs }
+  measurement_plan, aggregation_rule, exclusion_rule, missingness_rule, required_evidence
+  evidence_producers { execution, grade } with kind, identity, version_or_digest
+imports[]
+  absolute_path, source_digest, event_locators[], coverage, accessed_at
+runs[]
+  run_id, attempt_id, attempt_index, grade_id, case_key, variant_id, replicate_index
+  model, reasoning_effort, component_digests[], effective_configuration, fixed_factors
+  input_digest, source_digest, event_locator, coverage, suite_digest, git_sha
+  materialization_manifest_path, materialization_manifest_digest, candidate_access_audit_evidence
+  execution_evidence_path, execution_evidence_digest
+  status, measurements[], time, token, provider_cost, derived_cost, cost provenance
+  suite_access, controller_access, gold_access, oracle_access, posthoc_case_selection, fixed_factor_mapping_valid
+grades[]
+  grade_id, run_id, kind, version_or_digest, rubric_ref, gold_ref, blind_state
+  calibration, adjudication, producer, status
+  primary_metric_value, dimension_measurements[], hard_gate_results
+  grader_failure | null, candidate_failure | null, evidence_refs
+  grade_evidence_path, grade_evidence_digest
+comparison
+  state, record_digest, reference_variant_id, candidate_variant_id
+  bootstrap, eligibility, primary_metric, practical_minimum_difference
+  axes[], hard_gate_results, grade_status_counts, grader, conclusion
+```
+
+## Definition
+
+`use_kind` は `completeness-pilot` または `formal-comparison`、`experiment_purpose` は `change-regression` または `model-effort-comparison` とする。
+
+`use_kind` と `experiment_purpose` は必須である。未指定または未知の値を既定の実験種別へ読み替えず、そのDefinitionを開始または検証しない。Definitionは仮説、primary metric、practical minimum difference、case configuration、fixed factors、replicate、pairing、seed、execution order、budget、stop conditions、grader、hard gatesも必須とする。formal、特にmodel-effort-comparisonではbudgetまたはstop conditionsが欠けるDefinitionを開始しない。
+
+`change-regression` のVariant間ではmodelとreasoning effortを同じ値に固定し、比較対象のcomponent digestだけを変える。`model-effort-comparison` のVariant間ではcomponent digestを固定し、modelとreasoning effortだけを変える。比較に影響するその他の実効設定はDefinitionへ固定し、異なる場合はComparisonを作らない。
+
+`candidate_boundary`、`controller_boundary`、`oracle_boundary` は、各主体のidentity、権限、read/write可能な対象、確認に使ったevidenceを持つ。formalではcandidateがsuite root、controller、oracleへアクセス可能な場合に `invalid` とする。
+
+`replicate_count` はformalでは各Case・Variantで3以上、Caseは10以上の独立した `independence_group` を持つ。replicateはCase独立性を増やさない。複数modelまたはreasoning effortを比較するDefinitionは、一つの `reference_variant_id` を持ち、Comparisonはreferenceとのpaired値だけを含む。
+
+`primary_metric` は有利方向とpractical minimum differenceを持つ。hard gateはprimary metricと独立した必須条件であり、gateごとに対象、成立規則、結果、evidenceを持つ。品質、信頼性、安全、時間、token、費用を単一の総合点へ変換しない。
+
+## Run、Attempt、persistence
+
+RunはCase×Variant×replicateとして事前に計画し、P0 helperでは一つのRunへ一つのAttemptだけを結び付ける。`attempt_index=1` 以外、または同じAttempt IDの再利用はformalな入力として受理しない。開始不能、timeout、停止はそのRunの結果として保持し、裏で再試行して成功へ置き換えない。再試行を許す異なる方針が必要な場合は、比較開始前に別の実験契約として定義し、P0 helperの比較対象へ暗黙に混ぜない。
+
+Runの実効設定、入力、source locator、coverage、measurement、費用、境界監査、状態は、controllerまたは既存の検証・実行分析が生成したexecution evidence artifactへ束縛する。recordはそのartifactの絶対pathとSHA-256を持ち、artifactはproducer kind、identity、versionまたはdigest、Run claim digest、source digestとevent locator、candidateのsuite/controller/oracle/goldアクセス監査を持つ。Runのclaim digest、source locator、境界監査が一致しない場合は `invalid`、artifactまたは監査evidenceが取得できない場合は `incomplete` とする。
+
+同一task、thread、sessionに属するpersistenceは、同じAttemptの `start_digest`、順序付きturn record、same-thread follow-up、各turnへ直接結び付くevidenceだけで示す。別Attempt、別replicate、別task、または出力の類似性はpersistence evidenceにしない。必要なstart digest、順序、follow-up、turn coverageのいずれかが欠ける場合、persistenceは `unverified` とする。
+
+## Measurement
+
+Definitionのmeasurement planはaxis、`metric_id`、unit、aggregationを持つ。RunまたはGradeのmeasurementは、そのplanが指定する`metric_id`とvalueを持ち、対応するRun evidenceまたはGrade evidenceのclaim digestとevidence refsへ束縛する。axisは `quality`、`reliability`、`safety`、`time`、`token`、`provider-reported-cost`、`derived-cost` のいずれかとし、異なるaxisを暗黙に合算しない。値またはproducer evidenceが欠けるmeasurementは `unverified` な欠測としてComparisonへ残す。
+
+`time` は開始および終了または停止eventとそのrefsから導出する。`token` はruntimeが報告するmetric名と単位を保持し、未報告区分を作らない。`provider-reported-cost` はproviderの課金recordを根拠にする観測値である。
+
+`derived-cost` は次をすべて持つ場合だけ値を持つ。
+
+- price sourceとそのversionまたはdigest
+- effective timestamp
+- currency
+- billing unit
+- runtime usageからbilling unitへのusage mapping
+- formula
+- input refs
+- calculation timestamp
+
+いずれかが欠ける場合は `value=null`、`claim_kind=unverified`、`missing_reason` を残す。provider報告費用と導出費用を同じmeasurementへ統合しない。
+
+## Grade provenance
+
+各Gradeはgrader kind、versionまたはdigest、rubric ref、gold ref、blind状態、calibration、adjudication、producer、evidenceを持つ。deterministic graderを優先する。LLM judgeはcalibrationが確認できない場合、exploratoryなGradeとして記録できるが、primary metricまたはhard gateの入力にしない。
+
+Gradeはproducerが生成したGrade evidence artifactの絶対pathとSHA-256も持つ。artifactのproducer identityとversion、Grade claim digest、evidence refsがGradeと一致する場合だけ、その値を比較へ使う。Benchmarking helperはproducer artifactの作成者を暗黙に信頼せず、Reportへproducer kind、version、blind状態、calibration、adjudicationとevidence coverageを示す。署名済み証明または独立した実行主体性が必要な用途では、それをcontroller/oracle側のproducer契約として先に固定する。
+
+graderが実行、入力、rubric、gold、判定を完了できなかった状態は `grader_failure`、candidateのRunまたはAttemptが成果契約を満たさなかった状態は `candidate_failure` として別に保持する。一方を他方の値、または品質の欠測理由へ読み替えない。
+
+graderまたはoracleのrubric、gold、判定形式の契約適合性、独立性、検出証拠を確認する必要がある場合、TestOracleAssessmentをGradeのevidence inputとして参照する。Skill candidateまたはcustom agent candidateの挙動検証成果も、適用範囲を示したGradeまたはevidence inputとして参照できる。
+
+## Validity、欠測、結論
+
+`invalid` はdigest不一致、gold漏洩、事後case選択、またはformalなアクセス境界違反に使う。`incomplete` は定義を変えずに不足recordを追加して検証できる場合に使う。`pilot-complete` はcompleteness-pilotのrecord completenessが成立した状態であり、formalな品質または一般化の結論ではない。
+
+formalのComparisonは、Case外側のpaired値を10,000回再標本化するpaired bootstrapを用いる。Case内の複数replicateはDefinitionの集約規則で一値にしてからbootstrap入力にする。欠測と除外はCase、Variant、Run、Attempt、理由、事前規則への参照を保持する。事後のcase選択はinvalidであり、除外として隠さない。
+
+eligibleなformal Comparisonは、有利方向へ符号をそろえたprimary metricのpaired deltaとCIを使う。すべてのhard gateがpassでCI下限がpractical minimum difference以上なら `supported`、hard gateが一つでもfailなら、またはCI上限がpractical minimum difference未満なら `not-supported`、hard gateがpassでCIがpractical minimum differenceをまたぐなら `inconclusive` とする。pilot、invalid、incomplete、または単一観測は `eligibility.status` を非eligibleにし、記述的な観測だけを保持する。invalidまたはincompleteのComparisonはformalな結論を持たず、修正または証拠追記の再開条件を持つ。
