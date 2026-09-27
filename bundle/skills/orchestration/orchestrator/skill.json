@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "displayName": "Orchestrator",
-  "description": "利用者が直接操作する現在のタスクで、一つの目的に属する複数の作業や担当の進行と完了を統括するときに使う。",
+  "description": "利用者が直接操作するタスクで、一つの目的に属する複数の作業や担当を統括するとき、またはその目的への後続入力や自動継続を扱うときに使う。",
   "dependencies": [
     "artifact-handoff"
   ]
