@@ -1,0 +1,108 @@
+## 目的
+
+固定した実験定義と直接証拠から、Skill、custom agent、model、reasoning effort の差を定量化する。
+
+成果は、一つの **Benchmark Report Package** である。これは実験定義、suite固定、runとattempt、grade、比較、統計、グラフ、欠測と除外、根拠付き結論を同じ版として保持する。このSkillは、実験を実行するrunner、model execution、grader、LLM judge、候補の採用、release、promotionを所有しない。それらが生成した記録を、凍結済みの定義へ照合して取り込む。
+
+## 入力
+
+開始前に、次を一つのExperiment Definitionとして固定する。Definitionの根拠、適用範囲、採用状態を入力から直接確定できない場合は `$claim-grounding` を適用する。対象Skill、custom agent、model、reasoning effort、candidate、controller、oracle、実行記録の対応が曖昧で比較を変える場合は `$referent-modeling` を適用する。
+
+| 項目 | 内容 |
+| --- | --- |
+| use kind | `completeness-pilot` または `formal-comparison`。 |
+| experiment purpose | `change-regression` または `model-effort-comparison`。 |
+| suite | suite ID、Git SHA、canonical digest、caseの母集団、case選択規則、case keyの公開範囲。 |
+| candidate | 比較するcomponent、model、reasoning effort、各component digest、実効設定。 |
+| controller | caseを供給し、runを開始し、順序を管理する候補から分離された実行主体。 |
+| oracle | gradeを生成または取得する候補から分離された採点主体とgoldまたは評価契約。 |
+| 仮説と結論規則 | 事前登録した仮説、primary metric、その有利方向、practical minimum difference、CIとhard gateから結論を決める規則。 |
+| caseとconfiguration | case集合、case選択規則、候補構成、比較対象、fixed factors、実効設定。 |
+| 実行計画 | replicate数、paired対応、seed、execution order、budget、stop conditions、除外規則、欠測規則。 |
+| graderとhard gates | grader kind、versionまたはdigest、rubric ref、gold ref、blind状態、calibration、adjudication、producer、hard gatesと各gateの成立規則。 |
+| 計測計画 | 品質、信頼性、安全、時間、token、費用を別軸で測る定義、単位、計測範囲、集約方法。 |
+| 証拠取込条件 | 記録source、完全性、アクセス境界、Codex JSONLの絶対path、SHA-256、event locator、coverage、execution/Grade evidence producerのkind・identity・versionまたはdigest。 |
+
+`change-regression` はmodelとreasoning effortを固定し、比較対象間でcomponent digestだけを変える。`model-effort-comparison` はcomponent digestを固定し、modelとreasoning effortだけを変える。一つの比較でこの不変条件を満たせない場合は、その比較を作らず、必要な実験定義の訂正を返す。
+
+`use kind`、experiment purpose、仮説、primary metric、practical minimum difference、caseとconfiguration、fixed factors、replicateとpairing、seed、execution order、budget、stop conditions、grader、hard gates、suite固定、candidate、controller、oracle、execution/Grade evidence producerのいずれかが未指定または未知の値であるDefinitionは開始しない。既定値から目的、形式、統計条件を推定せず、必要な値を確定してから新しいDefinitionを作る。`formal-comparison`、特に`model-effort-comparison`は、budgetとstop conditionsを固定できない限り開始しない。
+
+## 用語と不変条件
+
+用語、識別子、必要なrecordは [Benchmark record](references/benchmark-record.md) に従う。suiteの機械可読な構造と検証規則は、このSkillに同梱する [`scripts/schemas/benchmark-suite.schema.json`](scripts/schemas/benchmark-suite.schema.json) を正本とし、本文とreferencesはrecordの意味、適用条件、公開境界を定める。
+
+- **Definition** は、仮説、primary metric、practical minimum difference、case、configuration、fixed factors、replicate、pairing、seed、execution order、budget、stop conditions、grader、hard gates、比較目的、suite、candidate、controller、oracle、統計、除外、報告境界を固定する正本である。
+- **Case** はsuiteに属する独立した評価単位、**Variant** はDefinitionで定めた比較構成、**Run** は一つのCaseとVariantの計画された実行、**Attempt** はRunを実現しようとした一回の実行試行、**Grade** はoracleがそのAttemptへ付けた評価、**Comparison** はpairedなRun群から導出する比較結果である。
+- candidateは測定対象、controllerは実行を統制する主体、oracleは評価主体である。candidateがsuite root、controller、oracleへアクセスできる構成は、candidateが評価素材または評価を変えられるため、`formal-comparison` では `invalid` とする。
+- suiteはGit SHAとcanonical digestの組で固定する。実行途中または比較前に変更されたsuite、component、grade contractは、新しいDefinitionとして扱う。
+- 同一task、thread、sessionに属する永続性の主張は、開始時のdigest、turn順序、same-thread follow-up、各turnの直接証拠でだけ成立する。別replicate、別Attempt、または似た出力は、その主張の代替証拠にしない。
+- Codex JSONLは複製しない。recordには絶対path、SHA-256、event locator、取得coverageを置く。直接観測できない値、順序、内容、使用量は補完せず `unverified` とする。詳細は [Codex JSONL evidence](references/codex-jsonl-evidence.md) に従う。
+- 品質、信頼性、安全、時間、token、費用を一つのスコアへ暗黙に集約しない。費用はprovider報告値と導出値を別measurementとして保持する。
+- digest不一致、gold漏洩、事後的なcase選択は `invalid` である。証拠不足は、同じDefinitionを変えない追記によって解消できる場合に限り `incomplete` とする。
+
+AgentBundleには実case、gold、private prompt、private oracleを置かない。このSkillには、実caseやgoldに依存しない汎用scripts、schema、参照契約だけを含める。
+
+## フロー
+
+### Phase 1: Definitionとsuiteを凍結する
+
+実験目的とuse kindを選び、Definition、Case集合、Variant集合、reference、controller、oracleを固定する。仮説、primary metric、有利方向、practical minimum difference、fixed factors、replicateとpairing、seed、execution order、budget、stop conditions、grader、hard gatesをDefinitionへ明記する。`validate-suite` を使い、suite rootのGit SHA、canonical digest、case keyの一意性、candidateからの到達可能性を確認する。candidateがsuite root、controller、oracleへアクセスできる場合、formalの実験を開始せず `invalid` としてアクセス境界を返す。
+
+`completeness-pilot` は、controller、oracle、record、証拠取込の配線とrecord completenessだけを確認する。品質差、信頼性、一般化、候補優劣を主張せず、必要なrecordが揃えば `pilot-complete` とする。formalな結論は `formal-comparison` だけで作る。
+
+`formal-comparison` は、少なくとも10個の独立Caseについて各構成を3反復する。独立性の単位はCaseであり、同じCase内のAttemptやreplicateを独立Caseとして数えない。複数modelまたはreasoning effortを比較するときは、Definitionで事前登録したreference Variantとのpaired比較だけを作る。budgetまたはstop conditionsが欠けるformalを開始せず、その不足を返す。
+
+### Phase 2: Caseをmaterializeし、Runを計画する
+
+`materialize-case` で固定されたsuiteからCaseを実行用入力へ展開する。controllerへ渡すのはそのRunに必要な入力と許可だけとし、candidateへgold、oracle、suite root、非公開prompt、非公開case選択情報を渡さない。
+
+RunごとにCase、Variant、replicate番号、開始前candidate digest、controller設定、oracle contract、許可、停止条件、paired keyを記録する。P0 helperはRunごとに一つのAttemptだけを受理する。開始されなかった試行、停止、失敗をそのRunの結果として残し、再試行で成功へ置き換えない。再試行を許す別方針は、新しい実験契約と対応helperを先に定義しない限りformal Comparisonへ混ぜない。
+
+### Phase 3: raw evidenceを取り込んで検証する
+
+`import-codex` でCodex JSONLや同等の一次記録を参照として取り込み、`validate` でDefinition、Run、Attempt、Grade、測定値、coverageを照合する。JSONLの複製、非公開入力のReportへの転記、未観測値の推定を行わない。
+
+Runはcontroller、delegated execution、Skill/custom-agent validation、subagent execution analysis、または既存raw evidenceのproducerが生成したexecution evidence artifactを参照する。Gradeはoracleまたはgrader producerが生成したGrade evidence artifactを参照する。各artifactの絶対pathとSHA-256、producer identityとversionまたはdigest、対象Run/Gradeのclaim digest、source digestとevent locator、evidence refsを照合する。execution evidenceはcandidateのsuite、controller、oracle、goldへのアクセス監査も持つ。record値だけの自己申告、locatorだけの存在、producer artifactと一致しない値をformalな直接証拠へ読み替えない。artifact不足は `incomplete`、digest、claim、source locator、アクセス境界の不一致は `invalid` とする。
+
+subagentの実行、設定、action、resource usageを実行記録から復元する必要があるときは `$subagent-execution-analysis` を適用し、その分析結果をAttemptのevidence inputとして利用する。このSkillはbenchmark固有のRun、Grade、Comparison、集約だけを所有し、同Skillのexecution同定、configuration、resource observationを重複して再構成しない。
+
+各Gradeは対象Attempt、grader kind、grader versionまたはdigest、rubric ref、gold ref、blind状態、calibration、adjudication、producer、grade時点、evidenceを持つ。deterministic graderを優先する。LLM judgeは、calibrationを確認できない場合はexploratoryなGradeとしてのみ扱い、primary metricまたはhard gateに使わない。grader failureとcandidate failureは別の状態として記録し、grader failureをcandidateの失敗へ読み替えない。candidate failureはfrozen graderが明示的に付けた失敗値とgateを保持し、欠測として除外しない。candidateがgoldまたはoracleの入力を読めた、書けた、またはその可能性を除外できない場合、影響するformal Comparisonを `invalid` とする。必要な直接証拠が欠ける場合は、欠けた項目、影響するRun、追加に必要なrecordを `incomplete` として残す。
+
+candidateがSkillであり、そのSkillの挙動を品質、信頼性、安全、hard gate、またはGradeの根拠に使う場合は、`$skill-behavior-validation` を適用する。candidateがcustom agentであり、選択、実効設定、行動、handoff、終了、資源使用を同じ用途の根拠に使う場合は、`$custom-agent-behavior-validation` を適用する。graderまたはoracleのrubric、gold、判定形式の契約適合性、独立性、検出証拠を確認する必要がある場合は、`$test-oracle-assessment` を適用する。各raw成果はGradeまたはevidence inputとして記録し、比較に使った適用範囲を残す。これらの検証Skillは、runner、model execution、grader、LLM judgeを代替せず、controllerがRunを開始・順序付ける責務も移さない。
+
+時間は開始・終了または停止eventから導出し、tokenはruntimeが報告する区分をそのまま保持する。provider報告費用は対応する課金recordの観測値として保持する。導出費用には、price sourceとそのversionまたはdigest、effective timestamp、currency、billing unit、usage mapping、formula、input refs、calculation timestampを必ず記録する。これらのいずれかが欠ける費用は `unverified` とする。
+
+### Phase 4: Comparison、統計、グラフを生成する
+
+`compare` は有効なpaired RunだけをCase外側の単位で集約する。formalな差と区間推定には、Caseを再標本化する10,000回のpaired bootstrapを使う。Attemptやreplicateを独立したbootstrap単位にせず、Case内ではDefinitionの集約規則を適用してからpaired値を作る。
+
+品質、信頼性、安全、時間、token、provider報告費用、導出費用の各軸について、母数、欠測数、除外数、Case集約値、差、区間、統計手順、hard-gate resultsを示す。単一の総合点を作らず、品質以外の値を品質差の根拠へ読み替えず、比較対象外のVariantをreferenceとの比較へ混入させない。
+
+eligibleなformal Comparisonでは、primary metricの符号を仮説に有利な方向へそろえ、Case外側のpaired deltaとCIを使う。すべてのhard gateがpassで、CI下限がpractical minimum difference以上なら `supported`、hard gateが一つでもfailなら、またはCI上限がpractical minimum difference未満なら `not-supported`、hard gateがpassでCIがpractical minimum differenceをまたぐなら `inconclusive` とする。pilot、invalid、incomplete、または単一観測のComparisonはeligibleでなく、記述的な観測としてだけ保持してformalな結論を作らない。
+
+グラフは同じBenchmark Recordとversionを参照し、読者が行う判断、軸、単位、集約、欠測、除外を明示する。`pilot-complete` は、各CaseとVariantの単一Runから直接観測したGrade statusとhard-gate failure countをmatrixで、elapsed timeと公開価格換算費用をゼロ基準のgrouped barで示す。公開価格換算費用は `derived-cost` の価格source、versionまたはdigest、適用日時、通貨、課金単位、usage mapping、式、入力参照が揃う値だけを使い、provider請求額またはsubscription chargeとは表記しない。tokenは監査用の `metrics.csv` に残すが、費用判断を目的とするpilotの主要chartにはしない。`model-effort-comparison` pilotは、一定の公開価格上限で各modelとreasoning effortの構成が登録Caseを何割Acceptedとしてカバーできたかを判断するcost-coverage curveを追加する。横軸は1 Runあたりの公開価格換算費用の上限、縦軸はその上限以下でGrade completedかつ全hard gate passになったCaseの全登録Caseに対する割合とし、各modelとreasoning effortの構成を独立した段階線で示す。各Caseの観測点はAcceptedを塗りつぶし、not Acceptedを白抜きで示す。線は観測した閾値とcoverageだけを示し、中間値の補間、順位、優劣、一般化を意味しない。各pilot chartには `n=1 per case × variant` と `descriptive only` を明記し、品質差、CI、Pareto、信頼性、順位、候補優劣を描かない。eligibleなformal Comparisonでは、`change-regression` はpaired-deltaを示し、`model-effort-comparison` はmetric matrix、各構成のquality-cost/time operating point、Pareto frontierを示す。信頼性chartは、formalな信頼性evidenceがある場合だけ生成する。実行agentは主要chartを最大4枚まで現在taskへ貼り、child実行ならchart pathをparentへhandoffする。
+
+### Phase 5: Benchmark Report Packageを生成する
+
+`setup-report` でprivate情報を含まないreport配置を準備し、`report` で [Report schema](references/report-schema.md) とsuiteの [`scripts/schemas/benchmark-suite.schema.json`](scripts/schemas/benchmark-suite.schema.json) に従う一つのBenchmark Report Packageを生成する。`$writing` を適用し、計画、直接観測、導出、欠測、除外、結論を区別して読者が追える表現に整える。main human reportにはprivate path、prompt、gold、oracleを載せない。`metrics.csv` のcase識別子はopaqueな `case_key` だけにする。
+
+Report Packageの正確なfile setは、self-containedな `report.html`、`report.md`、`metrics.csv`、`comparison.json`、`report_manifest.json`、`thread-summary.md` と、状態に応じた `charts/*.svg` および対応するPNGである。`pilot-complete` は `pilot-grade-status`、`pilot-hard-gates`、`pilot-elapsed-time`、`pilot-public-price-cost` の4組を必ず持ち、`model-effort-comparison` の場合は `pilot-performance-cost-curve` も持つ。eligibleなformal Comparisonは実験目的に対応する比較chartと、formalな信頼性evidenceが成立する場合の信頼性chartを持つ。`setup-report` はartifact-local virtual environmentをPython 3.12で作り、固定requirementsから `Matplotlib==3.11.1`、`Agg` backend、NumPyと描画依存を導入する。manifestにはPython、Matplotlib、NumPyの実version、解決済みpackage一覧と描画configを記録する。virtual environmentは導出成果物であり、BenchmarkRecord digestの入力に含めない。
+
+## 内部helpersと責務境界
+
+このSkillが利用する内部helperは `validate-suite`、`materialize-case`、`init`、`import-codex`、`validate`、`compare`、`setup-report`、`report` に限る。これらはDefinition検証、case展開、record初期化、証拠参照取込、整合確認、比較、report準備、report生成を支える内部実現であり、suiteを [`scripts/schemas/benchmark-suite.schema.json`](scripts/schemas/benchmark-suite.schema.json) へ照合する。公開CLIではない。
+
+Skill rootから、各helperは明示的に `python3 scripts/benchmark.py <helper> ...` として実行する。`setup-report` はPython 3.12を要求し、生成したreport環境のPythonで `report` を実行する。Python interpreter、実行bit、runner、依存環境はAgent Distributionが所有せず、実行する環境が提供する。必要なinterpreterまたは実行環境を利用できない場合は、実行を代替せず、欠けた条件と再開条件を返す。
+
+runner、model execution、grader、LLM judgeを新設または置換しない。DB、dashboard、PDF、候補の採否、release、promotionが必要な場合は、それぞれを所有する後続責務へBenchmark Report Packageと必要な再開条件を渡す。
+
+## 完了条件
+
+- Definition、suiteのGit SHAとcanonical digest、Case、Variant、Run、Attempt、Grade、Comparisonが同じ実験として追跡できる。
+- candidate、controller、oracleのアクセス境界を確認し、formalで不成立なら `invalid` としている。
+- use kindに応じた完了状態になり、completeness-pilotから品質、信頼性、一般化、候補優劣を結論していない。
+- formal-comparisonは10以上の独立Case、各構成3反復、Case外側の10,000 paired bootstrap、事前登録referenceとのpaired比較、budget、stop conditionsを満たしている。
+- Grade provenance、grader failure、candidate failure、hard-gate resultsを別々に追跡し、未校正LLM judgeをprimary metricまたはhard gateに使っていない。
+- persistence、設定、使用量、費用の各主張が直接証拠または明示した導出へ対応し、未観測値を `unverified` としている。
+- provider報告費用と導出費用、品質、信頼性、安全、時間、tokenを別々に報告している。
+- Benchmark Report Packageが指定file set、private情報を含まないmain human report、opaque case key、集計、欠測、除外、coverage、hard-gate results、根拠付き結論を利用できる状態で保持している。

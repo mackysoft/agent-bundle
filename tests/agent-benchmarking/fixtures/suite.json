@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "suiteId": "synthetic-suite",
+  "suiteVersion": "1.0.0",
+  "digestMethod": "sha256-canonical-suite-v1",
+  "canonicalSuiteDigest": "e5fb7dcec94d4bea801f291b5d22e53cd8637e68d39fecc8c72fe8cbe3c1092a",
+  "cases": [
+    {
+      "caseId": "case-01",
+      "split": "validation",
+      "taskFamily": "synthetic",
+      "group": "independent-01"
+    }
+  ]
+}

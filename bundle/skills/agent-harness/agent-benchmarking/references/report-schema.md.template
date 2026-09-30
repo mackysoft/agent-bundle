@@ -1,0 +1,98 @@
+## Benchmark Report Package schema
+
+Benchmark Report Packageは、一つのDefinitionに対応する比較可能な報告単位である。次の論理項目は一つの巨大なJSONへ複製せず、`comparison.json`、`metrics.csv`、`report_manifest.json`、human report、chartへ分けて保持する。どの媒体でも同じDefinition ID、record digest、evidence coverageを共有する。
+
+```text
+report.html, report.md, thread-summary.md
+  definition ID, suite ID/version/Git SHA/canonical digest
+  hypothesis, variants and component digests, grader summary, method
+  axis summaries with units/aggregation/CI/case/missing/exclusion counts
+  evidence coverage, Grade status counts, hard-gate aggregate, limits
+  re-evaluation triggers, conclusion or pilot non-eligibility
+metrics.csv
+  opaque case_key, variant_id, replicate_index, Run status, Grade status
+  hard_gate_failures, hard_gate_total
+  quality, reliability, safety, time, token, provider-reported-cost, derived-cost
+comparison.json for formal
+  state, comparison_id, definition_id, record_digest
+  reference_variant_id, candidate_variant_id, bootstrap, eligibility
+  primary metric, practical minimum difference, axes[]
+  case_coverage[], evidence_coverage, Grade status counts, safe grader summary
+  hard_gate_results, exclusions, exclusion_rule_digest, re_evaluation_triggers
+  conclusion, conclusion_basis
+comparison.json for pilot
+  state: not-applicable, definition_id, record_digest
+  eligibility: not-eligible, conclusion: null, re_evaluation_triggers
+report_manifest.json
+  report_id, definition_id, report_status, record_digest
+  Python/Matplotlib/NumPy/backend, resolved packages, render config
+  artifact list, artifact digests, self-hash rule
+charts/ for pilot-complete
+  Grade status, hard-gate failure count, elapsed time, end-to-end token
+  one direct observation per case and variant, descriptive only
+charts/ for eligible formal comparison
+  paired delta or model/effort heatmap and quality-cost/time Pareto
+  reliability only when formal reliability evidence is complete
+```
+
+`report_status` は `pilot-complete` または `complete` とする。`pilot-complete` は配線とrecord completenessのみを表す記述的な状態であり、品質、信頼性、一般化、候補優劣のformalな結論を示さない。`incomplete` は同じDefinitionへ証拠を追記する途中のrecord、`invalid` は訂正不能なrecordであり、P0 helperはそれらから最終Report Packageを生成しない。各Comparisonはformalか、単一観測か、eligibleかを追跡する。
+
+## 公開境界
+
+Reportには次を載せない。
+
+- private path
+- private prompt
+- gold
+- oracle
+- raw JSONL本文
+
+caseは公開不能なIDを含まないopaqueな `case_key` として示す。suite ID、Git SHA、canonical digest、Variantのcomponent digest、集計値、欠測、除外、coverage、統計手順、グラフ、結論は載せる。
+
+main human reportと`metrics.csv`はprivate path、private prompt、gold、oracle、raw JSONL本文を含めない。`metrics.csv` のcase識別子はopaqueな `case_key` だけとする。
+
+## File setと描画
+
+Report Packageは次のfileを必ず持つ。
+
+- self-containedな `report.html`
+- `report.md`
+- `metrics.csv`
+- `comparison.json`
+- `report_manifest.json`
+- `thread-summary.md`
+
+`pilot-complete` は次の `charts/*.svg` と対応するPNGを必ず持つ。
+
+- `pilot-grade-status`
+- `pilot-hard-gates`
+- `pilot-elapsed-time`
+- `pilot-public-price-cost`
+
+`model-effort-comparison` の `pilot-complete` は追加で次を持つ。
+
+- `pilot-performance-cost-curve`
+
+pilot chartは一つのCaseとVariantに一つの直接観測だけを描き、各chartへ `n=1 per case × variant` と `descriptive only` を明記する。Grade statusとhard-gate failure countは採点recordの状態をmatrixで示す。elapsed timeと公開価格換算費用は、カテゴリ間の絶対量を比較するためゼロ基準のgrouped barで示す。公開価格換算費用は `derived-cost` の価格根拠が完全な値だけを使い、provider請求額、subscription charge、tool feeを含む実費とは混同しない。tokenは `metrics.csv` に監査値として残すが、費用判断を目的とするpilotの主要chartにはしない。`model-effort-comparison` pilotのperformance-cost curveは1 Runあたりの公開価格換算費用の上限を横軸、その上限以下でGrade completedかつ全hard gate passになったCaseの全登録Caseに対する割合を縦軸とする。各modelとreasoning effortの構成を独立した段階線にし、各CaseをAcceptedなら塗りつぶし、not Acceptedなら白抜きの観測点で示す。このcost-coverage curveは、選択した費用上限で各構成が観測上どれだけのCaseをカバーしたかを判断するために使う。単一観測からCI、Pareto、補間、順位、候補優劣は示さない。
+
+chartの選択は、[HELM](https://arxiv.org/abs/2211.09110)のmulti-metric reporting、[MLPerf Inference](https://arxiv.org/abs/1911.02549)のscenario-specific figures of merit、[OpenAI PaperBench](https://cdn.openai.com/papers/22265bac-3191-44e5-b057-7aaacd8e90cd/paperbench.pdf)の公開価格基準日付きperformance-cost表示を設計根拠とする。指標を総合点へ潰さず、実利用上の判断へ直接対応する絶対単位を優先し、正式な反復証拠がある場合だけ区間推定またはParetoを示す。
+
+eligibleなformal Comparisonは実験目的に対応する `charts/*.svg` とPNGを必ず持つ。
+
+描画はartifact-local virtual environmentのPython 3.12、`Matplotlib==3.11.1`、`Agg` backend、NumPyを用いる。directとtransitive dependencyは固定requirementsから導入する。`report_manifest.json` はPython、Matplotlib、NumPyの実version、解決済みpackage一覧、backend、format、self-contained設定、artifact一覧を持つ。virtual environmentは導出成果物であり、BenchmarkRecord digestへ含めない。
+
+eligibleなformal `change-regression` のchartはpaired deltaを示す。eligibleなformal `model-effort-comparison` はmetric matrixと各構成のquality-cost/time operating pointを示し、同じchartにPareto frontierを重ねる。信頼性chartはformalな信頼性evidenceがある場合だけ含める。実行agentは主要chartを最大4枚まで現在taskへ貼り、child実行ならchart pathをparentへhandoffする。
+
+## Comparisonと結論
+
+各Comparisonは一つの事前登録reference Variantとのpaired比較である。`method.bootstrap` は `paired-bootstrap`、`resamples=10000`、`unit=case` を示す。interval、estimate、ケース数、case内集約、欠測、除外、hard gate resultsが追えるようにする。品質、信頼性、安全、時間、token、provider報告費用、導出費用を単一の総合点へ集約しない。
+
+結論は次のいずれかである。
+
+| 値 | 意味 |
+| --- | --- |
+| `supported` | 全hard gateがpassで、primary metricを有利方向へそろえたCI下限がpractical minimum difference以上である。 |
+| `not-supported` | hard gateが一つでもfail、またはCI上限がpractical minimum difference未満である。 |
+| `inconclusive` | 全hard gateがpassだが、CIがpractical minimum differenceをまたぐ。 |
+
+pilot、invalid、incomplete、単一観測、またはほかの非eligible状態の比較は、結論欄にformalな結論を置かず、状態、影響、必要な訂正または証拠、再評価条件を置く。品質、信頼性、安全、時間、token、provider報告費用、導出費用は別のmetric summaryとComparisonにする。
