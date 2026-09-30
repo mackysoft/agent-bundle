@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "model": "gpt-6-sol",
+  "model": "gpt-6.1-sol",
   "reasoningEffort": "max",
   "sandboxMode": "workspace-write"
 }
